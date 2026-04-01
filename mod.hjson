@@ -8,7 +8,7 @@ name: "example-java-mod"
 author: "You"
 
 #the fully qualified main class of the mod
-main: "example.ExampleJavaMod"
+main: "dev.jojofr.multicrafter.ExampleJavaMod"
 
 #the mod description as seen in the mod dialog
 description: "A Mindustry Java mod template."

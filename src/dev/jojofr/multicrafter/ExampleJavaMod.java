@@ -1,4 +1,4 @@
-package example;
+package dev.jojofr.multicrafter;
 
 import arc.*;
 import arc.util.*;
