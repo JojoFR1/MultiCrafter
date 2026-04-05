@@ -5,7 +5,7 @@
   "version": "1.0.0",
 
   "java": true,
-  "main": "dev.jojofr.multicrafter.ExampleJavaMod",
+  "main": "dev.jojofr.multicrafter.MultiCrafterMod",
 
   "displayName": "MultiCrafter",
   "author": "Jojo",
