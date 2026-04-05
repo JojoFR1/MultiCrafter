@@ -13,21 +13,21 @@ repositories {
 
     //Downloads the server-release JAR file from Mindustry releases; does not use any real repository. Surprisingly, this is the most reliable option.
     ivy {
-        url 'https://github.com/'
+        url = 'https://github.com/'
         patternLayout{artifact '/[organisation]/[module]/releases/download/[revision]/dependencies.jar'}
         metadataSources{ artifact() }
     }
 
     //"Latest" option to depend on BE builds.
     ivy {
-        url 'https://github.com/'
+        url = 'https://github.com/'
         patternLayout{artifact '/[organisation]/[module]/releases/download/master/[revision].jar'}
         metadataSources{ artifact() }
     }
 
     //Do the same with jabel
     ivy {
-        url 'https://github.com/'
+        url = 'https://github.com/'
         patternLayout{artifact '/[organisation]/[module]/releases/download/[revision]/jabel.jar'}
         metadataSources{ artifact() }
     }
