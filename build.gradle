@@ -104,3 +104,36 @@ tasks.register('deploy', Jar) {
 
     doLast { delete androidJarFile }
 }
+
+tasks.register("copyToMods", Copy) {
+    from jar into System.getProperty("user.home") + "/AppData/Roaming/Mindustry/mods" rename { "${project.name}.jar" }
+}
+
+tasks.register("run", JavaExec) {
+    dependsOn classes
+    dependsOn 'copyToMods'
+
+    mainClass = "-jar"
+    args = [
+            "C:\\Users\\Jojo\\Desktop\\Mindustry.jar"
+    ]
+
+    doLast {
+        delete System.getProperty("user.home") + "/AppData/Roaming/Mindustry/mods/${project.name}.jar"
+    }
+}
+
+tasks.register("runMobile", JavaExec) {
+    dependsOn classes
+    dependsOn 'copyToMods'
+
+    mainClass = "-jar"
+    args = [
+            "C:\\Users\\Jojo\\Desktop\\Mindustry.jar",
+            "-testMobile"
+    ]
+
+    doLast {
+        delete System.getProperty("user.home") + "/AppData/Roaming/Mindustry/mods/${project.name}.jar"
+    }
+}
