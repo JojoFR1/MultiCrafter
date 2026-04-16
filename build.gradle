@@ -79,14 +79,13 @@ tasks.register('jarAndroid') {
         if(!platformRoot) throw new GradleException('No android.jar found. Ensure that you have an Android platform installed.')
 
         // Collect dependencies needed for desugaring
-        def dependencies = (compileClasspath.asList() + runtimeClasspath.asList())
+        def dependencies = (compileClasspath.asList() + runtimeClasspath.asList() + [new File(platformRoot, 'android.jar')])
                 .collectMany{ ['--classpath', it.path] }
 
         // Dex and desugar files - this requires d8 in your PATH
         injected.execOperations.exec {
             commandLine isWindows ? 'd8.bat' : 'd8'
             args dependencies
-            args '--lib', new File(platformRoot, 'android.jar').absolutePath
             args '--min-api', '14', '--output', androidJarFile.get().asFile.absolutePath, desktopJarFile.get().asFile.absolutePath
 
             workingDir new File('build/libs')
