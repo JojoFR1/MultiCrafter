@@ -1,7 +1,7 @@
 {
   "name": "multicrafter",
   "repo": "JojoFR1/MultiCrafter",
-  "minGameVersion": 154,
+  "minGameVersion": 157,
   "version": "1.0.0",
 
   "java": true,
