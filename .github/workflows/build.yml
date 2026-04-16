@@ -24,7 +24,7 @@ jobs:
         cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
     - name: Build Mod Jar
-      run: ./gradlew deploy
+      run: ./gradlew deploy --configuration-cache
 
     - name: Upload built Jar file
       uses: actions/upload-artifact@v7

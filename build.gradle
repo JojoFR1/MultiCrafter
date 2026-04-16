@@ -1,4 +1,9 @@
-apply plugin: "java"
+plugins {
+    id 'java'
+}
+
+import javax.inject.Inject
+interface Injected { @Inject ExecOperations getExecOperations() }
 
 group = 'dev.jojofr.multicrafter'
 version = '1.0.0'
@@ -71,6 +76,7 @@ tasks.register('jarAndroid') {
     inputs.files(compileClasspath, runtimeClasspath, desktopJarFile)
     outputs.file(androidJarFile)
 
+    def injected = objects.newInstance(Injected)
     doLast {
         if(!sdkRoot || !new File(sdkRoot).exists()) throw new GradleException("No valid Android SDK found. Ensure that ANDROID_HOME is set to your Android SDK directory.")
 
@@ -79,13 +85,20 @@ tasks.register('jarAndroid') {
         if(!platformRoot) throw new GradleException("No android.jar found. Ensure that you have an Android platform installed.")
 
         //collect dependencies needed for desugaring
-        def dependencies = (compileClasspath.asList() + runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect{ "--classpath $it.path" }.join(" ")
+        def dependencies = (compileClasspath.asList() + runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collectMany{ ["--classpath", it.path] }
 
         def d8 = isWindows ? "d8.bat" : "d8"
 
         //dex and desugar files - this requires d8 in your PATH
-        "$d8 $dependencies --min-api 14 --output ${project.name}Android.jar ${project.name}Desktop.jar"
-                .execute(null, new File("build/libs")).waitForProcessOutput(System.out, System.err)
+        injected.execOperations.exec {
+            commandLine d8
+            args dependencies
+            args "--min-api", "14", "--output", androidJarFile.get().asFile.absolutePath, desktopJarFile.get().asFile.absolutePath
+
+            workingDir new File("build/libs")
+            standardOutput = System.out
+            errorOutput = System.err
+        }
     }
 }
 
@@ -99,19 +112,22 @@ tasks.register('deploy', Jar) {
 
     from { [zipTree(desktopJarFile), zipTree(androidJarFile)] }
 
-    doLast { delete androidJarFile }
+    doLast { androidJarFile.get().asFile.delete() }
 }
 
-def gameFile = layout.buildDirectory.file("game/Mindustry.jar").get().asFile
-def gameDataDir = layout.buildDirectory.dir("game/data").get()
+def gameFile = layout.buildDirectory.file("game/Mindustry.jar")
+def gameDataDir = layout.buildDirectory.dir("game/data")
 
 tasks.register('downloadGame') {
+    outputs.file(gameFile)
+
     doLast {
         def url = "https://github.com/Anuken/Mindustry/releases/download/$mindustryVersion/Mindustry.jar"
-        gameFile.parentFile.mkdirs()
+        def targetFile = gameFile.get().asFile
+        targetFile.parentFile.mkdirs()
 
         URI.create(url).toURL().withInputStream { input ->
-            gameFile.withOutputStream { output ->
+            targetFile.withOutputStream { output ->
                 output << input
             }
         }
@@ -119,27 +135,23 @@ tasks.register('downloadGame') {
 }
 
 tasks.register("copyToMods", Copy) {
-    from jar into gameDataDir.dir("mods") rename { "${project.name}.jar" }
+    from jar into gameDataDir.get().dir("mods") rename { "${project.name}.jar" }
 }
 
 tasks.register("run", JavaExec) {
-    if (!gameFile.exists()) dependsOn 'downloadGame'
-
-    dependsOn classes
+    dependsOn 'downloadGame'
     dependsOn 'copyToMods'
 
-    environment "MINDUSTRY_DATA_DIR", gameDataDir.asFile.absolutePath
+    environment "MINDUSTRY_DATA_DIR", gameDataDir.get().asFile.absolutePath
     mainClass = "-jar"
-    args = [gameFile.absolutePath]
+    args = [gameFile.get().asFile.absolutePath]
 }
 
 tasks.register("runMobile", JavaExec) {
-    if (!gameFile.exists()) dependsOn 'downloadGame'
-
-    dependsOn classes
+    dependsOn 'downloadGame'
     dependsOn 'copyToMods'
 
-    environment "MINDUSTRY_DATA_DIR", gameDataDir.asFile.absolutePath
+    environment "MINDUSTRY_DATA_DIR", gameDataDir.get().asFile.absolutePath
     mainClass = "-jar"
-    args = [gameFile.absolutePath, "-testMobile"]
+    args = [gameFile.get().asFile.absolutePath, "-testMobile"]
 }
