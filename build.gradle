@@ -40,14 +40,13 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.addAll(['--release', '8'])
 }
 
-def mindustryVersion = "v157.2"
+def mindustryVersion = 'v157.2'
 
 dependencies {
     def useLatest = false //set to "true" to always depend on the newest version of mindustry
 
-    compileOnly useLatest ? "Anuken:MindustryBuilds:latest" : "Anuken:Mindustry:$mindustryVersion"
-
-    annotationProcessor "Anuken:jabel:v1.0.0"
+    compileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
+    annotationProcessor 'Anuken:jabel:v1.0.0'
 }
 
 jar {
@@ -67,32 +66,30 @@ tasks.register('jarAndroid') {
     def desktopJarFile = layout.buildDirectory.file("libs/${project.name}Desktop.jar")
     def androidJarFile = layout.buildDirectory.file("libs/${project.name}Android.jar")
 
-    def sdkRoot = providers.environmentVariable("ANDROID_HOME").orElse(providers.environmentVariable("ANDROID_SDK_ROOT")).orNull
-    def isWindows = providers.systemProperty("os.name").get().toLowerCase().contains("win")
+    def sdkRoot = providers.environmentVariable('ANDROID_HOME').orElse(providers.environmentVariable('ANDROID_SDK_ROOT')).orNull
+    def isWindows = providers.systemProperty('os.name').get().toLowerCase().contains('win')
 
     inputs.files(compileClasspath, runtimeClasspath, desktopJarFile)
     outputs.file(androidJarFile)
 
     def injected = objects.newInstance(Injected)
     doLast {
-        if(!sdkRoot || !new File(sdkRoot).exists()) throw new GradleException("No valid Android SDK found. Ensure that ANDROID_HOME is set to your Android SDK directory.")
+        if(!sdkRoot || !new File(sdkRoot).exists()) throw new GradleException('No valid Android SDK found. Ensure that ANDROID_HOME is set to your Android SDK directory.')
 
-        def platformRoot = new File("$sdkRoot/platforms/").listFiles()?.sort()?.reverse()?.find{ f -> new File(f, "android.jar").exists() }
+        def platformRoot = new File("$sdkRoot/platforms/").listFiles()?.sort()?.reverse()?.find{ f -> new File(f, 'android.jar').exists() }
+        if(!platformRoot) throw new GradleException('No android.jar found. Ensure that you have an Android platform installed.')
 
-        if(!platformRoot) throw new GradleException("No android.jar found. Ensure that you have an Android platform installed.")
+        // Collect dependencies needed for desugaring
+        def dependencies = (compileClasspath.asList() + runtimeClasspath.asList() + [new File(platformRoot, 'android.jar')])
+                .collectMany{ ['--classpath', it.path] }
 
-        //collect dependencies needed for desugaring
-        def dependencies = (compileClasspath.asList() + runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collectMany{ ["--classpath", it.path] }
-
-        def d8 = isWindows ? "d8.bat" : "d8"
-
-        //dex and desugar files - this requires d8 in your PATH
+        // Dex and desugar files - this requires d8 in your PATH
         injected.execOperations.exec {
-            commandLine d8
+            commandLine isWindows ? 'd8.bat' : 'd8'
             args dependencies
-            args "--min-api", "14", "--output", androidJarFile.get().asFile.absolutePath, desktopJarFile.get().asFile.absolutePath
+            args '--min-api', '14', '--output', androidJarFile.get().asFile.absolutePath, desktopJarFile.get().asFile.absolutePath
 
-            workingDir new File("build/libs")
+            workingDir new File('build/libs')
             standardOutput = System.out
             errorOutput = System.err
         }
@@ -112,8 +109,8 @@ tasks.register('deploy', Jar) {
     doLast { androidJarFile.get().asFile.delete() }
 }
 
-def gameFile = layout.buildDirectory.file("game/Mindustry.jar")
-def gameDataDir = layout.buildDirectory.dir("game/data")
+def gameFile = layout.buildDirectory.file('game/Mindustry.jar')
+def gameDataDir = layout.buildDirectory.dir('game/data')
 
 tasks.register('downloadGame') {
     outputs.file(gameFile)
@@ -131,25 +128,25 @@ tasks.register('downloadGame') {
     }
 }
 
-tasks.register("copyToMods", Copy) {
+tasks.register('copyToMods', Copy) {
     def renamedJar = "${project.name}.jar"
-    from jar into gameDataDir.get().dir("mods") rename { renamedJar }
+    from jar into gameDataDir.get().dir('mods') rename { renamedJar }
 }
 
-tasks.register("run", JavaExec) {
+tasks.register('run', JavaExec) {
     dependsOn 'downloadGame'
     dependsOn 'copyToMods'
 
-    environment "MINDUSTRY_DATA_DIR", gameDataDir.get().asFile.absolutePath
-    mainClass = "-jar"
+    environment 'MINDUSTRY_DATA_DIR', gameDataDir.get().asFile.absolutePath
+    mainClass = '-jar'
     args = [gameFile.get().asFile.absolutePath]
 }
 
-tasks.register("runMobile", JavaExec) {
+tasks.register('runMobile', JavaExec) {
     dependsOn 'downloadGame'
     dependsOn 'copyToMods'
 
-    environment "MINDUSTRY_DATA_DIR", gameDataDir.get().asFile.absolutePath
-    mainClass = "-jar"
-    args = [gameFile.get().asFile.absolutePath, "-testMobile"]
+    environment 'MINDUSTRY_DATA_DIR', gameDataDir.get().asFile.absolutePath
+    mainClass = '-jar'
+    args = [gameFile.get().asFile.absolutePath, '-testMobile']
 }
