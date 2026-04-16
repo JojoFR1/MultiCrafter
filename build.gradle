@@ -35,13 +35,7 @@ repositories {
     }
 }
 
-// Java 8 backwards compatibility flag
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs.addAll(['--release', '8'])
-}
-
 def mindustryVersion = 'v157.2'
-
 dependencies {
     def useLatest = false //set to "true" to always depend on the newest version of mindustry
 
@@ -49,11 +43,16 @@ dependencies {
     annotationProcessor 'Anuken:jabel:v1.0.0'
 }
 
+// Java 8 backwards compatibility flag
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.addAll(['--release', '8'])
+}
+
 jar {
     archiveFileName = "${project.name}Desktop.jar"
 
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    from (layout.projectDirectory) { include "mod.json" }
+    from (layout.projectDirectory.file('mod.json'))
 }
 
 tasks.register('jarAndroid') {
@@ -109,15 +108,15 @@ tasks.register('deploy', Jar) {
     doLast { androidJarFile.get().asFile.delete() }
 }
 
-def gameFile = layout.buildDirectory.file('game/Mindustry.jar')
-def gameDataDir = layout.buildDirectory.dir('game/data')
+def gameFile = layout.projectDirectory.file('run/Mindustry.jar')
+def gameDataDir = layout.projectDirectory.dir('run/data')
 
 tasks.register('downloadGame') {
     outputs.file(gameFile)
 
     doLast {
         def url = "https://github.com/Anuken/Mindustry/releases/download/$mindustryVersion/Mindustry.jar"
-        def targetFile = gameFile.get().asFile
+        def targetFile = gameFile.asFile
         targetFile.parentFile.mkdirs()
 
         URI.create(url).toURL().withInputStream { input ->
@@ -130,23 +129,23 @@ tasks.register('downloadGame') {
 
 tasks.register('copyToMods', Copy) {
     def renamedJar = "${project.name}.jar"
-    from jar into gameDataDir.get().dir('mods') rename { renamedJar }
+    from jar into gameDataDir.dir('mods') rename { renamedJar }
 }
 
 tasks.register('run', JavaExec) {
     dependsOn 'downloadGame'
     dependsOn 'copyToMods'
 
-    environment 'MINDUSTRY_DATA_DIR', gameDataDir.get().asFile.absolutePath
+    environment 'MINDUSTRY_DATA_DIR', gameDataDir.asFile.absolutePath
     mainClass = '-jar'
-    args = [gameFile.get().asFile.absolutePath]
+    args = [gameFile.asFile.absolutePath]
 }
 
 tasks.register('runMobile', JavaExec) {
     dependsOn 'downloadGame'
     dependsOn 'copyToMods'
 
-    environment 'MINDUSTRY_DATA_DIR', gameDataDir.get().asFile.absolutePath
+    environment 'MINDUSTRY_DATA_DIR', gameDataDir.asFile.absolutePath
     mainClass = '-jar'
-    args = [gameFile.get().asFile.absolutePath, '-testMobile']
+    args = [gameFile.asFile.absolutePath, '-testMobile']
 }
