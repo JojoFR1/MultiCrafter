@@ -1,7 +1,4 @@
-plugins {
-    id 'java'
-}
-
+plugins { id 'java' }
 import javax.inject.Inject
 interface Injected { @Inject ExecOperations getExecOperations() }
 
@@ -135,7 +132,8 @@ tasks.register('downloadGame') {
 }
 
 tasks.register("copyToMods", Copy) {
-    from jar into gameDataDir.get().dir("mods") rename { "${project.name}.jar" }
+    def renamedJar = "${project.name}.jar"
+    from jar into gameDataDir.get().dir("mods") rename { renamedJar }
 }
 
 tasks.register("run", JavaExec) {
