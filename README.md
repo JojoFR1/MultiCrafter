@@ -32,7 +32,7 @@ ivy {
 Then, add the following to your dependencies:
 
 ```gradle
-implementation 'JojoFR1:MultiCrafter:1.0.0'
+implementation 'JojoFR1:MultiCrafter:v1.0.0'
 ```
 
 ## Building
