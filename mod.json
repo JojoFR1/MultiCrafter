@@ -10,9 +10,9 @@
   "displayName": "MultiCrafter",
   "author": "Jojo",
   "description": "Soon...",
-  "subtitle": "A library to make block with multiple recipes",
+  "subtitle": "A library to make block with multiple recipes.",
 
-  "hideBrowser": true,
-  "hidden": false,
+  "hideBrowser": false,
+  "hidden": true,
   "dependencies": []
 }
