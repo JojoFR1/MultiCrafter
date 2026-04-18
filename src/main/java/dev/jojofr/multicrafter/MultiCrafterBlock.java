@@ -114,17 +114,15 @@ public class MultiCrafterBlock extends Block {
                 inputTable.left();
                 
                 Table time = new Table();
-                // TODO format with minutes etc
                 Bar timeBar = new Bar(String.format("%.1f", recipe.craftTime / 60f) + "s", Pal.accent, () -> Interp.smooth.apply((Time.time % recipe.craftTime) / recipe.craftTime));
                 time.add(timeBar).height(50).width(250);
-                
-                Cell<Table> timeCell = recipeTable.add(time).pad(12);
-                timeCell.tooltip(Stat.productionTime.localized() + ": " + recipe.craftTime / 60f + "s");
+                recipeTable.add(time).pad(12);
                 
                 Cell<Table> outputCell = recipeTable.add(recipe.output.buildTable());
                 outputCell.right();
                 
                 table.add(recipeTable);
+                table.row();
             }
             
             table.row();

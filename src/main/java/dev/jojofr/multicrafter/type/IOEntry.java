@@ -1,6 +1,7 @@
 package dev.jojofr.multicrafter.type;
 
 import arc.scene.ui.layout.Table;
+import dev.jojofr.multicrafter.meta.SimpleStatValues;
 import mindustry.type.ItemStack;
 import mindustry.type.LiquidStack;
 import mindustry.type.PayloadStack;
@@ -43,18 +44,13 @@ public class IOEntry {
     
     public Table buildTable() {
         Table table = new Table();
-        // TODO input/output check
-        table.left();
-        table.right();
         
         Table materialTable = new Table();
         StatValues.items(false, items).display(materialTable);
-        // StatValues.liquids
-        // StatValues.
-        
-        // for (LiquidStack liquid : liquids) {
-        //     Cell<Stack> iconCell = materialTable.add(StatValues.stack(liquid)).pad(2);
-        // }
+        SimpleStatValues.liquids(false, liquids).display(materialTable);
+        if (power > 0) SimpleStatValues.power(power).display(materialTable);
+        if (heat > 0) SimpleStatValues.heat(heat).display(materialTable);
+        SimpleStatValues.payloads(payloads).display(materialTable);
         
         table.add(materialTable);
         
