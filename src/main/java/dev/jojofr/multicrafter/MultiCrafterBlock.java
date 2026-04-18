@@ -1,6 +1,7 @@
 package dev.jojofr.multicrafter;
 
 import arc.math.Interp;
+import arc.math.Mathf;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
