@@ -121,7 +121,7 @@ public class MultiCrafterBlock extends Block {
                 Cell<Table> outputCell = recipeTable.add(recipe.output.buildTable());
                 outputCell.right();
                 
-                table.add(recipeTable);
+                table.add(recipeTable).pad(10).grow();
                 table.row();
             }
             
