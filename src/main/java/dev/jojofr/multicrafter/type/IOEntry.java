@@ -50,7 +50,7 @@ public class IOEntry {
         SimpleStatValues.liquids(false, liquids).display(materialTable);
         if (power > 0) SimpleStatValues.power(power).display(materialTable);
         if (heat > 0) SimpleStatValues.heat(heat).display(materialTable);
-        SimpleStatValues.payloads(payloads).display(materialTable);
+        SimpleStatValues.payloads(false, payloads).display(materialTable);
         
         table.add(materialTable);
         

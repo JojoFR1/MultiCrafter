@@ -30,7 +30,7 @@ public class MultiCrafterBlock extends Block {
     public boolean dumpExtraLiquid = true;
     public boolean ignoreLiquidFullness = false;
     
-    Seq<Recipe> recipes = new Seq<>();
+    public Seq<Recipe> recipes = new Seq<>();
     // Recipe dependant
     public @Nullable ItemStack outputItem;
     public @Nullable ItemStack[] outputItems;
@@ -54,6 +54,8 @@ public class MultiCrafterBlock extends Block {
         flags = EnumSet.of(BlockFlag.factory);
         drawArrow = false;
         requirements(Category.crafting, ItemStack.empty);
+        
+        config(Integer.class, MultiCrafterBuild::setCurrentRecipe);
     }
     
     @Override
@@ -72,6 +74,9 @@ public class MultiCrafterBlock extends Block {
         public float totalProgress;
         public float warmup;
         
+        public Recipe currentRecipe;
+        public int currentRecipeIndex = 0;
+        
         @Override
         public void draw() { drawer.draw(this); }
         
@@ -87,16 +92,34 @@ public class MultiCrafterBlock extends Block {
         @Override
         public float totalProgress() { return totalProgress; }
         
+        private void setCurrentRecipe(int index) {
+            this.currentRecipeIndex = index;
+            this.currentRecipe = recipes.get(index);
+        }
         
         @Override
         public void write(Writes write) {
             super.write(write);
+            write.f(progress);
+            write.f(warmup);
+            
+            write.i(currentRecipeIndex);
         }
         
         @Override
-        public void read(Reads read) {
-            super.read(read);
+        public void read(Reads read, byte revision) {
+            super.read(read, revision);
+            progress = read.f();
+            warmup = read.f();
+            
+            currentRecipeIndex = Mathf.clamp(read.i(), 0, recipes.size - 1);
+            currentRecipe = recipes.get(currentRecipeIndex);
         }
+    }
+    
+    @Override
+    public void setBars() {
+        super.setBars();
     }
     
     @Override
@@ -113,6 +136,7 @@ public class MultiCrafterBlock extends Block {
                 Cell<Table> inputTable = recipeTable.add(recipe.input.buildTable());
                 inputTable.left();
                 
+                // TODO not perfect
                 Table time = new Table();
                 Bar timeBar = new Bar(String.format("%.1f", recipe.craftTime / 60f) + "s", Pal.accent, () -> Interp.smooth.apply((Time.time % recipe.craftTime) / recipe.craftTime));
                 time.add(timeBar).height(50).width(250);
