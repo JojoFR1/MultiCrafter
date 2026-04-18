@@ -20,6 +20,8 @@ import mindustry.type.ItemStack;
 import mindustry.type.LiquidStack;
 import mindustry.ui.Bar;
 import mindustry.world.Block;
+import mindustry.world.blocks.heat.HeatBlock;
+import mindustry.world.blocks.heat.HeatConsumer;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.BlockFlag;
@@ -70,10 +72,13 @@ public class MultiCrafterBlock extends Block {
         super.init();
     }
     
-    public class MultiCrafterBuild extends Building {
+    public class MultiCrafterBuild extends Building implements HeatBlock, HeatConsumer {
         public float progress;
         public float totalProgress;
         public float warmup;
+        
+        public float heat;
+        public float[] sideHeat = new float[4];
         
         public Recipe currentRecipe;
         public int currentRecipeIndex = 0;
@@ -93,6 +98,26 @@ public class MultiCrafterBlock extends Block {
         @Override
         public float totalProgress() { return totalProgress; }
         
+        @Override
+        public float heat() {
+            return heat;
+        }
+        
+        @Override
+        public float heatFrac() {
+            return heat / Math.max(currentRecipe.input.heat, currentRecipe.output.heat);
+        }
+        
+        @Override
+        public float[] sideHeat() {
+            return sideHeat;
+        }
+        
+        @Override
+        public float heatRequirement() {
+            return currentRecipe != null ? currentRecipe.input.heat : 0f;
+        }
+        
         private void setCurrentRecipe(int index) {
             this.currentRecipeIndex = index;
             this.currentRecipe = recipes.get(index);
@@ -103,6 +128,7 @@ public class MultiCrafterBlock extends Block {
             super.write(write);
             write.f(progress);
             write.f(warmup);
+            write.f(heat);
             
             write.i(currentRecipeIndex);
         }
@@ -112,6 +138,7 @@ public class MultiCrafterBlock extends Block {
             super.read(read, revision);
             progress = read.f();
             warmup = read.f();
+            heat = read.f();
             
             currentRecipeIndex = Mathf.clamp(read.i(), 0, recipes.size - 1);
             currentRecipe = recipes.get(currentRecipeIndex);
