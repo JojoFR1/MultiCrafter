@@ -2,9 +2,8 @@ package dev.jojofr.multicrafter.type;
 
 import arc.scene.ui.layout.Table;
 import dev.jojofr.multicrafter.meta.SimpleStatValues;
-import mindustry.type.ItemStack;
-import mindustry.type.LiquidStack;
-import mindustry.type.PayloadStack;
+import mindustry.type.*;
+import mindustry.world.blocks.payloads.Payload;
 import mindustry.world.meta.StatValues;
 
 
@@ -59,5 +58,40 @@ public class IOEntry {
     
     public boolean isEmpty() {
         return items.length == 0 && liquids.length == 0 && power <= 0 && heat <= 0 && payloads.length == 0;
+    }
+    
+    public boolean hasItems() {
+        return items.length > 0;
+    }
+    
+    public boolean acceptItem(Item item) {
+        for (ItemStack stack : items) if (item.equals(stack.item)) return true;
+        return false;
+    }
+    
+    public boolean hasLiquids() {
+        return liquids.length > 0;
+    }
+    
+    public boolean acceptLiquid(Liquid liquid) {
+        for (LiquidStack stack : liquids) if (liquid.equals(stack.liquid)) return true;
+        return false;
+    }
+    
+    public boolean hasPower() {
+        return power > 0;
+    }
+    
+    public boolean hasHeat() {
+        return heat > 0;
+    }
+    
+    public boolean hasPayloads() {
+        return payloads.length > 0;
+    }
+    
+    public boolean acceptPayload(Payload payload) {
+        for (PayloadStack stack : payloads) if (payload.equals(stack.item)) return true;
+        return false;
     }
 }

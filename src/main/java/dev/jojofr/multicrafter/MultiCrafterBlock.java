@@ -15,13 +15,18 @@ import mindustry.gen.Building;
 import mindustry.gen.Sounds;
 import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
-import mindustry.type.Category;
+import mindustry.type.Item;
 import mindustry.type.ItemStack;
+import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
 import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.blocks.heat.HeatBlock;
 import mindustry.world.blocks.heat.HeatConsumer;
+import mindustry.world.blocks.payloads.Payload;
+import mindustry.world.consumers.ConsumeItemDynamic;
+import mindustry.world.consumers.ConsumeLiquidsDynamic;
+import mindustry.world.consumers.ConsumePowerDynamic;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.BlockFlag;
@@ -56,7 +61,6 @@ public class MultiCrafterBlock extends Block {
         
         flags = EnumSet.of(BlockFlag.factory);
         drawArrow = false;
-        requirements(Category.crafting, ItemStack.empty);
         
         config(Integer.class, MultiCrafterBuild::setCurrentRecipe);
     }
@@ -69,9 +73,29 @@ public class MultiCrafterBlock extends Block {
     
     @Override
     public void init() {
+        if (recipes.isEmpty()) {
+            throw new IllegalStateException("MultiCrafterBlock " + name + " must have at least one recipe");
+        }
+        setupConsumers();
+        
         super.init();
     }
     
+    protected void setupConsumers() {
+        consume(new ConsumeItemDynamic(
+            (MultiCrafterBuild build) -> build.currentRecipe.input.items
+        ));
+        
+        consume(new ConsumeLiquidsDynamic(
+            (MultiCrafterBuild build) -> build.currentRecipe.input.liquids
+        ));
+        
+        consume(new ConsumePowerDynamic(build ->
+            ((MultiCrafterBuild) build).currentRecipe.input.power
+        ));
+    }
+    
+    // TODO Payload support
     public class MultiCrafterBuild extends Building implements HeatBlock, HeatConsumer {
         public float progress;
         public float totalProgress;
@@ -82,6 +106,12 @@ public class MultiCrafterBlock extends Block {
         
         public Recipe currentRecipe;
         public int currentRecipeIndex = 0;
+        
+        @Override
+        public void created() {
+            super.created();
+            setCurrentRecipe(0);
+        }
         
         @Override
         public void draw() { drawer.draw(this); }
@@ -99,28 +129,41 @@ public class MultiCrafterBlock extends Block {
         public float totalProgress() { return totalProgress; }
         
         @Override
-        public float heat() {
-            return heat;
+        public float heat() { return heat; }
+        
+        @Override
+        public float heatFrac() { return currentRecipe != null ?  heat / Math.max(currentRecipe.input.heat, currentRecipe.output.heat) : 0f; }
+        
+        @Override
+        public float[] sideHeat() { return sideHeat; }
+        
+        @Override
+        public float heatRequirement() { return currentRecipe != null ? currentRecipe.input.heat : 0f; }
+        
+        // TODO capacities
+        @Override
+        public boolean acceptItem(Building source, Item item) {
+            return currentRecipe.input.hasItems() && currentRecipe.input.acceptItem(item);
         }
         
         @Override
-        public float heatFrac() {
-            return heat / Math.max(currentRecipe.input.heat, currentRecipe.output.heat);
+        public boolean acceptLiquid(Building source, Liquid liquid) {
+            return currentRecipe.input.hasLiquids() && currentRecipe.input.acceptLiquid(liquid);
         }
         
         @Override
-        public float[] sideHeat() {
-            return sideHeat;
-        }
-        
-        @Override
-        public float heatRequirement() {
-            return currentRecipe != null ? currentRecipe.input.heat : 0f;
+        public boolean acceptPayload(Building source, Payload payload) {
+            return currentRecipe.input.hasPayloads() && currentRecipe.input.acceptPayload(payload);
         }
         
         private void setCurrentRecipe(int index) {
             this.currentRecipeIndex = index;
             this.currentRecipe = recipes.get(index);
+            
+            // TODO does not work
+            this.block.removeConsumers(c -> true);
+            setupConsumers();
+            reinitializeConsumers();
         }
         
         @Override
@@ -145,6 +188,7 @@ public class MultiCrafterBlock extends Block {
         }
     }
     
+    // TODO
     @Override
     public void setBars() {
         super.setBars();
