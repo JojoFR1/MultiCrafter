@@ -157,17 +157,17 @@ public class MultiCrafterBlock extends Block {
             return super.shouldConsume();
         }
         
-        // TODO capacities
         @Override
         public boolean acceptItem(Building source, Item item) {
-            return currentRecipe != null && currentRecipe.input.hasItems() && currentRecipe.input.acceptItem(item);
+            return currentRecipe != null && currentRecipe.input.hasItems() && currentRecipe.input.acceptItem(item) && items.get(item) < itemCapacity;
         }
         
         @Override
         public boolean acceptLiquid(Building source, Liquid liquid) {
-            return currentRecipe != null && currentRecipe.input.hasLiquids() && currentRecipe.input.acceptLiquid(liquid);
+            return currentRecipe != null && currentRecipe.input.hasLiquids() && currentRecipe.input.acceptLiquid(liquid) && liquids.get(liquid) < liquidCapacity;
         }
         
+        // TODO capacity
         @Override
         public boolean acceptPayload(Building source, Payload payload) {
             return currentRecipe != null && currentRecipe.input.hasPayloads() && currentRecipe.input.acceptPayload(payload);
