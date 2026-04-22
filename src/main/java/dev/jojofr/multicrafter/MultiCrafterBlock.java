@@ -97,6 +97,7 @@ public class MultiCrafterBlock extends Block {
     
     // TODO Payload support
     public class MultiCrafterBuild extends Building implements HeatBlock, HeatConsumer {
+        public float craftingTime;
         public float progress;
         public float totalProgress;
         public float warmup;
@@ -105,12 +106,71 @@ public class MultiCrafterBlock extends Block {
         public float[] sideHeat = new float[4];
         
         public Recipe currentRecipe;
-        public int currentRecipeIndex = 0;
+        public int currentRecipeIndex;
         
         @Override
         public void created() {
             super.created();
-            setCurrentRecipe(0);
+            
+            this.currentRecipeIndex = 0;
+            this.currentRecipe = recipes.get(0);
+        }
+        
+        @Override
+        public void updateTile() {
+            if (currentRecipe == null) return;
+            
+            if (currentRecipe.craftTime > 0) craftingTime += Time.delta;
+            
+            warmup = Mathf.approachDelta(warmup, 0f, currentRecipe.warmupSpeed);
+            totalProgress += warmup * Time.delta;
+            
+            if (craftingTime >= currentRecipe.craftTime) {
+                consume();
+                
+                for (ItemStack output : currentRecipe.output.items) {
+                    for (int i = 0; i < output.amount; i++) {
+                        offload(output.item);
+                    }
+                }
+                
+                craftingTime = 0;
+            }
+            
+            if (timer(timerDump, dumpTime / timeScale)) {
+                for (ItemStack output : currentRecipe.output.items) {
+                    dump(output.item);
+                }
+            }
+            
+            for (int i = 0; i < currentRecipe.output.liquids.length; i++) {
+                int direction = liquidOutputDirections[i % liquidOutputDirections.length];
+                if (direction == -1) continue;
+                
+                LiquidStack output = currentRecipe.output.liquids[i];
+                dumpLiquid(output.liquid, output.amount, direction);
+            }
+        }
+        
+        @Override
+        public boolean shouldConsume() {
+            return super.shouldConsume();
+        }
+        
+        // TODO capacities
+        @Override
+        public boolean acceptItem(Building source, Item item) {
+            return currentRecipe != null && currentRecipe.input.hasItems() && currentRecipe.input.acceptItem(item);
+        }
+        
+        @Override
+        public boolean acceptLiquid(Building source, Liquid liquid) {
+            return currentRecipe != null && currentRecipe.input.hasLiquids() && currentRecipe.input.acceptLiquid(liquid);
+        }
+        
+        @Override
+        public boolean acceptPayload(Building source, Payload payload) {
+            return currentRecipe != null && currentRecipe.input.hasPayloads() && currentRecipe.input.acceptPayload(payload);
         }
         
         @Override
@@ -120,6 +180,16 @@ public class MultiCrafterBlock extends Block {
         public void drawLight() {
             super.drawLight();
             drawer.drawLight(this);
+        }
+        
+        protected void setCurrentRecipe(int index) {
+            this.currentRecipeIndex = index;
+            this.currentRecipe = recipes.get(index);
+            
+            // TODO does not work
+            // this.block.removeConsumers(c -> true);
+            // setupConsumers();
+            // reinitializeConsumers();
         }
         
         @Override
@@ -139,32 +209,6 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public float heatRequirement() { return currentRecipe != null ? currentRecipe.input.heat : 0f; }
-        
-        // TODO capacities
-        @Override
-        public boolean acceptItem(Building source, Item item) {
-            return currentRecipe.input.hasItems() && currentRecipe.input.acceptItem(item);
-        }
-        
-        @Override
-        public boolean acceptLiquid(Building source, Liquid liquid) {
-            return currentRecipe.input.hasLiquids() && currentRecipe.input.acceptLiquid(liquid);
-        }
-        
-        @Override
-        public boolean acceptPayload(Building source, Payload payload) {
-            return currentRecipe.input.hasPayloads() && currentRecipe.input.acceptPayload(payload);
-        }
-        
-        private void setCurrentRecipe(int index) {
-            this.currentRecipeIndex = index;
-            this.currentRecipe = recipes.get(index);
-            
-            // TODO does not work
-            this.block.removeConsumers(c -> true);
-            setupConsumers();
-            reinitializeConsumers();
-        }
         
         @Override
         public void write(Writes write) {
