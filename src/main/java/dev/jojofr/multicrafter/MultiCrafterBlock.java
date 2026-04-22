@@ -213,6 +213,7 @@ public class MultiCrafterBlock extends Block {
         @Override
         public void write(Writes write) {
             super.write(write);
+            write.f(craftingTime);
             write.f(progress);
             write.f(warmup);
             write.f(heat);
@@ -223,6 +224,7 @@ public class MultiCrafterBlock extends Block {
         @Override
         public void read(Reads read, byte revision) {
             super.read(read, revision);
+            craftingTime = read.f();
             progress = read.f();
             warmup = read.f();
             heat = read.f();
