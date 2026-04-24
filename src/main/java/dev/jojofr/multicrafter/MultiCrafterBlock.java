@@ -6,7 +6,6 @@ import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.Seq;
-import arc.util.Nullable;
 import arc.util.Time;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
@@ -33,18 +32,11 @@ import mindustry.world.meta.BlockFlag;
 import mindustry.world.meta.Stat;
 
 public class MultiCrafterBlock extends Block {
-    public int[] liquidOutputDirections = {-1};
+    public Seq<Recipe> recipes = new Seq<>();
     
+    public int[] liquidOutputDirections = {-1};
     public boolean dumpExtraLiquid = true;
     public boolean ignoreLiquidFullness = false;
-    
-    public Seq<Recipe> recipes = new Seq<>();
-    // Recipe dependant
-    public @Nullable ItemStack outputItem;
-    public @Nullable ItemStack[] outputItems;
-    
-    public @Nullable LiquidStack outputLiquid;
-    public @Nullable LiquidStack[] outputLiquids;
     
     public DrawBlock drawer = new DrawDefault();
     
@@ -76,11 +68,19 @@ public class MultiCrafterBlock extends Block {
         if (recipes.isEmpty()) {
             throw new IllegalStateException("MultiCrafterBlock " + name + " must have at least one recipe");
         }
+        
+        for (Recipe recipe : recipes) {
+            if (recipe.hasItems()) hasItems = true;
+            if (recipe.hasLiquids()) hasLiquids = true;
+            if (recipe.hasPower()) hasPower = true;
+        }
+        
         setupConsumers();
         
         super.init();
     }
     
+    // TODO change it based of recipe?
     protected void setupConsumers() {
         consume(new ConsumeItemDynamic(
             (MultiCrafterBuild build) -> build.currentRecipe.input.items
@@ -97,7 +97,6 @@ public class MultiCrafterBlock extends Block {
     
     // TODO Payload support
     public class MultiCrafterBuild extends Building implements HeatBlock, HeatConsumer {
-        public float craftingTime;
         public float progress;
         public float totalProgress;
         public float warmup;
@@ -120,41 +119,101 @@ public class MultiCrafterBlock extends Block {
         public void updateTile() {
             if (currentRecipe == null) return;
             
-            if (currentRecipe.craftTime > 0) craftingTime += Time.delta;
+            if (currentRecipe.input.hasHeat()) heat = calculateHeat(sideHeat);
+            if (currentRecipe.output.hasHeat()) heat = Mathf.approachDelta(heat, currentRecipe.output.heat * efficiency, currentRecipe.warmupRate * edelta());
             
-            warmup = Mathf.approachDelta(warmup, 0f, currentRecipe.warmupSpeed);
-            totalProgress += warmup * Time.delta;
-            
-            if (craftingTime >= currentRecipe.craftTime) {
-                consume();
+            if (efficiency > 0) {
+                progress += getProgressIncrease(currentRecipe.craftTime);
+                warmup = Mathf.approachDelta(warmup, 1f, currentRecipe.warmupSpeed);
                 
-                for (ItemStack output : currentRecipe.output.items) {
-                    for (int i = 0; i < output.amount; i++) {
-                        offload(output.item);
+                if (currentRecipe.output.hasLiquids()) {
+                    float increase = getProgressIncrease(1f);
+                    for (LiquidStack liquid : currentRecipe.output.liquids) {
+                        handleLiquid(this, liquid.liquid, Math.min(liquid.amount * increase, liquidCapacity - liquids.get(liquid.liquid)));
                     }
                 }
                 
-                craftingTime = 0;
+                if (wasVisible && Mathf.chance(currentRecipe.updateEffectChance)) {
+                    currentRecipe.updateEffect.at(x + Mathf.range(size * currentRecipe.updateEffectSpread), y + Mathf.range(size * currentRecipe.updateEffectSpread));
+                }
+                
+            } else warmup = Mathf.approachDelta(warmup, 0f, currentRecipe.warmupSpeed);
+            
+            totalProgress += warmup * Time.delta;
+            if (progress >= 1f) {
+                craft();
             }
             
-            if (timer(timerDump, dumpTime / timeScale)) {
+            dumpOutputs();
+        }
+        
+        public void craft() {
+            consume();
+            
+            for (ItemStack output : currentRecipe.output.items) {
+                for (int i = 0; i < output.amount; i++) {
+                    offload(output.item);
+                }
+            }
+            
+            if (wasVisible) {
+                currentRecipe.craftEffect.at(x, y);
+            }
+            
+            progress %= 1f;
+        }
+        
+        public void dumpOutputs() {
+            if (currentRecipe == null) return;
+            
+            if (currentRecipe.output.hasItems() && timer(timerDump, dumpTime / timeScale)) {
                 for (ItemStack output : currentRecipe.output.items) {
                     dump(output.item);
                 }
             }
             
-            for (int i = 0; i < currentRecipe.output.liquids.length; i++) {
-                int direction = liquidOutputDirections[i % liquidOutputDirections.length];
-                if (direction == -1) continue;
-                
-                LiquidStack output = currentRecipe.output.liquids[i];
-                dumpLiquid(output.liquid, output.amount, direction);
+            if (currentRecipe.output.hasLiquids()) {
+                for (int i = 0; i < currentRecipe.output.liquids.length; i++) {
+                    int direction = liquidOutputDirections.length > i ? liquidOutputDirections[i] : -1;
+                    dumpLiquid(currentRecipe.output.liquids[i].liquid, 2f, direction);
+                }
             }
+        }
+        
+        public float getProgressIncrease(float baseTime) {
+            if (currentRecipe == null) return 0f;
+            if (ignoreLiquidFullness) return super.getProgressIncrease(baseTime);
+            
+            float max = 1f;
+            float scaling = 1f;
+            if (currentRecipe.output.hasLiquids()) {
+                max = 0f;
+                for (LiquidStack liquid : currentRecipe.output.liquids) {
+                    float value = (liquidCapacity - liquids.get(liquid.liquid) / (liquid.amount * edelta()));
+                    scaling = Math.min(scaling, value);
+                    max = Math.max(max, value);
+                }
+            }
+            
+            return super.getProgressIncrease(baseTime) * (dumpExtraLiquid ? Math.min(max, 1f) : scaling);
         }
         
         @Override
         public boolean shouldConsume() {
-            return super.shouldConsume();
+            if (currentRecipe == null) return false;
+            
+            for (ItemStack item : currentRecipe.output.items) {
+                if (items.get(item.item) + item.amount > itemCapacity) {
+                    return false;
+                }
+            }
+            
+            return enabled;
+        }
+        
+        @Override
+        public float calculateHeat(float[] sideHeat) {
+            return super.calculateHeat(sideHeat);
         }
         
         @Override
@@ -171,6 +230,11 @@ public class MultiCrafterBlock extends Block {
         @Override
         public boolean acceptPayload(Building source, Payload payload) {
             return currentRecipe != null && currentRecipe.input.hasPayloads() && currentRecipe.input.acceptPayload(payload);
+        }
+        
+        @Override
+        public int getMaximumAccepted(Item item) {
+            return itemCapacity;
         }
         
         @Override
@@ -193,10 +257,15 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
-        public float warmup() { return warmup; }
+        public float progress() {
+            return Mathf.clamp(progress);
+        }
         
         @Override
         public float totalProgress() { return totalProgress; }
+        
+        @Override
+        public float warmup() { return warmup; }
         
         @Override
         public float heat() { return heat; }
@@ -213,7 +282,6 @@ public class MultiCrafterBlock extends Block {
         @Override
         public void write(Writes write) {
             super.write(write);
-            write.f(craftingTime);
             write.f(progress);
             write.f(warmup);
             write.f(heat);
@@ -224,7 +292,6 @@ public class MultiCrafterBlock extends Block {
         @Override
         public void read(Reads read, byte revision) {
             super.read(read, revision);
-            craftingTime = read.f();
             progress = read.f();
             warmup = read.f();
             heat = read.f();
