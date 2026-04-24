@@ -31,6 +31,20 @@ import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.BlockFlag;
 import mindustry.world.meta.Stat;
 
+/*
+ *  - Item, liquid and power input seems to work fine
+ *  - Item and liquid output seems to work fine
+ * TODO: there's a lot
+ *  - Bars (the UI + update)
+ *  - Configuration (aka. select menu) for recipes
+ *  - Support for power output
+ *  - Support for heat input
+ *  - Support for heat output
+ *  - Support for payload input
+ *  - Support for payload output
+ *  - Support JSON (JS support will be dropped)
+ *  - Examples/Documentation
+ */
 public class MultiCrafterBlock extends Block {
     public Seq<Recipe> recipes = new Seq<>();
     
