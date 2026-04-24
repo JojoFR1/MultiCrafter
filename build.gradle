@@ -141,6 +141,7 @@ tasks.register('run', JavaExec) {
     args = [gameFile.asFile.absolutePath]
 }
 
+
 tasks.register('runMobile', JavaExec) {
     dependsOn 'downloadGame'
     dependsOn 'copyToMods'
@@ -148,4 +149,13 @@ tasks.register('runMobile', JavaExec) {
     environment 'MINDUSTRY_DATA_DIR', gameDataDir.asFile.absolutePath
     mainClass = '-jar'
     args = [gameFile.asFile.absolutePath, '-testMobile']
+}
+
+tasks.register('runNoMod', JavaExec) {
+    dependsOn 'downloadGame'
+    gameDataDir.file("mods/${project.name}.jar").asFile.delete()
+
+    environment 'MINDUSTRY_DATA_DIR', gameDataDir.asFile.absolutePath
+    mainClass = '-jar'
+    args = [gameFile.asFile.absolutePath]
 }
