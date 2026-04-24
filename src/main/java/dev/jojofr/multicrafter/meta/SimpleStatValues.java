@@ -1,5 +1,6 @@
 package dev.jojofr.multicrafter.meta;
 
+import arc.Core;
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
@@ -110,10 +111,11 @@ public class SimpleStatValues {
             o.add(new Image(region)).size(32f).scaling(Scaling.fit);
         }));
         
-        if(amount != 0) {
+        if(amount != 0f) {
+            float amountPerSecond = amount * 60f;
             stack.add(new Table(t -> {
                 t.left().bottom();
-                t.add(amount >= 1000 ? UI.formatAmount((long) amount) : Mathf.round(amount) + "").name("stack amount").style(Styles.outlineLabel);
+                t.add(amountPerSecond >= 1000f ? UI.formatAmount((long) amountPerSecond) : Mathf.round(amountPerSecond) + "").name("stack amount").style(Styles.outlineLabel);
                 t.pack();
             }));
         }
@@ -131,10 +133,11 @@ public class SimpleStatValues {
             o.add(new Image(region)).size(32f).scaling(Scaling.fit).color(color);
         }));
         
-        if(amount != 0) {
+        if(amount != 0f) {
+            float amountPerSecond = amount * 60f;
             stack.add(new Table(t -> {
                 t.left().bottom();
-                t.add(amount >= 1000 ? UI.formatAmount((long) amount) : Mathf.round(amount) + "").name("stack amount").style(Styles.outlineLabel);
+                t.add(amountPerSecond >= 1000f ? UI.formatAmount((long) amountPerSecond) : Mathf.round(amountPerSecond) + "").name("stack amount").style(Styles.outlineLabel);
                 t.pack();
             }));
         }

@@ -141,7 +141,6 @@ tasks.register('run', JavaExec) {
     args = [gameFile.asFile.absolutePath]
 }
 
-
 tasks.register('runMobile', JavaExec) {
     dependsOn 'downloadGame'
     dependsOn 'copyToMods'

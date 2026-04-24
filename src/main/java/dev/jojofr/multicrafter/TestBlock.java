@@ -15,8 +15,8 @@ public class TestBlock {
     public static Block testBlock;
     public static Recipe testRecipe = new Recipe("test",
         new IOEntry().withItems(ItemStack.with(Items.copper, 10, Items.lead, 5))
-            .withLiquids(LiquidStack.with(Liquids.cryofluid, 20)).withPower(5).withHeat(10),
-        new IOEntry().withItems(ItemStack.with(Items.silicon, 5)).withLiquids(LiquidStack.with(Liquids.water, 10)), 60
+            .withLiquids(LiquidStack.with(Liquids.cryofluid, 20f / 60f)).withPower(5f).withHeat(10f),
+        new IOEntry().withItems(ItemStack.with(Items.silicon, 5)).withLiquids(LiquidStack.with(Liquids.water, 10f)), 3f * 60f
     );
     
     public static void load() {
