@@ -24,6 +24,12 @@ public class TestBlock {
             health = 100;
             size = 3;
             
+            itemCapacity = 30;
+            liquidCapacity = 50;
+            
+            hasLiquids = true;
+            
+            
             recipes.add(testRecipe,
                 new Recipe("test2",
                     new IOEntry().withLiquids(LiquidStack.with(Liquids.cryofluid, 10)),

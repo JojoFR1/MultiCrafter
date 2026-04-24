@@ -6,7 +6,9 @@ import mindustry.type.*;
 import mindustry.world.blocks.payloads.Payload;
 import mindustry.world.meta.StatValues;
 
-
+/**
+ * Represents the input or output of a recipe, with items, liquids, power, heat and payloads.
+ */
 public class IOEntry {
     public ItemStack[] items = {};
     public LiquidStack[] liquids = {};
@@ -41,6 +43,11 @@ public class IOEntry {
         return this;
     }
     
+    /**
+     * Intended for internal use.
+     * <p>
+     * Builds a UI table representing this entry.
+     */
     public Table buildTable() {
         Table table = new Table();
         
