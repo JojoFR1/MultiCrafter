@@ -63,7 +63,7 @@ jar {
     archiveFileName = "${project.name}Desktop.jar"
 
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    from (layout.projectDirectory.file('mod.json'))
+    from (layout.projectDirectory.file('mod.hjson'))
 }
 
 tasks.register('jarAndroid') {
