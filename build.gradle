@@ -42,7 +42,8 @@ sourceSets {
     }
 }
 
-def mindustryVersion = 'v157.3'
+def mindustryVersion = 'v157.4'
+def mindustryGameVersion = 'v157.4'
 dependencies {
     def useLatest = false //set to "true" to always depend on the newest version of mindustry
 
@@ -131,7 +132,7 @@ tasks.register('downloadGame') {
     outputs.file(gameFile)
 
     doLast {
-        def url = "https://github.com/Anuken/Mindustry/releases/download/$mindustryVersion/Mindustry.jar"
+        def url = "https://github.com/Anuken/Mindustry/releases/download/$mindustryGameVersion/Mindustry.jar"
         def targetFile = gameFile.asFile
         targetFile.parentFile.mkdirs()
 

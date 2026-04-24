@@ -8,6 +8,8 @@ The rewrite of the original [MultiCrafterLib](https://github.com/liplum/MultiCra
 
 There is no official documentation yet. Coming soon.
 
+You can use the development testing mod as an example of how to use the library. The source code is available in the `src/testMod` folder, or [here](https://github.com/JojoFR1/MultiCrafter/blob/main/src/testMod/java/dev/jojofr/multicrafter/)
+
 ## Download
 
 ### Mod
@@ -24,7 +26,7 @@ You can add the library as a dependency in your mod by adding the following to y
 ```gradle
 ivy {
     url = 'https://github.com/'
-    patternLayout {artifact '/[organisation]/[module]/releases/download/[revision]/MultiCrafter_lib.jar'}
+    patternLayout {artifact '/[organisation]/[module]/releases/download/[revision]/MultiCrafter.jar'}
     metadataSources { artifact() }
 }
 ```
