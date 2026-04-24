@@ -16,6 +16,6 @@ A library mod that allows you to have multiple recipes in one block.
 Port & rewrite of the original mod, MutliCrafterLib, by Liplum.
 '''
 
-hideBrowser: false
+hideBrowser: true
 hidden: true
 dependencies: []
