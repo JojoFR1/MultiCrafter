@@ -35,12 +35,23 @@ repositories {
     }
 }
 
+sourceSets {
+    testMod {
+        java.srcDirs = ['src/testMod/java']
+        resources.srcDirs = ['src/testMod/resources']
+    }
+}
+
 def mindustryVersion = 'v157.3'
 dependencies {
     def useLatest = false //set to "true" to always depend on the newest version of mindustry
 
     compileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
     annotationProcessor 'Anuken:jabel:v1.0.0'
+
+    testModImplementation sourceSets.main.output
+    testModCompileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
+    testModAnnotationProcessor 'Anuken:jabel:v1.0.0'
 }
 
 // Java 8 backwards compatibility flag
@@ -108,6 +119,11 @@ tasks.register('deploy', Jar) {
     doLast { androidJarFile.get().asFile.delete() }
 }
 
+tasks.register('jarTest', Jar) {
+    archiveFileName = "${project.name}-test.jar"
+    from sourceSets.testMod.output
+}
+
 def gameFile = layout.projectDirectory.file('run/Mindustry.jar')
 def gameDataDir = layout.projectDirectory.dir('run/data')
 
@@ -127,14 +143,21 @@ tasks.register('downloadGame') {
     }
 }
 
-tasks.register('copyToMods', Copy) {
+tasks.register('copyLibToMods', Copy) {
     def renamedJar = "${project.name}.jar"
     from jar into gameDataDir.dir('mods') rename { renamedJar }
 }
 
+tasks.register('copyTestToMods', Copy) {
+    dependsOn jarTest
+    def renamedJar = "${project.name}-test.jar"
+    from jarTest into gameDataDir.dir('mods') rename { renamedJar }
+}
+
 tasks.register('run', JavaExec) {
     dependsOn 'downloadGame'
-    dependsOn 'copyToMods'
+    dependsOn 'copyLibToMods'
+    dependsOn 'copyTestToMods'
 
     environment 'MINDUSTRY_DATA_DIR', gameDataDir.asFile.absolutePath
     mainClass = '-jar'
@@ -143,7 +166,8 @@ tasks.register('run', JavaExec) {
 
 tasks.register('runMobile', JavaExec) {
     dependsOn 'downloadGame'
-    dependsOn 'copyToMods'
+    dependsOn 'copyLibToMods'
+    dependsOn 'copyTestMod'
 
     environment 'MINDUSTRY_DATA_DIR', gameDataDir.asFile.absolutePath
     mainClass = '-jar'
@@ -153,6 +177,7 @@ tasks.register('runMobile', JavaExec) {
 tasks.register('runNoMod', JavaExec) {
     dependsOn 'downloadGame'
     gameDataDir.file("mods/${project.name}.jar").asFile.delete()
+    gameDataDir.file("mods/${project.name}-test.jar").asFile.delete()
 
     environment 'MINDUSTRY_DATA_DIR', gameDataDir.asFile.absolutePath
     mainClass = '-jar'
