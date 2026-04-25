@@ -16,8 +16,11 @@ public class Recipe extends UnlockableContent {
     public float updateEffectSpread = 4f;
     public float warmupSpeed = 0.019f;
     
+    /** [Heat Consumer] */
     public float warmupRate = 0.15f;
+    /** [Heat Producer] After heat meets this requirement, excess heat will be scaled by this number. */
     public float overheatScale = 1f;
+    /** [Heat Producer] Maximum possible efficiency after overheat. */
     public float maxEfficiency = 4f;
     
     public Recipe(String name) { this(name, new IOEntry(), new IOEntry()); }

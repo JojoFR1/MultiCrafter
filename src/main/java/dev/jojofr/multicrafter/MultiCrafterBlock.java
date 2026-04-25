@@ -28,6 +28,8 @@ import mindustry.world.consumers.ConsumeLiquidsDynamic;
 import mindustry.world.consumers.ConsumePowerDynamic;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
+import mindustry.world.draw.DrawHeatOutput;
+import mindustry.world.draw.DrawMulti;
 import mindustry.world.meta.BlockFlag;
 import mindustry.world.meta.Stat;
 
@@ -37,9 +39,10 @@ import mindustry.world.meta.Stat;
  * TODO: there's a lot
  *  - Bars (the UI + update)
  *  - Configuration (aka. select menu) for recipes
+ *  - Multiple liquids bars
  *  - Support for power output
- *  - Support for heat input
- *  - Support for heat output
+ *  - Support for power input AND output
+ *  - Support for heat input AND output
  *  - Support for payload input
  *  - Support for payload output
  *  - Support JSON (JS support will be dropped)
@@ -52,7 +55,8 @@ public class MultiCrafterBlock extends Block {
     public boolean dumpExtraLiquid = true;
     public boolean ignoreLiquidFullness = false;
     
-    public DrawBlock drawer = new DrawDefault();
+    // TODO temporary
+    public DrawBlock drawer = new DrawMulti(new DrawDefault(), new DrawHeatOutput());
     
     public MultiCrafterBlock(String name) {
         super(name);
@@ -61,6 +65,11 @@ public class MultiCrafterBlock extends Block {
         solid = true;
         sync = true;
         configurable = true;
+        
+        // TODO temporary
+        rotateDraw = false;
+        rotate = true;
+        drawArrow = true;
         
         ambientSound = Sounds.loopMachine;
         ambientSoundVolume = 0.03f;
@@ -134,11 +143,11 @@ public class MultiCrafterBlock extends Block {
             if (currentRecipe == null) return;
             
             if (currentRecipe.input.hasHeat()) heat = calculateHeat(sideHeat);
-            if (currentRecipe.output.hasHeat()) heat = Mathf.approachDelta(heat, currentRecipe.output.heat * efficiency, currentRecipe.warmupRate * edelta());
+            if (currentRecipe.output.hasHeat()) heat = Mathf.approachDelta(heat, currentRecipe.output.heat * efficiency, currentRecipe.warmupRate * delta());
             
             if (efficiency > 0) {
                 progress += getProgressIncrease(currentRecipe.craftTime);
-                warmup = Mathf.approachDelta(warmup, 1f, currentRecipe.warmupSpeed);
+                warmup = Mathf.approachDelta(warmup, warmupTarget(), currentRecipe.warmupSpeed);
                 
                 if (currentRecipe.output.hasLiquids()) {
                     float increase = getProgressIncrease(1f);
@@ -222,6 +231,10 @@ public class MultiCrafterBlock extends Block {
                 }
             }
             
+            if (currentRecipe.input.hasHeat() && currentRecipe.input.heat > 0f && heat <= 0f) {
+                return false;
+            }
+            
             return enabled;
         }
         
@@ -294,6 +307,20 @@ public class MultiCrafterBlock extends Block {
         public float heatRequirement() { return currentRecipe != null ? currentRecipe.input.heat : 0f; }
         
         @Override
+        public float efficiencyScale() {
+            if (currentRecipe == null) return 0f;
+            
+            float over = Math.max(heat - currentRecipe.input.heat, 0f);
+            return Math.min(Mathf.clamp(heat / currentRecipe.input.heat) + over / currentRecipe.input.heat * currentRecipe.overheatScale, currentRecipe.maxEfficiency);
+        }
+        
+        public float warmupTarget() {
+            if (currentRecipe == null) return 0f;
+            
+            return Mathf.clamp(heat / currentRecipe.input.heat);
+        }
+        
+        @Override
         public void write(Writes write) {
             super.write(write);
             write.f(progress);
@@ -319,6 +346,9 @@ public class MultiCrafterBlock extends Block {
     @Override
     public void setBars() {
         super.setBars();
+       
+        // TODO temporary
+        addBar("heat", (MultiCrafterBuild entity) -> new Bar("bar.heat", Pal.lightOrange, () -> entity.heat / entity.currentRecipe.output.heat));
     }
     
     @Override
