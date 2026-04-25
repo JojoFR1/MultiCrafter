@@ -18,7 +18,7 @@ public class Recipe extends UnlockableContent {
     
     public float warmupRate = 0.15f;
     public float overheatScale = 1f;
-    public float maxEfficiency = 1f;
+    public float maxEfficiency = 4f;
     
     public Recipe(String name) { this(name, new IOEntry(), new IOEntry()); }
     public Recipe(String name, IOEntry input) { this(name, input, new IOEntry()); }
