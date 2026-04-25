@@ -47,7 +47,7 @@ public class SimpleStatValues {
     
     public static StatValue heat(float amount) {
         return table ->  {
-            Stack stack = simpleStack(Icon.waves, amount, new Color(1f, 0.22f, 0.22f, 0.8f));
+            Stack stack = simpleStack(Icon.waves, amount, new Color(1f, 0.22f, 0.22f, 0.8f), false);
             stack.addListener(Tooltip.Tooltips.getInstance().create("@bar.heat", mobile));
             
             table.add(stack).padRight(5);
@@ -80,11 +80,9 @@ public class SimpleStatValues {
         return t;
     }
     
-    
-    
     /** A copy of {@link StatValues} stack functions but using a float amount. */
     private static Stack floatStack(TextureRegion region, float amount, @Nullable UnlockableContent content) {
-        return floatStack(region, amount, content, true);
+        return floatStack(region, amount, content, true, true);
     }
     
     public static Stack floatStack(LiquidStack stack) {
@@ -96,14 +94,18 @@ public class SimpleStatValues {
     }
     
     public static Stack floatStack(UnlockableContent item, float amount, boolean tooltip) {
-        return floatStack(item.uiIcon, amount, item, tooltip);
+        return floatStack(item.uiIcon, amount, item, tooltip,  true);
     }
     
-    public static Stack floatStack(Liquid item) {
-        return floatStack(item.uiIcon, 0, item);
+    public static Stack floatStack(UnlockableContent item, float amount, boolean tooltip, boolean perSecond) {
+        return floatStack(item.uiIcon, amount, item, tooltip,  perSecond);
     }
     
-    private static Stack floatStack(TextureRegion region, float amount, @Nullable UnlockableContent content, boolean tooltip) {
+    public static Stack floatStack(Liquid liquid) {
+        return floatStack(liquid.uiIcon, 0, liquid);
+    }
+    
+    private static Stack floatStack(TextureRegion region, float amount, @Nullable UnlockableContent content, boolean tooltip, boolean perSecond) {
         Stack stack = new Stack();
         
         stack.add(new Table(o -> {
@@ -112,7 +114,7 @@ public class SimpleStatValues {
         }));
         
         if(amount != 0f) {
-            float amountPerSecond = amount * 60f;
+            float amountPerSecond = perSecond ? amount * 60f : amount;
             stack.add(new Table(t -> {
                 t.left().bottom();
                 t.add(amountPerSecond >= 1000f ? UI.formatAmount((long) amountPerSecond) : Mathf.round(amountPerSecond) + "").name("stack amount").style(Styles.outlineLabel);
@@ -126,6 +128,9 @@ public class SimpleStatValues {
     }
     
     private static Stack simpleStack(TextureRegionDrawable region, float amount, Color color) {
+        return simpleStack(region, amount, color, true);
+    }
+    private static Stack simpleStack(TextureRegionDrawable region, float amount, Color color, boolean perSecond) {
         Stack stack = new Stack();
         
         stack.add(new Table(o -> {
@@ -134,7 +139,7 @@ public class SimpleStatValues {
         }));
         
         if(amount != 0f) {
-            float amountPerSecond = amount * 60f;
+            float amountPerSecond = perSecond ? amount * 60f : amount;
             stack.add(new Table(t -> {
                 t.left().bottom();
                 t.add(amountPerSecond >= 1000f ? UI.formatAmount((long) amountPerSecond) : Mathf.round(amountPerSecond) + "").name("stack amount").style(Styles.outlineLabel);
