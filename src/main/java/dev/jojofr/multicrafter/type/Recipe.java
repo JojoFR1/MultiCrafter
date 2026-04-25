@@ -1,5 +1,6 @@
 package dev.jojofr.multicrafter.type;
 
+import arc.Core;
 import mindustry.content.Fx;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.UnlockableContent;
@@ -15,9 +16,9 @@ public class Recipe extends UnlockableContent {
     public float updateEffectSpread = 4f;
     public float warmupSpeed = 0.019f;
     
+    public float warmupRate = 0.15f;
     public float overheatScale = 1f;
     public float maxEfficiency = 1f;
-    public float warmupRate = 0.15f;
     
     public Recipe(String name) { this(name, new IOEntry(), new IOEntry()); }
     public Recipe(String name, IOEntry input) { this(name, input, new IOEntry()); }
@@ -26,9 +27,23 @@ public class Recipe extends UnlockableContent {
     }
     public Recipe(String name, IOEntry input, IOEntry output, float craftTime) {
         super(name);
+        
+        this.localizedName = Core.bundle.get(getContentTypeName() + "." + this.name + ".name", this.name);
+        this.description = Core.bundle.getOrNull(getContentTypeName() + "." + this.name + ".description");
+        this.details = Core.bundle.getOrNull(getContentTypeName() + "." + this.name + ".details");
+        this.credit = Core.bundle.getOrNull(getContentTypeName() + "." + this.name + ".credit");
+        
         this.input = input;
         this.output = output;
         this.craftTime = craftTime;
+    }
+    
+    @Override
+    public void postInit() {
+        if(databaseCategory == null || databaseCategory.isEmpty()) databaseCategory = getContentTypeName();
+        if(databaseTag == null || databaseTag.isEmpty()) databaseTag = "default";
+        
+        databaseTabs.addAll(shownPlanets);
     }
     
     public Recipe withCraftTime(float craftTime) {
@@ -74,11 +89,6 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
-    @Override
-    public ContentType getContentType() {
-        return ContentType.loadout_UNUSED;
-    }
-    
     public boolean hasItems() {
         return input != null && input.hasItems() || output != null && output.hasItems();
     }
@@ -97,5 +107,27 @@ public class Recipe extends UnlockableContent {
     
     public boolean hasPayloads() {
         return input != null && input.hasPayloads() || output != null && output.hasPayloads();
+    }
+    
+    @Override
+    public ContentType getContentType() {
+        return ContentType.typeid_UNUSED;
+    }
+    
+    public String getContentTypeName() {
+        return "recipe";
+    }
+    
+    @Override
+    public void loadIcon() {
+        fullIcon =
+            Core.atlas.find(fullOverride == null ? "" : fullOverride,
+                Core.atlas.find(getContentTypeName() + "-" + name + "-full",
+                    Core.atlas.find(name + "-full",
+                        Core.atlas.find(name,
+                            Core.atlas.find(getContentTypeName() + "-" + name,
+                                Core.atlas.find(name + "1"))))));
+        
+        uiIcon = Core.atlas.find(getContentTypeName() + "-" + name + "-ui", fullIcon);
     }
 }
