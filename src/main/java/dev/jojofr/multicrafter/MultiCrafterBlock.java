@@ -43,6 +43,8 @@ import mindustry.world.meta.Stat;
  *  - Support for power output
  *  - Support for power input AND output
  *  - Support for heat input AND output
+ *  - Fix known bug that produce "infinite" heat when two multicrafter are chained
+ *      I could either reuse the fix I made for the OG library that or maybe separate input/output (all in one variable)
  *  - Support for payload input
  *  - Support for payload output
  *  - Support JSON (JS support will be dropped)
