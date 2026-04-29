@@ -75,7 +75,7 @@ public class MultiCrafterBlock extends Block {
         ambientSoundVolume = 0.03f;
         
         flags = EnumSet.of(BlockFlag.factory);
-        drawArrow = false;
+        // drawArrow = false;
         
         config(Integer.class, MultiCrafterBuild::setCurrentRecipe);
     }
@@ -96,6 +96,8 @@ public class MultiCrafterBlock extends Block {
             if (recipe.hasItems()) hasItems = true;
             if (recipe.hasLiquids()) hasLiquids = true;
             if (recipe.hasPower()) hasPower = true;
+            if (recipe.output.hasPower()) outputsPower = true;
+            if (recipe.input.hasPower()) consumesPower = true;
         }
         
         setupConsumers();
@@ -105,17 +107,37 @@ public class MultiCrafterBlock extends Block {
     
     // TODO change it based of recipe?
     protected void setupConsumers() {
-        consume(new ConsumeItemDynamic(
-            (MultiCrafterBuild build) -> build.currentRecipe.input.items
-        ));
+        boolean hasItems = false;
+        boolean hasLiquids = false;
+        boolean hasPower = false;
+        boolean outputsPower = false;
         
-        consume(new ConsumeLiquidsDynamic(
-            (MultiCrafterBuild build) -> build.currentRecipe.input.liquids
-        ));
+        for (Recipe recipe : recipes) {
+            if (recipe.input.hasItems()) hasItems = true;
+            if (recipe.input.hasLiquids()) hasLiquids = true;
+            if (recipe.input.hasPower()) hasPower = true;
+            if (recipe.output.hasPower()) outputsPower = true;
+        }
         
-        consume(new ConsumePowerDynamic(build ->
-            ((MultiCrafterBuild) build).currentRecipe.input.power
-        ));
+        if (hasItems) {
+            consume(new ConsumeItemDynamic(
+                (MultiCrafterBuild build) -> build.currentRecipe.input.items
+            ));
+        }
+        
+        if (hasLiquids) {
+            consume(new ConsumeLiquidsDynamic(
+                (MultiCrafterBuild build) -> build.currentRecipe.input.liquids
+            ));
+        }
+        
+        if (hasPower) {
+            consume(new ConsumePowerDynamic(build ->
+                ((MultiCrafterBuild) build).currentRecipe.input.power
+            ));
+        } else if (outputsPower) {
+            consume(new ConsumePowerDynamic(build -> 0f));
+        }
     }
     
     // TODO Payload support
@@ -318,6 +340,12 @@ public class MultiCrafterBlock extends Block {
             if (currentRecipe == null) return 0f;
             
             return Mathf.clamp(heat / currentRecipe.input.heat);
+        }
+        
+        @Override
+        public float getPowerProduction() {
+            if (currentRecipe == null || !currentRecipe.output.hasPower()) return 0f;
+            return currentRecipe.output.power * efficiency;
         }
         
         @Override
