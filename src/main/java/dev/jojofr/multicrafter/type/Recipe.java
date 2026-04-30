@@ -1,10 +1,19 @@
 package dev.jojofr.multicrafter.type;
 
 import arc.Core;
+import arc.math.Interp;
+import arc.scene.ui.layout.Cell;
+import arc.scene.ui.layout.Table;
+import arc.util.Time;
 import mindustry.content.Fx;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.UnlockableContent;
 import mindustry.entities.Effect;
+import mindustry.gen.Icon;
+import mindustry.gen.Tex;
+import mindustry.graphics.Pal;
+import mindustry.ui.Bar;
+import mindustry.world.meta.Stat;
 
 public class Recipe extends UnlockableContent {
     public final IOEntry input, output;
@@ -25,9 +34,7 @@ public class Recipe extends UnlockableContent {
     
     public Recipe(String name) { this(name, new IOEntry(), new IOEntry()); }
     public Recipe(String name, IOEntry input) { this(name, input, new IOEntry()); }
-    public Recipe(String name, IOEntry input, IOEntry output) {
-        this(name, input, output, 80);
-    }
+    public Recipe(String name, IOEntry input, IOEntry output) { this(name, input, output, 80); }
     public Recipe(String name, IOEntry input, IOEntry output, float craftTime) {
         super(name);
         
@@ -47,6 +54,62 @@ public class Recipe extends UnlockableContent {
         if(databaseTag == null || databaseTag.isEmpty()) databaseTag = "default";
         
         databaseTabs.addAll(shownPlanets);
+    }
+    
+    @Override
+    public void loadIcon() {
+        fullIcon =
+            Core.atlas.find(fullOverride == null ? "" : fullOverride,
+                Core.atlas.find(getContentTypeName() + "-" + name + "-full",
+                    Core.atlas.find(name + "-full",
+                        Core.atlas.find(name,
+                            Core.atlas.find(getContentTypeName() + "-" + name,
+                                Core.atlas.find(name + "1"))))));
+        
+        uiIcon = Core.atlas.find(getContentTypeName() + "-" + name + "-ui", fullIcon);
+    }
+    
+    @Override
+    public void setStats() {
+        stats.add(Stat.output, table -> {
+            table.row();
+            table.add(buildTable()).pad(4f).grow();
+            table.defaults().grow();
+        });
+    }
+    
+    public Table buildTable() {
+        Table recipeTable = new Table();
+        recipeTable.setBackground(Tex.whiteui);
+        recipeTable.setColor(Pal.darkerGray);
+        
+        if (!this.unlocked()) {
+            recipeTable.setColor(Pal.darkestGray);
+            recipeTable.image(Icon.lock).size(100f, 50f).pad(12f).fill();
+            
+            return recipeTable;
+        }
+        
+        Cell<Table> inputTable = recipeTable.add(this.input.buildTable()).width(100f).pad(12f).fill();
+        inputTable.left();
+        
+        // TODO not perfect
+        Table time = new Table();
+        final float[] dur = {0f};
+        time.update(() -> {
+            dur[0] += Time.delta;
+            if (dur[0] >= this.craftTime) dur[0] = 0f;
+        });
+        
+        Bar timeBar = new Bar(String.format("%.1f", this.craftTime / 60f) + "s",
+            Pal.accent, () -> Interp.smooth.apply((Time.time % this.craftTime) / this.craftTime));
+        time.add(timeBar).height(50f).width(250f);
+        recipeTable.add(time).pad(12f);
+        
+        Cell<Table> outputCell = recipeTable.add(this.output.buildTable()).width(100f).pad(12f).fill();
+        outputCell.right();
+        
+        return recipeTable;
     }
     
     public Recipe withCraftTime(float craftTime) {
@@ -92,6 +155,11 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
+    public Recipe isUnlocked() {
+        this.unlocked = true;
+        return this;
+    }
+    
     public boolean hasItems() {
         return input != null && input.hasItems() || output != null && output.hasItems();
     }
@@ -119,18 +187,5 @@ public class Recipe extends UnlockableContent {
     
     public String getContentTypeName() {
         return "recipe";
-    }
-    
-    @Override
-    public void loadIcon() {
-        fullIcon =
-            Core.atlas.find(fullOverride == null ? "" : fullOverride,
-                Core.atlas.find(getContentTypeName() + "-" + name + "-full",
-                    Core.atlas.find(name + "-full",
-                        Core.atlas.find(name,
-                            Core.atlas.find(getContentTypeName() + "-" + name,
-                                Core.atlas.find(name + "1"))))));
-        
-        uiIcon = Core.atlas.find(getContentTypeName() + "-" + name + "-ui", fullIcon);
     }
 }

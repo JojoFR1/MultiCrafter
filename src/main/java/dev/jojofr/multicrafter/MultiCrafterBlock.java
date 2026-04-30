@@ -1,9 +1,6 @@
 package dev.jojofr.multicrafter;
 
-import arc.math.Interp;
 import arc.math.Mathf;
-import arc.scene.ui.layout.Cell;
-import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.Seq;
 import arc.util.Log;
@@ -12,9 +9,7 @@ import arc.util.io.Reads;
 import arc.util.io.Writes;
 import dev.jojofr.multicrafter.type.Recipe;
 import mindustry.gen.Building;
-import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
-import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -390,33 +385,7 @@ public class MultiCrafterBlock extends Block {
             table.row();
             
             for (Recipe recipe : recipes) {
-                Table recipeTable = new Table();
-                recipeTable.setBackground(Tex.whiteui);
-                recipeTable.setColor(Pal.darkerGray);
-                
-                if (!recipe.unlocked()) {
-                    recipeTable.setColor(Pal.darkestGray);
-                    recipeTable.image(Icon.lock).size(100f, 50f).pad(12f).fill();
-                    
-                    table.add(recipeTable).pad(4f).grow();
-                    table.row();
-                    continue;
-                }
-                
-                Cell<Table> inputTable = recipeTable.add(recipe.input.buildTable()).width(100f).pad(12f).fill();
-                inputTable.left();
-                
-                // TODO not perfect
-                Table time = new Table();
-                Bar timeBar = new Bar(String.format("%.1f", recipe.craftTime / 60f) + "s",
-                    Pal.accent, () -> Interp.smooth.apply((Time.time % recipe.craftTime) / recipe.craftTime));
-                time.add(timeBar).height(50f).width(250f);
-                recipeTable.add(time).pad(12f);
-                
-                Cell<Table> outputCell = recipeTable.add(recipe.output.buildTable()).width(100f).pad(12f).fill();
-                outputCell.right();
-                
-                table.add(recipeTable).pad(4f).grow();
+                table.add(recipe.buildTable()).pad(4f).grow();
                 table.row();
             }
             
