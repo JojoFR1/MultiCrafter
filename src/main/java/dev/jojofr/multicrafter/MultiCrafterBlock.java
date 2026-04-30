@@ -6,11 +6,13 @@ import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.Seq;
+import arc.util.Log;
 import arc.util.Time;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import dev.jojofr.multicrafter.type.Recipe;
 import mindustry.gen.Building;
+import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
 import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
@@ -68,11 +70,6 @@ public class MultiCrafterBlock extends Block {
         sync = true;
         configurable = true;
         
-        // TODO temporary
-        rotateDraw = false;
-        rotate = true;
-        drawArrow = true;
-        
         ambientSound = Sounds.loopMachine;
         ambientSoundVolume = 0.03f;
         
@@ -100,6 +97,11 @@ public class MultiCrafterBlock extends Block {
             if (recipe.hasPower()) hasPower = true;
             if (recipe.output.hasPower()) outputsPower = true;
             if (recipe.input.hasPower()) consumesPower = true;
+            
+            drawArrow = rotate = rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads());
+            Log.info("Recipe " + recipe.name + " has heat or payload output, setting rotate to " + rotate);
+            Log.info("Setting rotate to " + (rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads())));
+            rotateDraw = !rotate;
         }
         
         setupConsumers();
@@ -392,19 +394,29 @@ public class MultiCrafterBlock extends Block {
                 recipeTable.setBackground(Tex.whiteui);
                 recipeTable.setColor(Pal.darkerGray);
                 
-                Cell<Table> inputTable = recipeTable.add(recipe.input.buildTable());
+                if (!recipe.unlocked()) {
+                    recipeTable.setColor(Pal.darkestGray);
+                    recipeTable.image(Icon.lock).size(100f, 50f).pad(12f).fill();
+                    
+                    table.add(recipeTable).pad(4f).grow();
+                    table.row();
+                    continue;
+                }
+                
+                Cell<Table> inputTable = recipeTable.add(recipe.input.buildTable()).width(100f).pad(12f).fill();
                 inputTable.left();
                 
                 // TODO not perfect
                 Table time = new Table();
-                Bar timeBar = new Bar(String.format("%.1f", recipe.craftTime / 60f) + "s", Pal.accent, () -> Interp.smooth.apply((Time.time % recipe.craftTime) / recipe.craftTime));
-                time.add(timeBar).height(50).width(250);
-                recipeTable.add(time).pad(12);
+                Bar timeBar = new Bar(String.format("%.1f", recipe.craftTime / 60f) + "s",
+                    Pal.accent, () -> Interp.smooth.apply((Time.time % recipe.craftTime) / recipe.craftTime));
+                time.add(timeBar).height(50f).width(250f);
+                recipeTable.add(time).pad(12f);
                 
-                Cell<Table> outputCell = recipeTable.add(recipe.output.buildTable());
+                Cell<Table> outputCell = recipeTable.add(recipe.output.buildTable()).width(100f).pad(12f).fill();
                 outputCell.right();
                 
-                table.add(recipeTable).pad(10).grow();
+                table.add(recipeTable).pad(4f).grow();
                 table.row();
             }
             
