@@ -330,6 +330,7 @@ public class MultiCrafterBlock extends Block {
         @Override
         public float efficiencyScale() {
             if (currentRecipe == null) return 0f;
+            if (!currentRecipe.input.hasHeat()) return super.efficiencyScale();
             
             float over = Math.max(heat - currentRecipe.input.heat, 0f);
             return Math.min(Mathf.clamp(heat / currentRecipe.input.heat) + over / currentRecipe.input.heat * currentRecipe.overheatScale, currentRecipe.maxEfficiency);
