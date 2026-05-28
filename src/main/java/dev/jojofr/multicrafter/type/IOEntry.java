@@ -50,18 +50,15 @@ public class IOEntry {
      */
     public Table buildTable() { return buildTable(true); }
     public Table buildTable(boolean tooltip) {
-        Table table = new Table();
-        
         Table materialTable = new Table();
+        
         SimpleStatValues.items(false, tooltip, items).display(materialTable);
         SimpleStatValues.liquids(false, tooltip, liquids).display(materialTable);
         if (power > 0) SimpleStatValues.power(power).display(materialTable);
         if (heat > 0) SimpleStatValues.heat(heat).display(materialTable);
         SimpleStatValues.payloads(false, tooltip, payloads).display(materialTable);
         
-        table.add(materialTable);
-        
-        return table;
+        return materialTable;
     }
     
     public boolean isEmpty() {

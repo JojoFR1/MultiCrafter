@@ -1,23 +1,30 @@
 package dev.jojofr.multicrafter;
 
 import arc.math.Mathf;
+import arc.scene.event.HandCursorListener;
+import arc.scene.ui.Button;
+import arc.scene.ui.ImageButton;
+import arc.scene.ui.Tooltip;
+import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.Seq;
-import arc.util.Log;
 import arc.util.Time;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import dev.jojofr.multicrafter.type.Recipe;
+import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
 import mindustry.gen.Building;
+import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
+import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
-import mindustry.ui.Bar;
+import mindustry.ui.Styles;
 import mindustry.world.Block;
 import mindustry.world.blocks.heat.HeatBlock;
 import mindustry.world.blocks.heat.HeatConsumer;
@@ -352,6 +359,34 @@ public class MultiCrafterBlock extends Block {
         public float getPowerProduction() {
             if (currentRecipe == null || !currentRecipe.output.hasPower()) return 0f;
             return currentRecipe.output.power * efficiency;
+        }
+        
+        @Override
+        public void buildConfiguration(Table table) {
+            int index = 0;
+            for (Recipe recipe : recipes) {
+                Button button = new Button(Styles.togglet);
+
+                Table recipeTable = new Table();
+                if (!recipe.unlocked()) {
+                    recipeTable.image(Icon.lock).pad(4f).fill().grow();
+                    recipeTable.addListener(Tooltip.Tooltips.getInstance().create("@locked", Vars.mobile));
+                } else {
+                    recipeTable.add(recipe.input.buildTable(false)).pad(4f);
+                    recipeTable.image(Icon.right);
+                    recipeTable.add(recipe.output.buildTable(false)).pad(4f);
+
+                    final int finalIndex = index;
+                    button.changed(() -> configure(finalIndex));
+                    button.update(() -> button.setChecked(currentRecipeIndex == finalIndex));
+                }
+                button.setDisabled(!recipe.unlocked());
+                button.add(recipeTable).pad(4f);
+
+                table.add(button).pad(4f).margin(10f).grow();
+                table.row();
+                index++;
+            }
         }
         
         @Override
