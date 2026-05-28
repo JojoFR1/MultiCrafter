@@ -150,7 +150,7 @@ public class MultiCrafterBlock extends Block {
         
         public Recipe currentRecipe;
         public int currentRecipeIndex;
-        public Effect changeRecipeEffect = Fx.rotateBlock;
+        public Effect changeRecipeEffect = Fx.placeBlock;
         
         @Override
         public void created() {
@@ -301,8 +301,7 @@ public class MultiCrafterBlock extends Block {
             currentRecipeIndex = index;
             currentRecipe = recipes.get(index);
             progress = 0;
-            // changeRecipeEffect.at(x, y, 0, this);
-            changeRecipeEffect.at(x, y, block.size);
+            changeRecipeEffect.at(x, y, block.size, block);
             
             
             // TODO does not work
