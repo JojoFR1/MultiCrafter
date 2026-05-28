@@ -16,10 +16,12 @@ import mindustry.entities.Effect;
 import mindustry.gen.Building;
 import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
+import mindustry.graphics.Pal;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
+import mindustry.ui.Bar;
 import mindustry.ui.Styles;
 import mindustry.world.Block;
 import mindustry.world.blocks.heat.HeatBlock;
@@ -38,9 +40,9 @@ import mindustry.world.meta.Stat;
 /*
  *  - Item, liquid and power input seems to work fine
  *  - Item and liquid output seems to work fine
+ *  - Configuration (aka. select menu) for recipes
  * TODO: there's a lot
  *  - Bars (the UI + update)
- *  - Configuration (aka. select menu) for recipes
  *  - Multiple liquids bars
  *  - Support for power output
  *  - Support for power input AND output
@@ -51,6 +53,16 @@ import mindustry.world.meta.Stat;
  *  - Support for payload output
  *  - Support JSON (JS support will be dropped)
  *  - Examples/Documentation
+ */
+/*
+ TODO observations from a heat/power input/output test in one single block
+  - heat input transfer to the "output" side (when heat output)
+  - heat input/ouput maintain heat even when not working, output is 11 when 5 is expected
+  - recipe with no heat maintain the heat output, only reduce when heat output is selected and building is off
+  - when a recipe has power, the block requires power (even when the current recipe doesnt) and consumes none
+  - power output doesnt work, requiring a base power input (like the case above) then its "selfsufficient" since its internal buffer has power
+  - the selection menu is too big with multiple recipes, maybe look into making it a scrollable container? (also need to test for big input/output too)
+  - another small ui issue, the arrow for "input -> output" is not centered since the amount of input/output items can vary (and specify craft time)
  */
 public class MultiCrafterBlock extends Block {
     public Seq<Recipe> recipes = new Seq<>();
