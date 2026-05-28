@@ -94,8 +94,6 @@ public class MultiCrafterBlock extends Block {
             if (recipe.input.hasPower()) consumesPower = true;
             
             drawArrow = rotate = rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads());
-            Log.info("Recipe " + recipe.name + " has heat or payload output, setting rotate to " + rotate);
-            Log.info("Setting rotate to " + (rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads())));
             rotateDraw = !rotate;
         }
         
@@ -150,6 +148,7 @@ public class MultiCrafterBlock extends Block {
         
         public Recipe currentRecipe;
         public int currentRecipeIndex;
+        public Effect changeRecipeEffect = Fx.rotateBlock;
         
         @Override
         public void created() {
@@ -295,8 +294,14 @@ public class MultiCrafterBlock extends Block {
         }
         
         protected void setCurrentRecipe(int index) {
-            this.currentRecipeIndex = index;
-            this.currentRecipe = recipes.get(index);
+            if (index == currentRecipeIndex) return;
+            
+            currentRecipeIndex = index;
+            currentRecipe = recipes.get(index);
+            progress = 0;
+            // changeRecipeEffect.at(x, y, 0, this);
+            changeRecipeEffect.at(x, y, block.size);
+            
             
             // TODO does not work
             // this.block.removeConsumers(c -> true);
@@ -376,7 +381,7 @@ public class MultiCrafterBlock extends Block {
         super.setBars();
        
         // TODO temporary
-        addBar("heat", (MultiCrafterBuild entity) -> new Bar("bar.heat", Pal.lightOrange, () -> entity.heat / entity.currentRecipe.output.heat));
+        // addBar("heat", (MultiCrafterBuild entity) -> new Bar("bar.heat", Pal.lightOrange, () -> entity.heat / entity.currentRecipe.output.heat));
     }
     
     @Override
