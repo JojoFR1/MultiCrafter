@@ -1,6 +1,5 @@
 package dev.jojofr.multicrafter.meta;
 
-import arc.Core;
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
@@ -21,17 +20,27 @@ import mindustry.world.meta.StatValue;
 import mindustry.world.meta.StatValues;
 
 import static mindustry.Vars.mobile;
+import static mindustry.world.meta.StatValues.withTooltip;
 
 public class SimpleStatValues {
+    
+    public static StatValue items(boolean displayName, ItemStack... stacks) { return items(displayName, true, stacks); }
+    public static StatValue items(boolean displayName, boolean tooltip, ItemStack... stacks) {
+        return table -> {
+            for(ItemStack stack : stacks){
+                table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(5);
+            }
+        };
+    }
     
     public static StatValue liquids(LiquidStack... liquids) {
         return liquids(true, liquids);
     }
-    
-    public static StatValue liquids(boolean displayName, LiquidStack... liquids) {
+    public static StatValue liquids(boolean displayName, LiquidStack... liquids) { return liquids(displayName, true, liquids); }
+    public static StatValue liquids(boolean displayName, boolean tooltip, LiquidStack... liquids) {
         return table -> {
             for (LiquidStack liquid : liquids) {
-                table.add(displayLiquid(liquid.liquid, liquid.amount, displayName)).padRight(5);
+                table.add(displayLiquid(liquid.liquid, liquid.amount, displayName, tooltip)).padRight(5);
             }
         };
     }
@@ -54,30 +63,52 @@ public class SimpleStatValues {
         };
     }
     
-    public static StatValue payloads(PayloadStack... stacks){
-        return payloads(true, stacks);
-    }
-    
-    public static StatValue payloads(boolean displayName, PayloadStack... stacks){
+    public static StatValue payloads(PayloadStack... stacks){ return payloads(true, stacks); }
+    public static StatValue payloads(boolean displayName, PayloadStack... stacks){ return payloads(true, true, stacks); }
+    public static StatValue payloads(boolean displayName, boolean tooltip, PayloadStack... stacks){
         return table -> {
             for(PayloadStack stack : stacks){
-                table.add(displayPayloads(stack.item, stack.amount, displayName)).padRight(5);
+                table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(5);
             }
         };
     }
     
-    public static Table displayLiquid(Liquid liquid, float amount, boolean showName) {
+    public static Table displayLiquid(Liquid liquid, float amount, boolean showName) { return displayLiquid(liquid, amount, showName, true); }
+    public static Table displayLiquid(Liquid liquid, float amount, boolean showName, boolean tooltip) {
         Table t = new Table();
-        t.add(floatStack(liquid, amount));
+        t.add(floatStack(liquid, amount, tooltip));
         if (showName) t.add(liquid.localizedName).padLeft(4 + amount > 99 ? 4 : 0);
         return t;
     }
     
-    public static Table displayPayloads(UnlockableContent item, int amount, boolean showName){
+    public static Table displayPayloads(UnlockableContent item, int amount, boolean showName) { return displayPayloads(item, amount, showName, true); }
+    public static Table displayPayloads(UnlockableContent item, int amount, boolean showName, boolean tooltip) {
         Table t = new Table();
-        t.add(StatValues.stack(item, amount, !showName));
+        t.add(stack(item.uiIcon, amount, item, tooltip));
         if(showName) t.add(item.localizedName).padLeft(4 + amount > 99 ? 4 : 0);
         return t;
+    }
+    
+    private static Stack stack(TextureRegion region, int amount, @Nullable UnlockableContent content, boolean tooltip){
+        Stack stack = new Stack();
+        
+        stack.add(new Table(o -> {
+            o.left();
+            o.add(new Image(region)).size(32f).scaling(Scaling.fit);
+        }));
+        
+        if(amount != 0){
+            stack.add(new Table(t -> {
+                t.left().bottom();
+                t.add(amount >= 1000 ? UI.formatAmount(amount) : amount + "").name("stack amount").style(Styles.outlineLabel);
+                t.pack();
+            }));
+        }
+        
+        if (tooltip) withTooltip(stack, content, true);
+        stack.addListener(Tooltip.Tooltips.getInstance().create(content.localizedName, mobile));
+        
+        return stack;
     }
     
     /** A copy of {@link StatValues} stack functions but using a float amount. */
@@ -122,7 +153,8 @@ public class SimpleStatValues {
             }));
         }
         
-        StatValues.withTooltip(stack, content, tooltip);
+        if (tooltip) withTooltip(stack, content, true);
+        stack.addListener(Tooltip.Tooltips.getInstance().create(content.localizedName, mobile));
         
         return stack;
     }

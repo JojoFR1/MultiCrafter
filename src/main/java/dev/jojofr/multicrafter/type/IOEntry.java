@@ -48,15 +48,16 @@ public class IOEntry {
      * <p>
      * Builds a UI table representing this entry.
      */
-    public Table buildTable() {
+    public Table buildTable() { return buildTable(true); }
+    public Table buildTable(boolean tooltip) {
         Table table = new Table();
         
         Table materialTable = new Table();
-        StatValues.items(false, items).display(materialTable);
-        SimpleStatValues.liquids(false, liquids).display(materialTable);
+        SimpleStatValues.items(false, tooltip, items).display(materialTable);
+        SimpleStatValues.liquids(false, tooltip, liquids).display(materialTable);
         if (power > 0) SimpleStatValues.power(power).display(materialTable);
         if (heat > 0) SimpleStatValues.heat(heat).display(materialTable);
-        SimpleStatValues.payloads(false, payloads).display(materialTable);
+        SimpleStatValues.payloads(false, tooltip, payloads).display(materialTable);
         
         table.add(materialTable);
         
