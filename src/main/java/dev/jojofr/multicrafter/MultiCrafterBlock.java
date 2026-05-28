@@ -59,8 +59,6 @@ import mindustry.world.meta.Stat;
   - heat input transfer to the "output" side (when heat output)
   - heat input/ouput maintain heat even when not working, output is 11 when 5 is expected
   - recipe with no heat maintain the heat output, only reduce when heat output is selected and building is off
-  - when a recipe has power, the block requires power (even when the current recipe doesnt) and consumes none
-  - power output doesnt work, requiring a base power input (like the case above) then its "selfsufficient" since its internal buffer has power
   - the selection menu is too big with multiple recipes, maybe look into making it a scrollable container? (also need to test for big input/output too)
   - another small ui issue, the arrow for "input -> output" is not centered since the amount of input/output items can vary (and specify craft time)
  */
@@ -135,22 +133,29 @@ public class MultiCrafterBlock extends Block {
         
         if (hasItems) {
             consume(new ConsumeItemDynamic(
-                (MultiCrafterBuild build) -> build.currentRecipe.input.items
+                (MultiCrafterBuild build) -> build.currentRecipe == null ? ItemStack.empty : build.currentRecipe.input.items
             ));
         }
         
         if (hasLiquids) {
             consume(new ConsumeLiquidsDynamic(
-                (MultiCrafterBuild build) -> build.currentRecipe.input.liquids
+                (MultiCrafterBuild build) -> build.currentRecipe == null ? LiquidStack.empty : build.currentRecipe.input.liquids
             ));
         }
         
         if (hasPower) {
             consume(new ConsumePowerDynamic(build ->
-                ((MultiCrafterBuild) build).currentRecipe.input.power
-            ));
-        } else if (outputsPower) {
-            consume(new ConsumePowerDynamic(build -> 0f));
+                ((MultiCrafterBuild) build).currentRecipe == null ? 0f : ((MultiCrafterBuild) build).currentRecipe.input.power) {
+                @Override
+                public float efficiency(Building build) {
+                    MultiCrafterBuild multiCrafterBuild = (MultiCrafterBuild) build;
+                    if (multiCrafterBuild.currentRecipe == null || multiCrafterBuild.currentRecipe.input.power <= 0f) {
+                        return 1f;
+                    }
+                    
+                    return super.efficiency(build);
+                }
+            });
         }
     }
     
