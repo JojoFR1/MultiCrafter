@@ -1,9 +1,7 @@
 package dev.jojofr.multicrafter;
 
 import arc.math.Mathf;
-import arc.scene.event.HandCursorListener;
 import arc.scene.ui.Button;
-import arc.scene.ui.ImageButton;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
@@ -18,8 +16,6 @@ import mindustry.entities.Effect;
 import mindustry.gen.Building;
 import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
-import mindustry.gen.Tex;
-import mindustry.graphics.Pal;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;

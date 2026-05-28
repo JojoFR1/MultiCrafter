@@ -4,7 +4,6 @@ import arc.scene.ui.layout.Table;
 import dev.jojofr.multicrafter.meta.SimpleStatValues;
 import mindustry.type.*;
 import mindustry.world.blocks.payloads.Payload;
-import mindustry.world.meta.StatValues;
 
 /**
  * Represents the input or output of a recipe, with items, liquids, power, heat and payloads.
