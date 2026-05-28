@@ -38,17 +38,13 @@ import mindustry.world.meta.BlockFlag;
 import mindustry.world.meta.Stat;
 
 /*
- *  - Item, liquid and power input seems to work fine
- *  - Item and liquid output seems to work fine
+ *  - Item, liquid, power and heat input seems to work fine
+ *  - Item, liquid, power and heat output seems to work fine
  *  - Configuration (aka. select menu) for recipes
  * TODO: there's a lot
  *  - Bars (the UI + update)
  *  - Multiple liquids bars
- *  - Support for power output
  *  - Support for power input AND output
- *  - Support for heat input AND output
- *  - Fix known bug that produce "infinite" heat when two multicrafter are chained
- *      I could either reuse the fix I made for the OG library that or maybe separate input/output (all in one variable)
  *  - Support for payload input
  *  - Support for payload output
  *  - Support JSON (JS support will be dropped)
@@ -56,9 +52,6 @@ import mindustry.world.meta.Stat;
  */
 /*
  TODO observations from a heat/power input/output test in one single block
-  - heat input transfer to the "output" side (when heat output)
-  - heat input/ouput maintain heat even when not working, output is 11 when 5 is expected
-  - recipe with no heat maintain the heat output, only reduce when heat output is selected and building is off
   - the selection menu is too big with multiple recipes, maybe look into making it a scrollable container? (also need to test for big input/output too)
   - another small ui issue, the arrow for "input -> output" is not centered since the amount of input/output items can vary (and specify craft time)
  */
@@ -85,6 +78,8 @@ public class MultiCrafterBlock extends Block {
         
         flags = EnumSet.of(BlockFlag.factory);
         // drawArrow = false;
+        
+        
         
         config(Integer.class, MultiCrafterBuild::setCurrentRecipe);
     }
@@ -166,6 +161,7 @@ public class MultiCrafterBlock extends Block {
         public float warmup;
         
         public float heat;
+        public float outputHeat;
         public float[] sideHeat = new float[4];
         
         public Recipe currentRecipe;
@@ -185,7 +181,10 @@ public class MultiCrafterBlock extends Block {
             if (currentRecipe == null) return;
             
             if (currentRecipe.input.hasHeat()) heat = calculateHeat(sideHeat);
-            if (currentRecipe.output.hasHeat()) heat = Mathf.approachDelta(heat, currentRecipe.output.heat * efficiency, currentRecipe.warmupRate * delta());
+            else heat = Mathf.approachDelta(heat, 0f, currentRecipe.warmupRate * delta());
+            
+            if (currentRecipe.output.hasHeat()) outputHeat = Mathf.approachDelta(outputHeat, currentRecipe.output.heat * efficiency, currentRecipe.warmupRate * delta());
+            else outputHeat = Mathf.approachDelta(outputHeat, 0f, currentRecipe.warmupRate * delta());
             
             if (efficiency > 0) {
                 progress += getProgressIncrease(currentRecipe.craftTime);
@@ -342,10 +341,10 @@ public class MultiCrafterBlock extends Block {
         public float warmup() { return warmup; }
         
         @Override
-        public float heat() { return heat; }
+        public float heat() { return outputHeat; }
         
         @Override
-        public float heatFrac() { return currentRecipe != null ?  heat / Math.max(currentRecipe.input.heat, currentRecipe.output.heat) : 0f; }
+        public float heatFrac() { return currentRecipe != null ? outputHeat / Math.max(currentRecipe.input.heat, currentRecipe.output.heat) : 0f; }
         
         @Override
         public float[] sideHeat() { return sideHeat; }
@@ -408,6 +407,7 @@ public class MultiCrafterBlock extends Block {
             write.f(progress);
             write.f(warmup);
             write.f(heat);
+            write.f(outputHeat);
             
             write.i(currentRecipeIndex);
         }
@@ -418,6 +418,7 @@ public class MultiCrafterBlock extends Block {
             progress = read.f();
             warmup = read.f();
             heat = read.f();
+            outputHeat = read.f();
             
             currentRecipeIndex = Mathf.clamp(read.i(), 0, recipes.size - 1);
             currentRecipe = recipes.get(currentRecipeIndex);
