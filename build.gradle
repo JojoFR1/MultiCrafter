@@ -6,7 +6,7 @@ group = 'dev.jojofr.multicrafter'
 version = '1.0.0'
 
 java {
-    targetCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_17
     sourceCompatibility = JavaVersion.VERSION_17
 }
 
@@ -26,13 +26,6 @@ repositories {
         patternLayout {artifact '/[organisation]/[module]/releases/download/master/[revision].jar'}
         metadataSources { artifact() }
     }
-
-    //Do the same with jabel
-    ivy {
-        url = 'https://github.com/'
-        patternLayout {artifact '/[organisation]/[module]/releases/download/[revision]/jabel.jar'}
-        metadataSources { artifact() }
-    }
 }
 
 sourceSets {
@@ -48,16 +41,9 @@ dependencies {
     def useLatest = false //set to "true" to always depend on the newest version of mindustry
 
     compileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
-    annotationProcessor 'Anuken:jabel:v1.0.0'
 
     testModImplementation sourceSets.main.output
     testModCompileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
-    testModAnnotationProcessor 'Anuken:jabel:v1.0.0'
-}
-
-// Java 8 backwards compatibility flag
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs.addAll(['--release', '8'])
 }
 
 jar {
