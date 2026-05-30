@@ -25,9 +25,19 @@ jobs:
     - name: Build Mod Jar
       run: ./gradlew deploy --configuration-cache
 
-    - name: Upload built Jar file
+    - name: Build Lib Jar
+      run: ./gradlew jarLib --configuration-cache
+
+    - name: Upload built Mod Jar file
       uses: actions/upload-artifact@v7
       with:
         name: ${{ github.event.repository.name }}
         path: build/libs/${{ github.event.repository.name }}.jar
+        archive: false
+    
+    - name: Upload built Lib Jar file
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ github.event.repository.name }}
+        path: build/libs/${{ github.event.repository.name }}-lib.jar
         archive: false
