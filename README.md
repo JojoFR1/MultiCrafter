@@ -4,11 +4,14 @@ A modding library for Mindustry that allows you to create blocks with multiple c
 
 The rewrite of the original [MultiCrafterLib](https://github.com/liplum/MultiCrafterLib) with a better codebase and for Mindustry v8.
 
+⚠️ This library is still in development, expect bugs.
+
 ## How to Use
 
-There is no official documentation yet. Coming soon.
+There is no official documentation yet. It (might) come in the future.
 
 You can use the development testing mod as an example of how to use the library. The source code is available in the `src/testMod` folder, or [here](https://github.com/JojoFR1/MultiCrafter/blob/main/src/testMod/java/dev/jojofr/multicrafter/)
+It contains both Java and JSON examples of how to use the library.
 
 ## Download
 
@@ -21,7 +24,21 @@ You can then import the downloaded JAR file in game by putting it in the `mods` 
 
 ### Library (not yet available)
 
-You can add the library as a dependency in your mod by adding the following to your `build.gradle`:
+#### JSON
+
+You can add the library as a dependency in your mod by adding the following to your `mod.(h)json`:
+
+```json
+"dependencies": ["multicrafter"]
+```
+
+This will make user of your mod require the library to be installed. You can then use the type `MultiCrafter` in your JSON block definitions.
+
+#### Java
+
+You need to follow the JSON instructions above to make sure your users have the library installed.
+
+Internally, your mod will need the library as a dependency by adding the following to your `build.gradle`:
 
 ```gradle
 ivy {
@@ -61,6 +78,14 @@ You can simply take the generated JAR file and put it in the `mods` folder of yo
 
 For development purposes, you can run the mod directly in a local, separate instance, of Mindustry from the
 command line using: `./gradlew run` or `./gradlew runAndroid` for Android testing (doesn't require the Android jar).
+
+## Contributing
+
+I am open to any contributions.
+
+Feel free to open issues for bug reports, feature request or any questions you may have.
+
+You can also open pull requests if you want to directly contribute to the library.
 
 ## Credits
 
