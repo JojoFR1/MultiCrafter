@@ -3,7 +3,6 @@ package dev.jojofr.multicrafter;
 import arc.Core;
 import arc.math.Mathf;
 import arc.scene.ui.Button;
-import arc.scene.ui.ScrollPane;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
@@ -12,6 +11,7 @@ import arc.util.Strings;
 import arc.util.Time;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import dev.jojofr.multicrafter.type.JsonRecipe;
 import dev.jojofr.multicrafter.type.Recipe;
 import mindustry.Vars;
 import mindustry.content.Fx;
@@ -48,7 +48,6 @@ import mindustry.world.meta.Stat;
  *  - Bars (the UI + update)
  *  - Multiple liquids bars
  *  - Support for payloads
- *  - Support JSON (JS support will be dropped)
  *  - Examples/Documentation
  */
 /*
@@ -57,14 +56,15 @@ import mindustry.world.meta.Stat;
   - another small ui issue, the arrow for "input -> output" is not centered since the amount of input/output items can vary (and specify craft time)
  */
 public class MultiCrafterBlock extends Block {
-    public Seq<Recipe> recipes = new Seq<>();
+    public transient Seq<Recipe> recipes = new Seq<>();
+    /** Only intended for internal use and JSON parsing */
+    public Seq<JsonRecipe>  jsonRecipes = new Seq<>();
     
     public int[] liquidOutputDirections = {-1};
     public boolean dumpExtraLiquid = true;
     public boolean ignoreLiquidFullness = false;
     
-    // TODO temporary
-    public DrawBlock drawer = new DrawMulti(new DrawDefault(), new DrawHeatOutput());
+    public DrawBlock drawer = new DrawDefault();
     
     public MultiCrafterBlock(String name) {
         super(name);
@@ -93,6 +93,8 @@ public class MultiCrafterBlock extends Block {
     
     @Override
     public void init() {
+        for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(jsonRecipe.toRecipe());
+        
         if (recipes.isEmpty()) {
             throw new IllegalStateException("MultiCrafterBlock " + name + " must have at least one recipe");
         }

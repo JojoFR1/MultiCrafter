@@ -30,7 +30,7 @@ public class TestBlock {
                     new IOEntry().withLiquids(LiquidStack.with(Liquids.cryofluid, 10)),
                     new IOEntry().withLiquids(LiquidStack.with(Liquids.water, 5)),
                     180f
-                )
+                ).isUnlocked()
             );
             
             requirements(Category.crafting, ItemStack.empty);
@@ -57,7 +57,7 @@ public class TestBlock {
                     new IOEntry().withItems(ItemStack.with(Items.silicon, 2)).withHeat(10),
                     new IOEntry().withItems(ItemStack.with(Items.lead, 5)).withHeat(5),
                     180f
-                ).isUnlocked(),
+                ).isUnlocked().withMaxEfficiency(1f),
                 new Recipe("test-poweri",
                     new IOEntry().withItems(ItemStack.with(Items.silicon, 3)).withPower(10),
                     new IOEntry().withItems(ItemStack.with(Items.lead, 5)),
@@ -69,8 +69,8 @@ public class TestBlock {
                     180f
                 ).isUnlocked(),
                 new Recipe("test-powerio",
-                    new IOEntry().withItems(ItemStack.with(Items.silicon, 3)).withPower(10),
-                    new IOEntry().withItems(ItemStack.with(Items.lead, 5)).withPower(5),
+                    new IOEntry().withItems(ItemStack.with(Items.silicon, 3)).withPower(2.5f),
+                    new IOEntry().withItems(ItemStack.with(Items.lead, 5)).withPower(5f),
                     180f
                 ).isUnlocked()
             );
