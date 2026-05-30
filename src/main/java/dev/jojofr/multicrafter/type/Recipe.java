@@ -160,6 +160,11 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
+    public Recipe isLocked() {
+        this.unlocked = false;
+        return this;
+    }
+    
     public boolean hasItems() {
         return input != null && input.hasItems() || output != null && output.hasItems();
     }
@@ -185,7 +190,7 @@ public class Recipe extends UnlockableContent {
         return ContentType.typeid_UNUSED;
     }
     
-    public String getContentTypeName() {
+    protected String getContentTypeName() {
         return "recipe";
     }
 }

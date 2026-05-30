@@ -1,11 +1,14 @@
 package dev.jojofr.multicrafter;
 
+import arc.Core;
 import arc.math.Mathf;
 import arc.scene.ui.Button;
+import arc.scene.ui.ScrollPane;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.Seq;
+import arc.util.Strings;
 import arc.util.Time;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
@@ -44,9 +47,7 @@ import mindustry.world.meta.Stat;
  * TODO: there's a lot
  *  - Bars (the UI + update)
  *  - Multiple liquids bars
- *  - Support for power input AND output
- *  - Support for payload input
- *  - Support for payload output
+ *  - Support for payloads
  *  - Support JSON (JS support will be dropped)
  *  - Examples/Documentation
  */
@@ -117,13 +118,11 @@ public class MultiCrafterBlock extends Block {
         boolean hasItems = false;
         boolean hasLiquids = false;
         boolean hasPower = false;
-        boolean outputsPower = false;
         
         for (Recipe recipe : recipes) {
             if (recipe.input.hasItems()) hasItems = true;
             if (recipe.input.hasLiquids()) hasLiquids = true;
             if (recipe.input.hasPower()) hasPower = true;
-            if (recipe.output.hasPower()) outputsPower = true;
         }
         
         if (hasItems) {
@@ -322,7 +321,6 @@ public class MultiCrafterBlock extends Block {
             progress = 0;
             changeRecipeEffect.at(x, y, block.size, block);
             
-            
             // TODO does not work
             // this.block.removeConsumers(c -> true);
             // setupConsumers();
@@ -344,7 +342,8 @@ public class MultiCrafterBlock extends Block {
         public float heat() { return outputHeat; }
         
         @Override
-        public float heatFrac() { return currentRecipe != null ? outputHeat / Math.max(currentRecipe.input.heat, currentRecipe.output.heat) : 0f; }
+        public float heatFrac() { return currentRecipe != null ? heat / Math.max(currentRecipe.input.heat, 0.01f) : 0f; }
+        public float heatOutputFrac() { return currentRecipe != null ? outputHeat / Math.max(currentRecipe.output.heat, 0.01f) : 0f; }
         
         @Override
         public float[] sideHeat() { return sideHeat; }
@@ -376,6 +375,8 @@ public class MultiCrafterBlock extends Block {
         @Override
         public void buildConfiguration(Table table) {
             int index = 0;
+            
+            Table buttonTable = new Table();
             for (Recipe recipe : recipes) {
                 Button button = new Button(Styles.togglet);
 
@@ -395,10 +396,12 @@ public class MultiCrafterBlock extends Block {
                 button.setDisabled(!recipe.unlocked());
                 button.add(recipeTable).pad(4f);
 
-                table.add(button).pad(4f).margin(10f).grow();
-                table.row();
+                buttonTable.add(button).pad(4f).margin(10f).grow();
+                buttonTable.row();
                 index++;
             }
+            
+            table.add(buttonTable);
         }
         
         @Override
@@ -425,13 +428,35 @@ public class MultiCrafterBlock extends Block {
         }
     }
     
-    // TODO
     @Override
     public void setBars() {
         super.setBars();
-       
-        // TODO temporary
-        // addBar("heat", (MultiCrafterBuild entity) -> new Bar("bar.heat", Pal.lightOrange, () -> entity.heat / entity.currentRecipe.output.heat));
+        
+        if (hasPower)
+            addBar("power", (MultiCrafterBuild b) -> new Bar(
+                b.currentRecipe.output.hasPower() ? Core.bundle.format("bar.poweroutput", Strings.fixed(b.getPowerProduction() * 60f * b.timeScale(), 1)) : "bar.power",
+                Pal.powerBar,
+                () -> b.efficiency
+            ));
+        
+        if (recipes.contains(recipe -> recipe.input.hasHeat()))
+            addBar("heat", (MultiCrafterBuild b) -> new Bar(
+                Core.bundle.format("bar.heatpercent", (int) (b.heat + 0.01f), (int) (b.efficiencyScale() * 100 + 0.01f)),
+                Pal.lightOrange,
+                b::heatFrac
+            ));
+        if (recipes.contains(recipe -> recipe.output.hasHeat()))
+            addBar("heat-output", (MultiCrafterBuild b) -> new Bar(
+                "bar.heat",
+                Pal.lightOrange,
+                b::heatOutputFrac
+            ));
+        
+        addBar("progress", (MultiCrafterBuild b) -> new Bar(
+            "bar.loadprogress",
+            Pal.accent,
+            b::progress
+        ));
     }
     
     @Override
