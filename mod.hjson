@@ -1,6 +1,6 @@
 name: "multicrafter"
 repo: "JojoFR1/MultiCrafter"
-minGameVersion: 157
+minGameVersion: 158
 version: "1.0.0"
 
 java: true
@@ -8,7 +8,7 @@ main: "dev.jojofr.multicrafter.MultiCrafterMod"
 
 displayName: "MultiCrafter"
 author: "Jojo"
-subtitle: "[Library] Multiple recipes in one block"
+subtitle: "A library for multiple recipes in one block."
 description:
 '''
 A library mod that allows you to have multiple recipes in one block.
@@ -16,6 +16,6 @@ A library mod that allows you to have multiple recipes in one block.
 Port & rewrite of the original mod, MutliCrafterLib, by Liplum.
 '''
 
-hideBrowser: true
+hideBrowser: false
 hidden: true
 dependencies: []
