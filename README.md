@@ -43,7 +43,7 @@ Internally, your mod will need the library as a dependency by adding the followi
 ```gradle
 ivy {
     url = 'https://github.com/'
-    patternLayout {artifact '/[organisation]/[module]/releases/download/[revision]/MultiCrafter.jar'}
+    patternLayout {artifact '/[organisation]/[module]/releases/download/[revision]/MultiCrafter-lib.jar'}
     metadataSources { artifact() }
 }
 ```
@@ -60,7 +60,7 @@ Building requires **JDK 17** or later.
 
 ### Desktop
 
-At the root of the project, use the following command: `./gradlew jar`
+At the root of the project, use the following command: `./gradlew jar` for the mod, or `./gradlew jarLib` for the library.
 
 Once the build process is finished, the output will be present in `./build/libs/MultiCrafterDesktop.jar`.
 
@@ -74,7 +74,7 @@ Once the build process is finished, the output will be present in `./build/libs/
 
 ## Running
 
-You can simply take the generated JAR file and put it in the `mods` folder of your Mindustry installation.
+You can simply take the generated (mod) JAR file and put it in the `mods` folder of your Mindustry installation.
 
 For development purposes, you can run the mod directly in a local, separate instance, of Mindustry from the
 command line using: `./gradlew run` or `./gradlew runAndroid` for Android testing (doesn't require the Android jar).

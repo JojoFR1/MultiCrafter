@@ -106,6 +106,16 @@ tasks.register('deploy', Jar) {
     doLast { androidJarFile.get().asFile.delete() }
 }
 
+tasks.register('jarLib', Jar) {
+    archiveFileName = "${project.name}-lib.jar"
+
+    from sourceSets.main.output
+
+    exclude 'mod.json'
+    exclude 'mod.hjson'
+}
+
+
 tasks.register('jarTest', Jar) {
     archiveFileName = "${project.name}-test.jar"
     from sourceSets.testMod.output
