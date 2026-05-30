@@ -22,7 +22,7 @@ the latest snapshot from the [actions page](https://github.com/JojoFR1/MultiCraf
 
 You can then import the downloaded JAR file in game by putting it in the `mods` folder of your Mindustry installation or by using the import button.
 
-### Library (not yet available)
+### Library
 
 #### JSON
 
