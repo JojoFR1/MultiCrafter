@@ -1,5 +1,10 @@
 # MultiCrafter
 
+![GitHub Release](https://img.shields.io/github/v/release/JojoFR1/Multicrafter?display_name=tag&style=for-the-badge)
+![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/JojoFR1/MultiCrafter/aMultiCrafter.jar?displayAssetName=false&style=for-the-badge&label=Downloads%20(mod))
+![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/JojoFR1/MultiCrafter/MultiCrafter-lib.jar?displayAssetName=false&style=for-the-badge&label=Downloads%20(library))
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JojoFR1/MultiCrafter/build.yml?style=for-the-badge)
+
 A modding library for Mindustry that allows you to create blocks with multiple crafting recipes.
 
 The rewrite of the original [MultiCrafterLib](https://github.com/liplum/MultiCrafterLib) with a better codebase and for Mindustry v8.
