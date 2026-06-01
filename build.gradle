@@ -3,7 +3,7 @@ import javax.inject.Inject
 interface Injected { @Inject ExecOperations getExecOperations() }
 
 group = 'dev.jojofr.multicrafter'
-version = '1.0.0'
+version = '1.0.1'
 
 java {
     targetCompatibility = JavaVersion.VERSION_17
@@ -50,7 +50,7 @@ jar {
     archiveFileName = "${project.name}Desktop.jar"
 
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    from (layout.projectDirectory.file('mod.hjson'))
+    from (layout.projectDirectory.files('mod.hjson', 'icon.png'))
 }
 
 tasks.register('jarAndroid') {

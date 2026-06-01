@@ -94,5 +94,6 @@ You can also open pull requests if you want to directly contribute to the librar
 
 ## Credits
 
-- [liplum](https://github.com/liplum) | Original author of the MultiCrafterLib.
-- [Jojo](https://github.com/JojoFR1) | Author and maintainer of MultiCrafter.
+- [Jojo](https://github.com/JojoFR1) | Author and maintainer of this library.
+- Patou | Created the mod icon.
+- [liplum](https://github.com/liplum) | Original author of the deprecated MultiCrafterLib, which this library is a rewrite of.
