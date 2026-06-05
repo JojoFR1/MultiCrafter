@@ -46,11 +46,22 @@ dependencies {
     testModCompileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
 }
 
+
+tasks.register('jarLib', Jar) {
+    archiveFileName = "${project.name}-lib.jar"
+
+    from sourceSets.main.output
+
+    exclude 'mod.json'
+    exclude 'mod.hjson'
+    exclude 'icon.png'
+}
+
 jar {
     archiveFileName = "${project.name}Desktop.jar"
 
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    from (layout.projectDirectory.files('mod.hjson', 'icon.png'))
+    from (layout.projectDirectory.files('mod.json', 'mod.hjson', 'icon.png'))
 }
 
 tasks.register('jarAndroid') {
@@ -101,18 +112,13 @@ tasks.register('deploy', Jar) {
     def desktopJarFile = layout.buildDirectory.file("libs/${project.name}Desktop.jar")
     def androidJarFile = layout.buildDirectory.file("libs/${project.name}Android.jar")
 
-    from { [zipTree(desktopJarFile), zipTree(androidJarFile)] }
-
-    doLast { androidJarFile.get().asFile.delete() }
+    from(desktopJarFile.map { zipTree(it) })
+    from(androidJarFile.map { zipTree(it) })
 }
 
-tasks.register('jarLib', Jar) {
-    archiveFileName = "${project.name}-lib.jar"
-
-    from sourceSets.main.output
-
-    exclude 'mod.json'
-    exclude 'mod.hjson'
+tasks.register('deployLib') {
+    dependsOn deploy
+    dependsOn jarLib
 }
 
 
