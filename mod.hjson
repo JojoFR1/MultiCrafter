@@ -7,13 +7,22 @@ java: true
 main: "dev.jojofr.multicrafter.MultiCrafterMod"
 
 displayName: "MultiCrafter"
-author: "Jojo"
+author:
+'''
+Jojo
+[gray[]]Original Author:[[]]
+Liplum
+[gray[]]Icon:[[]]
+Patou
+'''
 subtitle: "A library for multiple recipes in one block."
 description:
 '''
-A library mod that allows you to have multiple recipes in one block.
+A library for mods that allows you to create factories with [yellow[]]multiple recipes[[]] in a single block.
 
-Port & rewrite of the original mod, MutliCrafterLib, by Liplum.
+[lightgray[]]Official port and rewrite of the original library [gray[]]MutliCrafterLib[[]].[[]]
+
+[red[]]⚠[[]] Does [red[]]NOT[[]] add any content on its own, but is [gold[]]required[[]] for mods that want to use the library.
 '''
 
 hideBrowser: false
