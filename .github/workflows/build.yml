@@ -22,19 +22,12 @@ jobs:
       with:
         cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-    - name: Build Mod & Library Jar
-      run: ./gradlew deployLib --configuration-cache
+    - name: Build Mod Jar
+      run: ./gradlew deploy --configuration-cache
 
     - name: Upload Mod Jar file
       uses: actions/upload-artifact@v7
       with:
         name: ${{ github.event.repository.name }}
         path: build/libs/${{ github.event.repository.name }}.jar
-        archive: false
-    
-    - name: Upload Library Jar file
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ github.event.repository.name }}
-        path: build/libs/${{ github.event.repository.name }}-lib.jar
         archive: false

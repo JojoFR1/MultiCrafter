@@ -106,21 +106,6 @@ tasks.register('deploy', Jar) {
     from(androidJarFile.map { zipTree(it) })
 }
 
-tasks.register('jarLib', Jar) {
-    archiveFileName = "${project.name}-lib.jar"
-
-    from sourceSets.main.output
-
-    exclude 'mod.json'
-    exclude 'mod.hjson'
-    exclude 'icon.png'
-}
-
-tasks.register('deployLib') {
-    dependsOn deploy
-    dependsOn jarLib
-}
-
 
 tasks.register('jarTest', Jar) {
     archiveFileName = "${project.name}-test.jar"
