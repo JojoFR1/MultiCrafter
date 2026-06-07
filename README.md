@@ -47,7 +47,7 @@ Internally, your mod will need the library as a dependency by adding the followi
 ```gradle
 ivy {
     url = 'https://github.com/'
-    patternLayout {artifact '/[organisation]/[module]/releases/download/[revision]/MultiCrafter-lib.jar'}
+    patternLayout {artifact '/[organisation]/[module]/releases/download/[revision]/MultiCrafter.jar'}
     metadataSources { artifact() }
 }
 ```
