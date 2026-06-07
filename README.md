@@ -15,8 +15,7 @@ The rewrite of the original [MultiCrafterLib](https://github.com/liplum/MultiCra
 
 There is no official documentation yet. It (might) come in the future.
 
-You can use the development testing mod as an example of how to use the library. The source code is available in the `src/testMod` folder, or [here](https://github.com/JojoFR1/MultiCrafter/blob/main/src/testMod/java/dev/jojofr/multicrafter/)
-It contains both Java and JSON examples of how to use the library.
+You can use the development testing mod as an example of how to use the library in both Java and JSON. The source code is available in the `src/testMod` folder, or [here](https://github.com/JojoFR1/MultiCrafter/blob/main/src/testMod/) ([Java Version](https://github.com/JojoFR1/MultiCrafter/tree/main/src/testMod/java/dev/jojofr/multicrafter) or [JSON Version](https://github.com/JojoFR1/MultiCrafter/tree/main/src/testMod/resources))
 
 ## Download
 
