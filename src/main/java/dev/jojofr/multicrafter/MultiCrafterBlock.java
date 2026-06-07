@@ -58,7 +58,7 @@ import mindustry.world.meta.Stat;
 public class MultiCrafterBlock extends Block {
     public transient Seq<Recipe> recipes = new Seq<>();
     /** Only intended for internal use and JSON parsing */
-    public Seq<JsonRecipe>  jsonRecipes = new Seq<>();
+    public Seq<JsonRecipe> jsonRecipes = new Seq<>();
     
     public int[] liquidOutputDirections = {-1};
     public boolean dumpExtraLiquid = true;
@@ -80,8 +80,6 @@ public class MultiCrafterBlock extends Block {
         flags = EnumSet.of(BlockFlag.factory);
         // drawArrow = false;
         
-        
-        
         config(Integer.class, MultiCrafterBuild::setCurrentRecipe);
     }
     
@@ -93,10 +91,10 @@ public class MultiCrafterBlock extends Block {
     
     @Override
     public void init() {
-        for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(jsonRecipe.toRecipe());
+        for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(new Recipe(jsonRecipe));
         
         if (recipes.isEmpty()) {
-            throw new IllegalStateException("MultiCrafterBlock " + name + " must have at least one recipe");
+            throw new IllegalStateException("The block "+ name +" does not have recipes! It must have at least one recipe.");
         }
         
         for (Recipe recipe : recipes) {

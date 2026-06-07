@@ -7,8 +7,8 @@ import mindustry.mod.Mod;
 public class MultiCrafterMod extends Mod {
 
     public MultiCrafterMod() {
-        Log.info("[MultiCrafter] Library successfully loaded!");
-        
         ClassMap.classes.put("MultiCrafter", MultiCrafterBlock.class);
+        
+        Log.info("[MultiCrafter] Library successfully loaded!");
     }
 }

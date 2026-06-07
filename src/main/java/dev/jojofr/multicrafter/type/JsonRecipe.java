@@ -1,10 +1,12 @@
 package dev.jojofr.multicrafter.type;
 
+import arc.util.Nullable;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
+import mindustry.type.ItemStack;
 
 public class JsonRecipe {
-    public String name = "emptyrecipe";
+    public String name = "empty-recipe";
     public IOEntry input = new IOEntry(), output = new IOEntry();
     
     public float craftTime = 80f;
@@ -20,15 +22,6 @@ public class JsonRecipe {
     
     public boolean unlocked = false;
     
-    public Recipe toRecipe() {
-        Recipe recipe = new Recipe(name, input, output, craftTime)
-            .withCraftEffect(craftEffect)
-            .withUpdateEffect(updateEffect, updateEffectChance, updateEffectSpread)
-            .withWarmupSpeed(warmupSpeed)
-            .withWarmupRate(warmupRate)
-            .withOverheatScale(overheatScale)
-            .withMaxEfficiency(maxEfficiency);
-        
-        return unlocked ? recipe.isUnlocked() : recipe.isLocked();
-    }
+    @Nullable public String research = null;
+    @Nullable public ItemStack[] researchRequirements = null;
 }

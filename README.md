@@ -58,6 +58,13 @@ Then, add the following to your dependencies:
 compileOnly 'JojoFR1:MultiCrafter:v1.0.1'
 ```
 
+## Planned/Known Issues
+
+- (Small issue) Recipes defined in JSON does not appear in the mod "Content" tab, as they are defined post-content loading.
+This is a minor issue, and no known workaround exists for now.
+- (Plans) Better recipe selection UI, maybe add an icon for recipes.
+
+
 ## Building
 
 Building requires **JDK 17** or later.

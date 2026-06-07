@@ -4,14 +4,18 @@ import arc.Core;
 import arc.math.Interp;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
+import arc.util.Log;
 import arc.util.Time;
 import mindustry.content.Fx;
+import mindustry.content.TechTree;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.UnlockableContent;
 import mindustry.entities.Effect;
 import mindustry.gen.Icon;
 import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
+import mindustry.io.SaveVersion;
+import mindustry.type.ItemStack;
 import mindustry.ui.Bar;
 import mindustry.world.meta.Stat;
 
@@ -46,6 +50,46 @@ public class Recipe extends UnlockableContent {
         this.input = input;
         this.output = output;
         this.craftTime = craftTime;
+    }
+    
+    public Recipe(JsonRecipe jsonRecipe) {
+        this(jsonRecipe.name, jsonRecipe.input, jsonRecipe.output, jsonRecipe.craftTime);
+        
+        this.craftEffect = jsonRecipe.craftEffect;
+        this.updateEffect = jsonRecipe.updateEffect;
+        this.updateEffectChance = jsonRecipe.updateEffectChance;
+        this.updateEffectSpread = jsonRecipe.updateEffectSpread;
+        this.warmupSpeed = jsonRecipe.warmupSpeed;
+        this.warmupRate = jsonRecipe.warmupRate;
+        this.overheatScale = jsonRecipe.overheatScale;
+        this.maxEfficiency = jsonRecipe.maxEfficiency;
+        
+        if (jsonRecipe.unlocked) isUnlocked();
+        
+        if (jsonRecipe.research != null) {
+            String researchName = jsonRecipe.research;
+            
+            TechTree.TechNode lastNode = TechTree.all.find(node -> node.content == this);
+            if (lastNode != null) lastNode.remove();
+            
+            TechTree.TechNode parent = TechTree.all.find(techNode ->
+                techNode.content.name.equals(researchName)
+                // || techNode.content.name.equals(this.minfo.mod.name +"-"+ researchName)
+                || techNode.content.name.equals(SaveVersion.mapFallback(researchName))
+            );
+            
+            if (parent == null) {
+                Log.warn("Content '@' isn't in the tech tree, but '@' requires it.", researchName, this.name);
+                return;
+            }
+            
+            ItemStack[] requirements = jsonRecipe.researchRequirements != null ? jsonRecipe.researchRequirements : researchRequirements();
+            TechTree.TechNode node = new TechTree.TechNode(null, this, requirements);
+            if (!parent.children.contains(node)) parent.children.add(node);
+            
+            node.parent = parent;
+            node.planet = parent.planet;
+        }
     }
     
     @Override
