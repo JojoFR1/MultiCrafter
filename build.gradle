@@ -3,7 +3,7 @@ import javax.inject.Inject
 interface Injected { @Inject ExecOperations getExecOperations() }
 
 group = 'dev.jojofr.multicrafter'
-version = '1.0.1'
+version = '1.1.0'
 
 java {
     targetCompatibility = JavaVersion.VERSION_17
@@ -46,16 +46,6 @@ dependencies {
     testModCompileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
 }
 
-
-tasks.register('jarLib', Jar) {
-    archiveFileName = "${project.name}-lib.jar"
-
-    from sourceSets.main.output
-
-    exclude 'mod.json'
-    exclude 'mod.hjson'
-    exclude 'icon.png'
-}
 
 jar {
     archiveFileName = "${project.name}Desktop.jar"
@@ -114,6 +104,16 @@ tasks.register('deploy', Jar) {
 
     from(desktopJarFile.map { zipTree(it) })
     from(androidJarFile.map { zipTree(it) })
+}
+
+tasks.register('jarLib', Jar) {
+    archiveFileName = "${project.name}-lib.jar"
+
+    from sourceSets.main.output
+
+    exclude 'mod.json'
+    exclude 'mod.hjson'
+    exclude 'icon.png'
 }
 
 tasks.register('deployLib') {
