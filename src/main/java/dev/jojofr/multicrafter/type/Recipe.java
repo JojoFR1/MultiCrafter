@@ -17,6 +17,7 @@ import mindustry.graphics.Pal;
 import mindustry.io.SaveVersion;
 import mindustry.type.ItemStack;
 import mindustry.ui.Bar;
+import mindustry.world.Block;
 import mindustry.world.meta.Stat;
 
 public class Recipe extends UnlockableContent {
@@ -52,8 +53,10 @@ public class Recipe extends UnlockableContent {
         this.craftTime = craftTime;
     }
     
-    public Recipe(JsonRecipe jsonRecipe) {
-        this(jsonRecipe.name, jsonRecipe.input, jsonRecipe.output, jsonRecipe.craftTime);
+    public Recipe(JsonRecipe jsonRecipe, Block owner) {
+        this(prefixName(jsonRecipe.name, owner), jsonRecipe.input, jsonRecipe.output, jsonRecipe.craftTime);
+        
+        if (this.minfo == null) this.minfo = owner.minfo;
         
         this.craftEffect = jsonRecipe.craftEffect;
         this.updateEffect = jsonRecipe.updateEffect;
@@ -74,7 +77,7 @@ public class Recipe extends UnlockableContent {
             
             TechTree.TechNode parent = TechTree.all.find(techNode ->
                 techNode.content.name.equals(researchName)
-                // || techNode.content.name.equals(this.minfo.mod.name +"-"+ researchName)
+                || techNode.content.name.equals(this.minfo.mod.name +"-"+ researchName)
                 || techNode.content.name.equals(SaveVersion.mapFallback(researchName))
             );
             
@@ -194,8 +197,8 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
-    public Recipe withWarmupRate(float spread) {
-        this.warmupRate = spread;
+    public Recipe withWarmupRate(float warmupRate) {
+        this.warmupRate = warmupRate;
         return this;
     }
     
@@ -236,5 +239,14 @@ public class Recipe extends UnlockableContent {
     
     protected String getContentTypeName() {
         return "recipe";
+    }
+    
+    private static String prefixName(String name, Block owner) {
+        if (owner == null || owner.minfo == null || owner.minfo.mod == null) return name;
+        
+        String modName = owner.minfo.mod.name;
+        String prefix = modName + "-";
+        
+        return name.startsWith(prefix) ? name : prefix + name;
     }
 }
