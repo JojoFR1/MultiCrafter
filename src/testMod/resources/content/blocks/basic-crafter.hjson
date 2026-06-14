@@ -40,4 +40,4 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
 
 # Back to the default game variables
 requirements: ["copper/10"]
-category: "production"
+category: "crafting"

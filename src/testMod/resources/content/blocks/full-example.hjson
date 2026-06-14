@@ -9,7 +9,8 @@ itemCapacity: 15
 jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mod use.
     # All default values, they are all (technically) optional
     {
-        name: empty-recipe  # Will cause a conflict if you have multiple recipes with the same name
+        # Will cause a conflict if you have multiple recipes with the same name
+        name: empty-recipe
 
         # From ticks to seconds: 80 / 60 = 1.33 seconds
         # From seconds to ticks: 1.33 * 60 = 80 ticks
@@ -57,4 +58,4 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
 
 # Back to the default game variables
 requirements: ["copper/10"]
-category: "production"
+category: "crafting"
