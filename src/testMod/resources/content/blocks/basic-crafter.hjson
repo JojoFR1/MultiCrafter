@@ -16,7 +16,7 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
         output: {
             items: ["silicon/1"]
         }
-        craftTime: 60  # In seconds
+        craftTime: 60  # = 1 second
         unlocked: true
     }
     {
@@ -28,7 +28,7 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
         output: {
             items: ["plastanium/1"]
         }
-        craftTime: 600  # In seconds
+        craftTime: 600  # = 10 seconds
 
         # This recipe will be locked until the player unlock this research
         unlocked: false

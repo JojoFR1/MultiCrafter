@@ -11,21 +11,28 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
     {
         name: empty-recipe  # Will cause a conflict if you have multiple recipes with the same name
 
-        craftTime: 80  # in seconds
+        # From ticks to seconds: 80 / 60 = 1.33 seconds
+        # From seconds to ticks: 1.33 * 60 = 80 ticks
+        craftTime: 80  # Value is per tick! Multiply the desired value (in seconds) by 60 to get the correct amount (the game run at 60 ticks per second).
         input: {
             items: []
-            liquids: [] # Values are per tick! Divide the desired values by 60 to get the correct amount (the game run at 60 ticks per second)
-            power: 0 # Value are per tick! Divide the desired value by 60 to get the correct amount (the game run at 60 ticks per second)
+            liquids: [] # Values are per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
+            power: 0 # Value is per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
             heat: 0
             // payloads: [] # NOT SUPPORTED YET! IT WON'T DO ANYTHING!
         }
         output: {
             items: []
-            liquids: [] # Values are per tick! Divide the desired values by 60 to get the correct amount (the game run at 60 ticks per second)
-            power: 0 # Value are per tick! Divide the desired value by 60 to get the correct amount (the game run at 60 ticks per second)
+            liquids: [] # Values are per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
+            power: 0 # Value is per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
             heat: 0
             // payloads: [] # NOT SUPPORTED YET! IT WON'T DO ANYTHING!
         }
+        # Example for amount to amount/tick conversion:
+        #     10 water/second = 10 / 60 = 0.167 water/tick
+        #     0.83 water/tick = 0.83 * 60 = 50 water/second
+        # It works for power or liquids quantity.
+
         craftEffect: none
         updateEffect: none
         updateEffectChance: 0.04
