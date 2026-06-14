@@ -1,0 +1,53 @@
+# Mandatory, defines the block as a multicrafter
+type: MultiCrafter
+
+# You can define any block variable below, as long as it is supported by the game.
+size: 2
+itemCapacity: 15
+
+# The library specific variables
+jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mod use.
+    # All default values, they are all (technically) optional
+    {
+        name: empty-recipe  # Will cause a conflict if you have multiple recipes with the same name
+
+        craftTime: 80  # in seconds
+        input: {
+            items: []
+            liquids: [] # Values are per tick! Divide the desired values by 60 to get the correct amount (the game run at 60 ticks per second)
+            power: 0 # Value are per tick! Divide the desired value by 60 to get the correct amount (the game run at 60 ticks per second)
+            heat: 0
+            // payloads: [] # NOT SUPPORTED YET! IT WON'T DO ANYTHING!
+        }
+        output: {
+            items: []
+            liquids: [] # Values are per tick! Divide the desired values by 60 to get the correct amount (the game run at 60 ticks per second)
+            power: 0 # Value are per tick! Divide the desired value by 60 to get the correct amount (the game run at 60 ticks per second)
+            heat: 0
+            // payloads: [] # NOT SUPPORTED YET! IT WON'T DO ANYTHING!
+        }
+        craftEffect: none
+        updateEffect: none
+        updateEffectChance: 0.04
+        updateEffectSpread: 4
+        warmupSpeed: 0.019
+
+        # Only for heat based block
+        warmupRate: 0.15
+        overheatScale: 1
+        maxEfficiency: 4
+
+        # If false (by default), the recipe will need to be researched to unlock. Useful for recipes that needs items unlocked later in your progression.
+        unlocked: false
+
+        # Any unlockable content, including recipes from this or other block (must have been loaded before!). The content *has* to be in the research tree.
+        research: core-shard
+        # Optional. If not set, the recipe will be unlocked automatically if the parent node (defined above) is unlocked.
+        researchRequirements: ["lead/10"]
+    }
+]
+
+
+# Back to the default game variables
+requirements: ["copper/10"]
+category: "production"

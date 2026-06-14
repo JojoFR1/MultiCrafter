@@ -1,0 +1,43 @@
+# Mandatory, defines the block as a multicrafter
+type: MultiCrafter
+
+# You can define any block variable below, as long as it is supported by the game.
+size: 2
+itemCapacity: 15
+
+# The library specific variables
+jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mod use.
+    # One recipe = one JSON object (with the braces {})
+    {
+        name: first-basic
+        input: {
+            items: ["graphite/10"]
+        }
+        output: {
+            items: ["silicon/1"]
+        }
+        craftTime: 60  # In seconds
+        unlocked: true
+    }
+    {
+        name: second-basic
+        input: {
+            items: ["titanium/2"]
+            liquids: ["water/10"]
+        }
+        output: {
+            items: ["plastanium/1"]
+        }
+        craftTime: 600  # In seconds
+
+        # This recipe will be locked until the player unlock this research
+        unlocked: false
+        research: core-shard
+        researchRequirements: ["titanium/500", "plastanium/50"]
+    }
+]
+
+
+# Back to the default game variables
+requirements: ["copper/10"]
+category: "production"
