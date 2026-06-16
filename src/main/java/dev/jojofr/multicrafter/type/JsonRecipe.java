@@ -24,6 +24,7 @@ public class JsonRecipe {
     public float maxEfficiency = 4f;
     
     public boolean unlocked = false;
+    public boolean alwaysUnlocked = false;
     @Nullable public String research = null;
     @Nullable public ItemStack[] researchRequirements = null;
     

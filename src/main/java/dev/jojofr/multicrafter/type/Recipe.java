@@ -72,7 +72,8 @@ public class Recipe extends UnlockableContent {
         this.overheatScale = jsonRecipe.overheatScale;
         this.maxEfficiency = jsonRecipe.maxEfficiency;
         
-        if (jsonRecipe.unlocked) isUnlocked();
+        this.unlocked = jsonRecipe.unlocked;
+        this.alwaysUnlocked = jsonRecipe.alwaysUnlocked;
         
         if (jsonRecipe.research != null) {
             String researchName = jsonRecipe.research;
