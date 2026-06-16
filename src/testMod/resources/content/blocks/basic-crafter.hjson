@@ -35,6 +35,7 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
         research: {
             parent: core-shard
             requirements: ["titanium/500", "plastanium/50"]
+            objectives: ["silicon", "duo"]
         }
     }
 ]
