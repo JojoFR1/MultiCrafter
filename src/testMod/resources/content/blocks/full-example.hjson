@@ -67,6 +67,8 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
 
         # If false (by default), the recipe will need to be researched to unlock. Useful for recipes that needs items unlocked later in your progression.
         unlocked: false
+        # If true, the recipe will be always unlocked, even after a research tree reset.
+        alwaysUnlocked: false
 
         # Any unlockable content, including recipes from this or other block (must have been loaded before!). The content *has* to be in the research tree.
         research: core-shard
