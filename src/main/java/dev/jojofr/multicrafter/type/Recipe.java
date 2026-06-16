@@ -58,6 +58,7 @@ public class Recipe extends UnlockableContent {
         
         if (this.minfo == null) this.minfo = owner.minfo;
         
+        this.localizedName = jsonRecipe.localizedName;
         this.craftEffect = jsonRecipe.craftEffect;
         this.updateEffect = jsonRecipe.updateEffect;
         this.updateEffectChance = jsonRecipe.updateEffectChance;

@@ -7,6 +7,7 @@ import mindustry.type.ItemStack;
 
 public class JsonRecipe {
     public String name = "empty-recipe";
+    public String localizedName = "Empty Recipe";
     public IOEntry input = new IOEntry(), output = new IOEntry();
     
     public float craftTime = 80f;
