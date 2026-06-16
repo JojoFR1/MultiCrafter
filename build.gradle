@@ -3,7 +3,7 @@ import javax.inject.Inject
 interface Injected { @Inject ExecOperations getExecOperations() }
 
 group = 'dev.jojofr.multicrafter'
-version = '1.1.0'
+version = '1.2.0'
 
 java {
     targetCompatibility = JavaVersion.VERSION_17
