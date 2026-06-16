@@ -6,6 +6,7 @@ import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Time;
+import dev.jojofr.multicrafter.MultiCrafterBlock;
 import mindustry.content.Fx;
 import mindustry.content.TechTree;
 import mindustry.ctype.ContentType;
@@ -16,6 +17,7 @@ import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
 import mindustry.io.SaveVersion;
 import mindustry.type.ItemStack;
+import mindustry.type.LiquidStack;
 import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.draw.DrawBlock;
@@ -24,6 +26,7 @@ import mindustry.world.meta.Stat;
 
 public class Recipe extends UnlockableContent {
     public final IOEntry input, output;
+    public float weight = 1f;
     
     public float craftTime;
     public Effect craftEffect = Fx.none;
@@ -36,7 +39,7 @@ public class Recipe extends UnlockableContent {
     public float warmupRate = 0.15f;
     /** [Heat Producer] After heat meets this requirement, excess heat will be scaled by this number. */
     public float overheatScale = 1f;
-    /** [Heat Producer] Maximum possible efficiency after overheat. */
+    /** [Heat Producer] Maximum possible efficiency after overheating. */
     public float maxEfficiency = 4f;
     
     public DrawBlock drawer = new DrawDefault();
@@ -59,8 +62,9 @@ public class Recipe extends UnlockableContent {
     
     public Recipe(JsonRecipe jsonRecipe, Block owner) {
         this(prefixName(jsonRecipe.name, owner), jsonRecipe.input, jsonRecipe.output, jsonRecipe.craftTime);
-        
         if (this.minfo == null) this.minfo = owner.minfo;
+        
+        this.weight = jsonRecipe.weight;
         
         if (this.localizedName == null || this.localizedName.isEmpty())
             this.localizedName = jsonRecipe.localizedName;
@@ -173,6 +177,11 @@ public class Recipe extends UnlockableContent {
         return recipeTable;
     }
     
+    public Recipe withWeight(float weight) {
+        this.weight = weight;
+        return this;
+    }
+    
     public Recipe withCraftTime(float craftTime) {
         this.craftTime = craftTime;
         return this;
@@ -232,6 +241,16 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
+    public Recipe isAlwaysUnlocked() {
+        this.alwaysUnlocked = true;
+        return this;
+    }
+    
+    public Recipe isNotAlwaysUnlocked() {
+        this.alwaysUnlocked = false;
+        return this;
+    }
+    
     public boolean hasItems() {
         return input != null && input.hasItems() || output != null && output.hasItems();
     }
@@ -248,8 +267,20 @@ public class Recipe extends UnlockableContent {
         return input != null && input.hasHeat() || output != null && output.hasHeat();
     }
     
-    public boolean hasPayloads() {
-        return input != null && input.hasPayloads() || output != null && output.hasPayloads();
+    public boolean hasPayloads() { return input != null && input.hasPayloads() || output != null && output.hasPayloads(); }
+    
+    public boolean hasInput(MultiCrafterBlock.MultiCrafterBuild building) {
+        if (input.hasItems()) {
+            for (ItemStack stack : input.items) if (building.items.get(stack.item) < stack.amount) return false;
+        }
+        
+        if (input.hasLiquids()) {
+            for (LiquidStack stack : input.liquids) if (building.liquids.get(stack.liquid) < stack.amount) return false;
+        }
+        
+        if (input.hasHeat() && building.heat < input.heat) return false;
+        
+        return true;
     }
     
     @Override

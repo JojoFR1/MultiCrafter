@@ -13,7 +13,9 @@ import mindustry.world.draw.DrawDefault;
 public class JsonRecipe {
     public String name = "empty-recipe";
     public String localizedName = "Empty Recipe";
+    
     public IOEntry input = new IOEntry(), output = new IOEntry();
+    public float weight = 1f;
     
     public float craftTime = 80f;
     public Effect craftEffect = Fx.none;

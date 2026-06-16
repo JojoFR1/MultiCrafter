@@ -60,6 +60,7 @@ public class MultiCrafterBlock extends Block {
     public transient Seq<Recipe> recipes = new Seq<>();
     /** Only intended for internal use and JSON parsing */
     public Seq<JsonRecipe> jsonRecipes = new Seq<>();
+    public boolean autoSelectRecipe = false;
     
     public int[] liquidOutputDirections = {-1};
     public boolean dumpExtraLiquid = true;
@@ -97,6 +98,8 @@ public class MultiCrafterBlock extends Block {
         if (recipes.isEmpty()) {
             throw new IllegalStateException("The block "+ name +" does not have recipes! It must have at least one recipe.");
         }
+        
+        configurable = !autoSelectRecipe;
         
         for (Recipe recipe : recipes) {
             if (recipe.hasItems()) hasItems = true;
@@ -182,6 +185,23 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public void updateTile() {
+            if (autoSelectRecipe && (efficiency <= 0f || progress <= 0f)) {
+                Recipe bestRecipe = null;
+                int bestIndex = -1;
+                
+                for (int i = 0; i < recipes.size; i++) {
+                    Recipe recipe = recipes.get(i);
+                    if (recipe.unlocked() && recipe.hasInput(this)) {
+                        if (bestRecipe == null || recipe.weight > bestRecipe.weight) {
+                            bestRecipe = recipe;
+                            bestIndex = i;
+                        }
+                    }
+                }
+                
+                if (bestRecipe != null && bestIndex != currentRecipeIndex) setCurrentRecipe(bestIndex);
+            }
+            
             if (currentRecipe == null) return;
             
             if (currentRecipe.input.hasHeat()) heat = calculateHeat(sideHeat);
@@ -290,11 +310,35 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public boolean acceptItem(Building source, Item item) {
+            if (autoSelectRecipe) {
+                boolean valid = false;
+                for (Recipe recipe : recipes) {
+                    if (recipe.unlocked() && recipe.input.hasItems() && recipe.input.acceptItem(item)) {
+                        valid = true;
+                        break;
+                    }
+                }
+                
+                return valid && items.get(item) < itemCapacity;
+            }
+            
             return currentRecipe != null && currentRecipe.input.hasItems() && currentRecipe.input.acceptItem(item) && items.get(item) < itemCapacity;
         }
         
         @Override
         public boolean acceptLiquid(Building source, Liquid liquid) {
+            if (autoSelectRecipe) {
+                boolean valid = false;
+                for (Recipe recipe : recipes) {
+                    if (recipe.unlocked() && recipe.input.hasLiquids() && recipe.input.acceptLiquid(liquid)) {
+                        valid = true;
+                        break;
+                    }
+                }
+                
+                return valid && liquids.get(liquid) < liquidCapacity;
+            }
+            
             return currentRecipe != null && currentRecipe.input.hasLiquids() && currentRecipe.input.acceptLiquid(liquid) && liquids.get(liquid) < liquidCapacity;
         }
         
@@ -380,6 +424,7 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public void buildConfiguration(Table table) {
+            if (autoSelectRecipe) return;
             int index = 0;
             
             Table buttonTable = new Table();
