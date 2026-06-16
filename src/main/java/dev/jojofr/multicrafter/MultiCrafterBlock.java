@@ -1,12 +1,14 @@
 package dev.jojofr.multicrafter;
 
 import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.scene.ui.Button;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.Seq;
+import arc.util.Eachable;
 import arc.util.Strings;
 import arc.util.Time;
 import arc.util.io.Reads;
@@ -16,6 +18,7 @@ import dev.jojofr.multicrafter.type.Recipe;
 import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
+import mindustry.entities.units.BuildPlan;
 import mindustry.gen.Building;
 import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
@@ -35,8 +38,6 @@ import mindustry.world.consumers.ConsumeLiquidsDynamic;
 import mindustry.world.consumers.ConsumePowerDynamic;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
-import mindustry.world.draw.DrawHeatOutput;
-import mindustry.world.draw.DrawMulti;
 import mindustry.world.meta.BlockFlag;
 import mindustry.world.meta.Stat;
 
@@ -152,6 +153,10 @@ public class MultiCrafterBlock extends Block {
             });
         }
     }
+    
+    @Override public void drawPlanRegion(BuildPlan plan, Eachable<BuildPlan> list) { drawer.drawPlan(this, plan, list); }
+    @Override public void getRegionsToOutline(Seq<TextureRegion> out) { drawer.getRegionsToOutline(this, out); }
+    @Override protected TextureRegion[] icons() { return drawer.finalIcons(this); }
     
     // TODO Payload support
     public class MultiCrafterBuild extends Building implements HeatBlock, HeatConsumer {
