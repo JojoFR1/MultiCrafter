@@ -4,6 +4,8 @@ import arc.util.Nullable;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
 import mindustry.type.ItemStack;
+import mindustry.world.draw.DrawBlock;
+import mindustry.world.draw.DrawDefault;
 
 public class JsonRecipe {
     public String name = "empty-recipe";
@@ -22,7 +24,8 @@ public class JsonRecipe {
     public float maxEfficiency = 4f;
     
     public boolean unlocked = false;
-    
     @Nullable public String research = null;
     @Nullable public ItemStack[] researchRequirements = null;
+    
+    public DrawBlock drawer = new DrawDefault();
 }

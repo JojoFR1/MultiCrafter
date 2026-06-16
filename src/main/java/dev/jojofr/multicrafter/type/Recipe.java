@@ -18,6 +18,8 @@ import mindustry.io.SaveVersion;
 import mindustry.type.ItemStack;
 import mindustry.ui.Bar;
 import mindustry.world.Block;
+import mindustry.world.draw.DrawBlock;
+import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.Stat;
 
 public class Recipe extends UnlockableContent {
@@ -36,6 +38,8 @@ public class Recipe extends UnlockableContent {
     public float overheatScale = 1f;
     /** [Heat Producer] Maximum possible efficiency after overheat. */
     public float maxEfficiency = 4f;
+    
+    public DrawBlock drawer = new DrawDefault();
     
     public Recipe(String name) { this(name, new IOEntry(), new IOEntry()); }
     public Recipe(String name, IOEntry input) { this(name, input, new IOEntry()); }
@@ -94,6 +98,8 @@ public class Recipe extends UnlockableContent {
             node.parent = parent;
             node.planet = parent.planet;
         }
+        
+        this.drawer = jsonRecipe.drawer;
     }
     
     @Override
