@@ -72,8 +72,12 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
 
         # Any unlockable content, including recipes from this or other block (must have been loaded before!). The content *has* to be in the research tree.
         research: core-shard
-        # Optional. If not set, the recipe will be unlocked automatically if the parent node (defined above) is unlocked.
-        researchRequirements: ["lead/10"]
+        # or...
+        research: {
+            parent: core-shard
+            requirements: []
+            objectives: []
+        }
 
         # This drawer will be drawn at the place of a 'DrawRecipe' in the block drawer.
         drawer: {

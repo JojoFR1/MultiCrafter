@@ -75,8 +75,8 @@ public class Recipe extends UnlockableContent {
         this.unlocked = jsonRecipe.unlocked;
         this.alwaysUnlocked = jsonRecipe.alwaysUnlocked;
         
-        if (jsonRecipe.research != null) {
-            String researchName = jsonRecipe.research;
+        if (jsonRecipe.research != null && jsonRecipe.research.parent != null) {
+            String researchName = jsonRecipe.research.parent;
             
             TechTree.TechNode lastNode = TechTree.all.find(node -> node.content == this);
             if (lastNode != null) lastNode.remove();
@@ -92,8 +92,13 @@ public class Recipe extends UnlockableContent {
                 return;
             }
             
-            ItemStack[] requirements = jsonRecipe.researchRequirements != null ? jsonRecipe.researchRequirements : researchRequirements();
+            ItemStack[] requirements = jsonRecipe.research.requirements != null ? jsonRecipe.research.requirements
+                                     : jsonRecipe.researchRequirements != null ? jsonRecipe.researchRequirements
+                                     : researchRequirements();
             TechTree.TechNode node = new TechTree.TechNode(null, this, requirements);
+            if (jsonRecipe.research.objectives != null && jsonRecipe.research.objectives.length > 0)
+                node.objectives.addAll(jsonRecipe.research.objectives);
+            
             if (!parent.children.contains(node)) parent.children.add(node);
             
             node.parent = parent;

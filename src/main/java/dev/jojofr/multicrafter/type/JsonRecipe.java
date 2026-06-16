@@ -1,8 +1,11 @@
 package dev.jojofr.multicrafter.type;
 
 import arc.util.Nullable;
+import arc.util.serialization.Json;
+import arc.util.serialization.JsonValue;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
+import mindustry.game.Objectives;
 import mindustry.type.ItemStack;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
@@ -25,8 +28,32 @@ public class JsonRecipe {
     
     public boolean unlocked = false;
     public boolean alwaysUnlocked = false;
-    @Nullable public String research = null;
-    @Nullable public ItemStack[] researchRequirements = null;
+    @Nullable public ResearchData research = null;
+    @Nullable @Deprecated public ItemStack[] researchRequirements = null;
     
     public DrawBlock drawer = new DrawDefault();
+    
+    public static class ResearchData implements Json.JsonSerializable {
+        public String parent;
+        @Nullable public ItemStack[] requirements;
+        @Nullable public Objectives.Objective[] objectives;
+        
+        @Override
+        public void write(Json json) {}
+        
+        @Override
+        public void read(Json json, JsonValue jsonData) {
+            if (jsonData.isString()) {
+                this.parent = jsonData.asString();
+            } else if (jsonData.isObject()) {
+                this.parent = jsonData.getString("parent", null);
+                
+                if (jsonData.has("requirements"))
+                    this.requirements = json.readValue(ItemStack[].class, jsonData.get("requirements"));
+                
+                if (jsonData.has("objectives"))
+                    this.objectives = json.readValue(Objectives.Objective[].class, jsonData.get("objectives"));
+            }
+        }
+    }
 }

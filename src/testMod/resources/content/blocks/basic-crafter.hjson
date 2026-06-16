@@ -17,7 +17,7 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
             items: ["silicon/1"]
         }
         craftTime: 60  # = 1 second
-        unlocked: true
+        alwaysUnlocked: true
     }
     {
         name: second-basic
@@ -32,8 +32,10 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
 
         # This recipe will be locked until the player unlock this research
         unlocked: false
-        research: core-shard
-        researchRequirements: ["titanium/500", "plastanium/50"]
+        research: {
+            parent: core-shard
+            requirements: ["titanium/500", "plastanium/50"]
+        }
     }
 ]
 
