@@ -5,12 +5,32 @@ type: MultiCrafter
 size: 2
 itemCapacity: 15
 
+# Default of the game
+drawer: {
+    type: DrawDefault
+}
+
 # The library specific variables
+drawer: {
+    type: DrawMulti
+    drawers: [
+        {
+            # The recipe specific drawer will be drawn here
+            type: DrawRecipe
+        }
+        {
+            type: DrawDefault
+        }
+    ]
+}
+
+
 jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mod use.
     # All default values, they are all (technically) optional
     {
         # Will cause a conflict if you have multiple recipes with the same name
         name: empty-recipe
+        localizedName: "Empty Recipe"
 
         # From ticks to seconds: 80 / 60 = 1.33 seconds
         # From seconds to ticks: 1.33 * 60 = 80 ticks
@@ -52,6 +72,11 @@ jsonRecipes: [ # /!\ 'recipes' won't work as it is only for internal and Java mo
         research: core-shard
         # Optional. If not set, the recipe will be unlocked automatically if the parent node (defined above) is unlocked.
         researchRequirements: ["lead/10"]
+
+        # This drawer will be drawn at the place of a 'DrawRecipe' in the block drawer.
+        drawer: {
+            type: DrawDefault
+        }
     }
 ]
 
