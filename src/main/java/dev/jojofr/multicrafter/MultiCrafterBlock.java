@@ -367,6 +367,7 @@ public class MultiCrafterBlock extends Block {
         
         public float warmupTarget() {
             if (currentRecipe == null) return 0f;
+            if (!currentRecipe.input.hasHeat()) return 1f;
             
             return Mathf.clamp(heat / currentRecipe.input.heat);
         }
