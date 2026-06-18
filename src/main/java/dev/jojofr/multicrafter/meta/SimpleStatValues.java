@@ -33,7 +33,7 @@ public class SimpleStatValues {
         return table -> {
             for(ItemStack stack : stacks){
                 table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(4f);
-                if (++count % 6 == 0) table.row();
+                if (++count % 5 == 0) table.row();
             }
         };
     }
@@ -46,7 +46,7 @@ public class SimpleStatValues {
         return table -> {
             for (LiquidStack liquid : liquids) {
                 table.add(displayLiquid(liquid.liquid, liquid.amount, displayName, tooltip)).padRight(4f);
-                if (++count % 6 == 0) table.row();
+                if (++count % 5 == 0) table.row();
             }
         };
     }
@@ -75,7 +75,7 @@ public class SimpleStatValues {
         return table -> {
             for(PayloadStack stack : stacks){
                 table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(4f);
-                if (++count % 6 == 0) table.row();
+                if (++count % 5 == 0) table.row();
             }
         };
     }
