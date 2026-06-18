@@ -469,9 +469,9 @@ public class MultiCrafterBlock extends Block {
                     recipeTable.image(Icon.lock).pad(4f).fill().grow();
                     recipeTable.addListener(Tooltip.Tooltips.getInstance().create("@locked", Vars.mobile));
                 } else {
-                    recipeTable.add(recipe.input.buildTable(false, currentRecipe.craftTime)).pad(4f);
+                    recipeTable.add(recipe.input.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
                     recipeTable.image(Icon.right);
-                    recipeTable.add(recipe.output.buildTable(false, currentRecipe.craftTime)).pad(4f);
+                    recipeTable.add(recipe.output.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
 
                     final int finalIndex = index;
                     button.changed(() -> configure(finalIndex));
