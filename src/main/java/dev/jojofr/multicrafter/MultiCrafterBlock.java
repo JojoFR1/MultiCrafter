@@ -416,6 +416,9 @@ public class MultiCrafterBlock extends Block {
             // this.block.removeConsumers(c -> true);
             // setupConsumers();
             // reinitializeConsumers();
+            
+            if (currentRecipe.hasAttribute()) attrsum = sumAttribute(currentRecipe.attribute, tile.x, tile.y);
+            else attrsum = 0f;
         }
         
         @Override
@@ -535,6 +538,18 @@ public class MultiCrafterBlock extends Block {
                 Pal.lightOrange,
                 b::heatOutputFrac
             ));
+        
+        addBar("efficiency", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.hasAttribute()) {
+                return null;
+            }
+            
+            return new Bar(
+                Core.bundle.format("bar.efficiency", (int) (b.efficiencyMultiplier() * 100 * (b.currentRecipe != null ? b.currentRecipe.displayEfficiencyScale : 1f))),
+                Pal.lightOrange,
+                b::efficiencyMultiplier
+            );
+        });
         
         addBar("progress", (MultiCrafterBuild b) -> new Bar(
             "bar.loadprogress",
