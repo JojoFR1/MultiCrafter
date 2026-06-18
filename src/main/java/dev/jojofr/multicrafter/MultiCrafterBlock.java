@@ -9,6 +9,7 @@ import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.Seq;
 import arc.util.Eachable;
+import arc.util.Log;
 import arc.util.Strings;
 import arc.util.Time;
 import arc.util.io.Reads;
@@ -468,9 +469,9 @@ public class MultiCrafterBlock extends Block {
                     recipeTable.image(Icon.lock).pad(4f).fill().grow();
                     recipeTable.addListener(Tooltip.Tooltips.getInstance().create("@locked", Vars.mobile));
                 } else {
-                    recipeTable.add(recipe.input.buildTable(false)).pad(4f);
+                    recipeTable.add(recipe.input.buildTable(false, currentRecipe.craftTime)).pad(4f);
                     recipeTable.image(Icon.right);
-                    recipeTable.add(recipe.output.buildTable(false)).pad(4f);
+                    recipeTable.add(recipe.output.buildTable(false, currentRecipe.craftTime)).pad(4f);
 
                     final int finalIndex = index;
                     button.changed(() -> configure(finalIndex));
@@ -545,11 +546,24 @@ public class MultiCrafterBlock extends Block {
     @Override
     public void setStats() {
         super.setStats();
+        setOutputStat();
+    }
+    
+    protected void setOutputStat() {
         stats.add(Stat.output, table -> {
+            // Add a toggle to show in per second or total amount
+            table.row();
+            boolean perSecond = Core.settings.getBool("multicrafter.show-per-second");
+            table.check(Core.bundle.format("ui.show-per-second"), perSecond, b -> {
+                Core.settings.put("multicrafter.show-per-second", b);
+                stats.remove(Stat.output);
+                setOutputStat();
+                
+            });
             table.row();
             
             for (Recipe recipe : recipes) {
-                table.add(recipe.buildTable()).pad(4f).grow();
+                table.add(recipe.buildTable(this, true, perSecond)).pad(4f).grow();
                 table.row();
             }
             
