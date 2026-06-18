@@ -26,12 +26,14 @@ import static mindustry.Vars.mobile;
 import static mindustry.world.meta.StatValues.withTooltip;
 
 public class SimpleStatValues {
+    public static int count = 0;
     
     public static StatValue items(boolean displayName, ItemStack... stacks) { return items(displayName, true, stacks); }
     public static StatValue items(boolean displayName, boolean tooltip, ItemStack... stacks) {
         return table -> {
             for(ItemStack stack : stacks){
-                table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(5);
+                table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(4f);
+                if (++count % 6 == 0) table.row();
             }
         };
     }
@@ -43,7 +45,8 @@ public class SimpleStatValues {
     public static StatValue liquids(boolean displayName, boolean tooltip, LiquidStack... liquids) {
         return table -> {
             for (LiquidStack liquid : liquids) {
-                table.add(displayLiquid(liquid.liquid, liquid.amount, displayName, tooltip)).padRight(5);
+                table.add(displayLiquid(liquid.liquid, liquid.amount, displayName, tooltip)).padRight(4f);
+                if (++count % 6 == 0) table.row();
             }
         };
     }
@@ -53,7 +56,7 @@ public class SimpleStatValues {
             Stack stack = simpleStack(Icon.power, amount, Pal.power);
             stack.addListener(Tooltip.Tooltips.getInstance().create("@bar.power", mobile));
             
-            table.add(stack).padRight(5);
+            table.add(stack).padRight(4f);
         };
     }
     
@@ -62,7 +65,7 @@ public class SimpleStatValues {
             Stack stack = simpleStack(Icon.waves, amount, new Color(1f, 0.22f, 0.22f, 0.8f), false);
             stack.addListener(Tooltip.Tooltips.getInstance().create("@bar.heat", mobile));
             
-            table.add(stack).padRight(5);
+            table.add(stack).padRight(4f);
         };
     }
     
@@ -71,7 +74,8 @@ public class SimpleStatValues {
     public static StatValue payloads(boolean displayName, boolean tooltip, PayloadStack... stacks){
         return table -> {
             for(PayloadStack stack : stacks){
-                table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(5);
+                table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(4f);
+                if (++count % 6 == 0) table.row();
             }
         };
     }
@@ -97,7 +101,7 @@ public class SimpleStatValues {
         
         stack.add(new Table(o -> {
             o.left();
-            o.add(new Image(region)).size(32f).scaling(Scaling.fit);
+            o.add(new Image(region)).size(28f).scaling(Scaling.fit);
         }));
         
         if(amount != 0){
@@ -144,7 +148,7 @@ public class SimpleStatValues {
         
         stack.add(new Table(o -> {
             o.left();
-            o.add(new Image(region)).size(32f).scaling(Scaling.fit);
+            o.add(new Image(region)).size(28f).scaling(Scaling.fit);
         }));
         
         if(amount != 0f) {
@@ -170,7 +174,7 @@ public class SimpleStatValues {
         
         stack.add(new Table(o -> {
             o.left();
-            o.add(new Image(region)).size(32f).scaling(Scaling.fit).color(color);
+            o.add(new Image(region)).size(28f).scaling(Scaling.fit).color(color);
         }));
         
         if(amount != 0f) {

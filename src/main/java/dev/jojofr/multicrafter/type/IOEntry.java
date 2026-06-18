@@ -51,15 +51,24 @@ public class IOEntry {
      */
     public Table buildTable() { return buildTable(true); }
     public Table buildTable(boolean tooltip) {
+        Table table = new Table();
         Table materialTable = new Table();
         
+        SimpleStatValues.count = 0;
         SimpleStatValues.items(false, tooltip, items).display(materialTable);
         SimpleStatValues.liquids(false, tooltip, liquids).display(materialTable);
-        if (power > 0) SimpleStatValues.power(power).display(materialTable);
-        if (heat > 0) SimpleStatValues.heat(heat).display(materialTable);
         SimpleStatValues.payloads(false, tooltip, payloads).display(materialTable);
+        materialTable.row();
         
-        return materialTable;
+        Table smallIndictor = new Table();
+        if (power > 0) SimpleStatValues.power(power).display(smallIndictor);
+        if (heat > 0) SimpleStatValues.heat(heat).display(smallIndictor);
+        
+        table.add(materialTable);
+        table.row();
+        table.add(smallIndictor);
+        
+        return table;
     }
     
     public IOEntry removeDuplicate(String name) {
