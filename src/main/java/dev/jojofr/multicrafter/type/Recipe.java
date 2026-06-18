@@ -24,6 +24,8 @@ import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.Attribute;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValue;
+import mindustry.world.meta.StatValues;
 
 public class Recipe extends UnlockableContent {
     public final IOEntry input, output;
@@ -158,12 +160,20 @@ public class Recipe extends UnlockableContent {
     public void setStats() {
         stats.add(Stat.output, table -> {
             table.row();
-            table.add(buildTable()).pad(4f).grow();
+            boolean perSecond = Core.settings.getBool("multicrafter.show-per-second");
+            table.check("Show per second? ", perSecond, b -> {
+                Core.settings.put("multicrafter.show-per-second", b);
+                stats.remove(Stat.output);
+                setStats();
+            });
+            table.row();
+            
+            table.add(buildTable(null, false, perSecond)).pad(4f).grow();
             table.defaults().grow();
         });
     }
     
-    public Table buildTable() {
+    public Table buildTable(Block block, boolean showAttribute, boolean perSecond) {
         Table recipeTable = new Table();
         recipeTable.setBackground(Tex.whiteui);
         recipeTable.setColor(Pal.darkerGray);
@@ -175,7 +185,7 @@ public class Recipe extends UnlockableContent {
             return recipeTable;
         }
         
-        Cell<Table> inputTable = recipeTable.add(this.input.buildTable()).width(100f).pad(12f).fill();
+        Cell<Table> inputTable = recipeTable.add(this.input.buildTable(perSecond, craftTime)).minWidth(80f).maxWidth(220f).pad(12f).fill();
         inputTable.left();
         
         // TODO not perfect
@@ -191,8 +201,20 @@ public class Recipe extends UnlockableContent {
         time.add(timeBar).height(50f).width(250f);
         recipeTable.add(time).pad(12f);
         
-        Cell<Table> outputCell = recipeTable.add(this.output.buildTable()).width(100f).pad(12f).fill();
+        Cell<Table> outputCell = recipeTable.add(this.output.buildTable(perSecond, craftTime)).minWidth(80f).maxWidth(220f).pad(12f).fill();
         outputCell.right();
+        
+        if (showAttribute && this.hasAttribute()) {
+            recipeTable.row();
+            
+            Table attributeTable = new Table();
+            attributeTable.add("[lightgray] " + (baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities).localized() + ":[] ").left();
+            
+            StatValue value = StatValues.blocks(attribute, block.floating, boostScale * block.size * block.size, !displayEfficiency);
+            value.display(attributeTable);
+            
+            recipeTable.add(attributeTable).colspan(3).left().pad(12f);
+        }
         
         return recipeTable;
     }
