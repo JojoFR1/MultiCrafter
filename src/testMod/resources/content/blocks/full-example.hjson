@@ -57,14 +57,18 @@ jsonRecipes: [
         craftTime: 80
         input: {
             items: []
+            # Liquid consumption is per second, so it will consume: x liquid amount * 60 ticks * craftTime seconds, for a single craft.
             liquids: [] # Values are per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
+            # Power consumption is per second, so it will consume: x power amount * 60 ticks * craftTime seconds, for a single craft.
             power: 0 # Value is per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
             heat: 0
             // payloads: [] # NOT SUPPORTED YET! IT WON'T DO ANYTHING!
         }
         output: {
             items: []
+            # Liquid consumption is per second, so it will consume: x liquid amount * 60 ticks * craftTime seconds, for a single craft.
             liquids: [] # Values are per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
+            # Power consumption is per second, so it will consume: x power amount * 60 ticks * craftTime seconds, for a single craft.
             power: 0 # Value is per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
             heat: 0
             // payloads: [] # NOT SUPPORTED YET! IT WON'T DO ANYTHING!
@@ -88,8 +92,11 @@ jsonRecipes: [
         ### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
         # Attributes are per recipe. Same variables as the vanilla AttributeCrafter.
         # By default, it is defined as null (or in JSON... nothing?) or not present. Making your block not an AttributeCrafter.
-        # The value 'null' does NOT exist in JSON, if you do not want it then do not define it.
+        # The value 'null' is only a representation of the default Java value, it is not a valid value (will cause a NullPointerException).
+        # If you want to disable the attribute, do not define it at all.
         attribute: null
+        # This line is to avoid a crash when loading the testing mod, ignore it.
+        attribute: none
         baseEfficiency: 1.0
         boostScale: 1.0
         maxBoost: 1.0
