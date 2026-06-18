@@ -27,9 +27,11 @@ drawer: {
 
 ## The library specific variables, all default values. You do not need to define all of them, only the ones you want to change.
 
+### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
 # If true, the selection menu will be disabled and the recipe will be selected based off the input and weights.
 # The recipe will only change if the input changes and that the current crafting is done.
 autoSelectRecipe: false
+### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
 # /!\ The field 'recipes' won't work as it is only intended for internal and Java mod use. Using it will not work!
 jsonRecipes: [
@@ -41,11 +43,13 @@ jsonRecipes: [
         # For bundles: "recipe.name.key", key can be: 'name', 'description', 'details' or 'credit'.
         localizedName: "Empty Recipe"
 
+        ### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
         # When 'autoSelectRecipe' is true, this weight will influence which recipe will be selected if the crafter has:
         #   - Multiple items of different recipes
         #   - The same item in multiple recipes
         # The higher weighted recipe will be selected.
         weight: 1.0
+        ### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
         # Value is per tick! Multiply the desired value (in seconds) by 60 to get the correct amount (the game run at 60 ticks per second).
         #   From ticks to seconds: 80 / 60 = 1.33 seconds
@@ -80,6 +84,20 @@ jsonRecipes: [
         warmupRate: 0.15
         overheatScale: 1
         maxEfficiency: 4
+
+        ### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
+        # Attributes are per recipe. Same variables as the vanilla AttributeCrafter.
+        # By default, it is defined as null (or in JSON... nothing?) or not present. Making your block not an AttributeCrafter.
+        # The value 'null' does NOT exist in JSON, if you do not want it then do not define it.
+        attribute: null
+        baseEfficiency: 1.0
+        boostScale: 1.0
+        maxBoost: 1.0
+        minEfficiency: -1.0
+        displayEfficiencyScale: 1.0
+        displayEfficiency: true
+        scaleLiquidConsumption: false
+        ### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
         # If false, the recipe will need to be researched to unlock. Useful for recipes that needs items unlocked later in your progression.
         unlocked: false
