@@ -166,6 +166,7 @@ public class MultiCrafterBlock extends Block {
         public float progress;
         public float totalProgress;
         public float warmup;
+        public float attrsum;
         
         public float heat;
         public float outputHeat;
@@ -283,7 +284,31 @@ public class MultiCrafterBlock extends Block {
                 }
             }
             
-            return super.getProgressIncrease(baseTime) * (dumpExtraLiquid ? Math.min(max, 1f) : scaling);
+            float progressIncrease = super.getProgressIncrease(baseTime) * (dumpExtraLiquid ? Math.min(max, 1f) : scaling);
+            return currentRecipe.hasAttribute() ? progressIncrease * efficiencyMultiplier() : progressIncrease;
+        }
+        
+        public float efficiencyMultiplier() {
+            if (currentRecipe == null) return 0f;
+            if (!currentRecipe.hasAttribute()) return 1f;
+            
+            return currentRecipe.baseEfficiency + Math.min(currentRecipe.maxBoost, currentRecipe.boostScale * attrsum) + currentRecipe.attribute.env();
+        }
+        
+        @Override
+        public float efficiencyScale() {
+            if (currentRecipe == null) return 0f;
+            
+            if (currentRecipe.input.hasHeat()) {
+                float over = Math.max(heat - currentRecipe.input.heat, 0f);
+                float scale = Math.min(Mathf.clamp(heat / currentRecipe.input.heat) + over / currentRecipe.input.heat * currentRecipe.overheatScale, currentRecipe.maxEfficiency);
+                
+                if (currentRecipe.hasAttribute()) return scale * efficiencyMultiplier();
+                return scale;
+            }
+            if (currentRecipe.hasAttribute()) return currentRecipe.scaleLiquidConsumption ? efficiencyMultiplier() : super.efficiencyScale();
+            
+            return super.efficiencyScale();
         }
         
         @Override
@@ -306,6 +331,22 @@ public class MultiCrafterBlock extends Block {
         @Override
         public float calculateHeat(float[] sideHeat) {
             return super.calculateHeat(sideHeat);
+        }
+        
+        @Override
+        public void pickedUp() {
+            attrsum = 0f;
+            warmup = 0f;
+        }
+        
+        @Override
+        public void onProximityUpdate() {
+            super.onProximityUpdate();
+            
+            if (currentRecipe == null) return;
+            if (!currentRecipe.hasAttribute()) return;
+            
+            attrsum = sumAttribute(currentRecipe.attribute, tile.x, tile.y);
         }
         
         @Override
@@ -364,7 +405,7 @@ public class MultiCrafterBlock extends Block {
         
         protected void setCurrentRecipe(int index) {
             if (index == currentRecipeIndex) return;
-            
+
             currentRecipeIndex = index;
             currentRecipe = recipes.get(index);
             progress = 0;
@@ -399,15 +440,6 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public float heatRequirement() { return currentRecipe != null ? currentRecipe.input.heat : 0f; }
-        
-        @Override
-        public float efficiencyScale() {
-            if (currentRecipe == null) return 0f;
-            if (!currentRecipe.input.hasHeat()) return super.efficiencyScale();
-            
-            float over = Math.max(heat - currentRecipe.input.heat, 0f);
-            return Math.min(Mathf.clamp(heat / currentRecipe.input.heat) + over / currentRecipe.input.heat * currentRecipe.overheatScale, currentRecipe.maxEfficiency);
-        }
         
         public float warmupTarget() {
             if (currentRecipe == null) return 0f;
