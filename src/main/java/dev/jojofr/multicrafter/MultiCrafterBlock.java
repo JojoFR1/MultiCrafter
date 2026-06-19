@@ -285,31 +285,16 @@ public class MultiCrafterBlock extends Block {
                 }
             }
             
-            float progressIncrease = super.getProgressIncrease(baseTime) * (dumpExtraLiquid ? Math.min(max, 1f) : scaling);
-            return currentRecipe.hasAttribute() ? progressIncrease * efficiencyMultiplier() : progressIncrease;
-        }
-        
-        public float efficiencyMultiplier() {
-            if (currentRecipe == null) return 0f;
-            if (!currentRecipe.hasAttribute()) return 1f;
-            
-            return currentRecipe.baseEfficiency + Math.min(currentRecipe.maxBoost, currentRecipe.boostScale * attrsum) + currentRecipe.attribute.env();
+            return super.getProgressIncrease(baseTime) * (dumpExtraLiquid ? Math.min(max, 1f) : scaling);
         }
         
         @Override
         public float efficiencyScale() {
             if (currentRecipe == null) return 0f;
+            if (!currentRecipe.input.hasHeat()) return super.efficiencyScale();
             
-            if (currentRecipe.input.hasHeat()) {
-                float over = Math.max(heat - currentRecipe.input.heat, 0f);
-                float scale = Math.min(Mathf.clamp(heat / currentRecipe.input.heat) + over / currentRecipe.input.heat * currentRecipe.overheatScale, currentRecipe.maxEfficiency);
-                
-                if (currentRecipe.hasAttribute()) return scale * efficiencyMultiplier();
-                return scale;
-            }
-            if (currentRecipe.hasAttribute()) return currentRecipe.scaleLiquidConsumption ? efficiencyMultiplier() : super.efficiencyScale();
-            
-            return super.efficiencyScale();
+            float over = Math.max(heat - currentRecipe.input.heat, 0f);
+            return Math.min(Mathf.clamp(heat / currentRecipe.input.heat) + over / currentRecipe.input.heat * currentRecipe.overheatScale, currentRecipe.maxEfficiency);
         }
         
         @Override
@@ -332,22 +317,6 @@ public class MultiCrafterBlock extends Block {
         @Override
         public float calculateHeat(float[] sideHeat) {
             return super.calculateHeat(sideHeat);
-        }
-        
-        @Override
-        public void pickedUp() {
-            attrsum = 0f;
-            warmup = 0f;
-        }
-        
-        @Override
-        public void onProximityUpdate() {
-            super.onProximityUpdate();
-            
-            if (currentRecipe == null) return;
-            if (!currentRecipe.hasAttribute()) return;
-            
-            attrsum = sumAttribute(currentRecipe.attribute, tile.x, tile.y);
         }
         
         @Override
@@ -416,9 +385,6 @@ public class MultiCrafterBlock extends Block {
             // this.block.removeConsumers(c -> true);
             // setupConsumers();
             // reinitializeConsumers();
-            
-            if (currentRecipe.hasAttribute()) attrsum = sumAttribute(currentRecipe.attribute, tile.x, tile.y);
-            else attrsum = 0f;
         }
         
         @Override
@@ -538,20 +504,20 @@ public class MultiCrafterBlock extends Block {
                 Pal.lightOrange,
                 b::heatOutputFrac
             ));
-        
-        addBar("efficiency", (MultiCrafterBuild b) -> {
-            if (b.currentRecipe == null || !b.currentRecipe.hasAttribute()) {
-                return null;
-            }
-            
-            return new Bar(
-                Core.bundle.format("bar.efficiency", (int) (b.efficiencyMultiplier() * 100 * (b.currentRecipe != null ? b.currentRecipe.displayEfficiencyScale : 1f))),
-                Pal.lightOrange,
-                b::efficiencyMultiplier
-            );
-        });
-        
         addBar("progress", (MultiCrafterBuild b) -> new Bar(
+
+        // addBar("efficiency", (MultiCrafterBuild b) -> {
+        //     if (b.currentRecipe == null || !b.currentRecipe.hasAttribute()) {
+        //         return null;
+        //     }
+        //
+        //     return new Bar(
+        //         Core.bundle.format("bar.efficiency", (int) (b.efficiencyMultiplier() * 100 * (b.currentRecipe != null ? b.currentRecipe.displayEfficiencyScale : 1f))),
+        //         Pal.lightOrange,
+        //         b::efficiencyMultiplier
+        //     );
+        // });
+        
             "bar.loadprogress",
             Pal.accent,
             b::progress

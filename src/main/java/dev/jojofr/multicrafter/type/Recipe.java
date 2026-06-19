@@ -22,10 +22,7 @@ import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
-import mindustry.world.meta.Attribute;
 import mindustry.world.meta.Stat;
-import mindustry.world.meta.StatValue;
-import mindustry.world.meta.StatValues;
 
 public class Recipe extends UnlockableContent {
     public final IOEntry input, output;
@@ -44,16 +41,6 @@ public class Recipe extends UnlockableContent {
     public float overheatScale = 1f;
     /** [Heat Producer] Maximum possible efficiency after overheating. */
     public float maxEfficiency = 4f;
-    
-    // Attribute support
-    public Attribute attribute = null;
-    public float baseEfficiency = 1f;
-    public float boostScale = 1f;
-    public float maxBoost = 1f;
-    public float minEfficiency = -1f;
-    public float displayEfficiencyScale = 1f;
-    public boolean displayEfficiency = true;
-    public boolean scaleLiquidConsumption = false;
     
     public DrawBlock drawer = new DrawDefault();
     
@@ -89,15 +76,6 @@ public class Recipe extends UnlockableContent {
         this.warmupRate = jsonRecipe.warmupRate;
         this.overheatScale = jsonRecipe.overheatScale;
         this.maxEfficiency = jsonRecipe.maxEfficiency;
-        
-        this.attribute = jsonRecipe.attribute;
-        this.baseEfficiency = jsonRecipe.baseEfficiency;
-        this.boostScale = jsonRecipe.boostScale;
-        this.maxBoost = jsonRecipe.maxBoost;
-        this.minEfficiency = jsonRecipe.minEfficiency;
-        this.displayEfficiencyScale = jsonRecipe.displayEfficiencyScale;
-        this.displayEfficiency = jsonRecipe.displayEfficiency;
-        this.scaleLiquidConsumption = jsonRecipe.scaleLiquidConsumption;
         
         this.unlocked = jsonRecipe.unlocked;
         this.alwaysUnlocked = jsonRecipe.alwaysUnlocked;
@@ -204,18 +182,6 @@ public class Recipe extends UnlockableContent {
         Cell<Table> outputCell = recipeTable.add(this.output.buildTable(perSecond, craftTime)).minWidth(80f).maxWidth(220f).pad(12f).fill();
         outputCell.right();
         
-        if (showAttribute && this.hasAttribute()) {
-            recipeTable.row();
-            
-            Table attributeTable = new Table();
-            attributeTable.add("[lightgray] " + (baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities).localized() + ":[] ").left();
-            
-            StatValue value = StatValues.blocks(attribute, block.floating, boostScale * block.size * block.size, !displayEfficiency);
-            value.display(attributeTable);
-            
-            recipeTable.add(attributeTable).colspan(3).left().pad(12f);
-        }
-        
         return recipeTable;
     }
     
@@ -291,27 +257,6 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
-    public Recipe withAttribute(Attribute attribute) { return withAttribute(attribute, 1f, 1f, 1f, -1f, 1f, true, false); }
-    public Recipe withAttribute(Attribute attribute, float baseEfficiency) { return withAttribute(attribute, baseEfficiency, 1f, 1f, -1f, 1f, true, false); }
-    public Recipe withAttribute(Attribute attribute, float baseEfficiency, float boostScale) { return withAttribute(attribute, baseEfficiency, boostScale, 1f, -1f, 1f, true, false); }
-    public Recipe withAttribute(Attribute attribute, float baseEfficiency, float boostScale, float maxBoost) { return withAttribute(attribute, baseEfficiency, boostScale, maxBoost, -1f, 1f, true, false); }
-    public Recipe withAttribute(Attribute attribute, float baseEfficiency, float boostScale, float maxBoost, float minEfficiency) { return withAttribute(attribute, baseEfficiency, boostScale, maxBoost, minEfficiency, 1f, true, false); }
-    public Recipe withAttribute(Attribute attribute, float baseEfficiency, float boostScale, float maxBoost, float minEfficiency, float displayEfficiencyScale) { return withAttribute(attribute, baseEfficiency, boostScale, maxBoost, minEfficiency, displayEfficiencyScale, true, false); }
-    public Recipe withAttribute(Attribute attribute, float baseEfficiency, float boostScale, float maxBoost, float minEfficiency, float displayEfficiencyScale, boolean displayEfficiency) { return withAttribute(attribute, baseEfficiency, boostScale, maxBoost, minEfficiency, displayEfficiencyScale, displayEfficiency, false); }
-    public Recipe withAttribute(Attribute attribute, float baseEfficiency, float boostScale, float maxBoost,
-                                float minEfficiency, float displayEfficiencyScale, boolean displayEfficiency, boolean scaleLiquidConsumption)
-    {
-        this.attribute = attribute;
-        this.baseEfficiency = baseEfficiency;
-        this.boostScale = boostScale;
-        this.maxBoost = maxBoost;
-        this.minEfficiency = minEfficiency;
-        this.displayEfficiencyScale = displayEfficiencyScale;
-        this.displayEfficiency = displayEfficiency;
-        this.scaleLiquidConsumption = scaleLiquidConsumption;
-        return this;
-    }
-    
     public Recipe withDrawer(DrawBlock drawer) {
         this.drawer = drawer;
         return this;
@@ -334,8 +279,6 @@ public class Recipe extends UnlockableContent {
     }
     
     public boolean hasPayloads() { return input != null && input.hasPayloads() || output != null && output.hasPayloads(); }
-    
-    public boolean hasAttribute() { return attribute != null; }
     
     public boolean hasInput(MultiCrafterBlock.MultiCrafterBuild building) {
         if (input.hasItems()) {

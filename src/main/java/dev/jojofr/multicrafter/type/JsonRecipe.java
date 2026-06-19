@@ -29,16 +29,6 @@ public class JsonRecipe {
     public float overheatScale = 1f;
     public float maxEfficiency = 4f;
     
-    // Attribute support
-    @Nullable public Attribute attribute = null;
-    public float baseEfficiency = 1f;
-    public float boostScale = 1f;
-    public float maxBoost = 1f;
-    public float minEfficiency = -1f;
-    public float displayEfficiencyScale = 1f;
-    public boolean displayEfficiency = true;
-    public boolean scaleLiquidConsumption = false;
-    
     public boolean unlocked = false;
     public boolean alwaysUnlocked = false;
     @Nullable public ResearchData research = null;
