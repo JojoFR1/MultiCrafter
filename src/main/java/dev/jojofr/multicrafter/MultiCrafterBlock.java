@@ -167,7 +167,6 @@ public class MultiCrafterBlock extends Block {
         public float progress;
         public float totalProgress;
         public float warmup;
-        public float attrsum;
         
         public float heat;
         public float outputHeat;

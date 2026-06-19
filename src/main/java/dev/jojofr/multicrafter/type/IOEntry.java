@@ -61,7 +61,6 @@ public class IOEntry {
         SimpleStatValues.items(false, tooltip, items).display(materialTable);
         SimpleStatValues.liquids(false, tooltip, liquids).display(materialTable);
         SimpleStatValues.payloads(false, tooltip, payloads).display(materialTable);
-        materialTable.row();
         
         Table smallIndictor = new Table();
         if (power > 0) SimpleStatValues.power(power).display(smallIndictor);

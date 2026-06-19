@@ -163,7 +163,7 @@ public class Recipe extends UnlockableContent {
             return recipeTable;
         }
         
-        Cell<Table> inputTable = recipeTable.add(this.input.buildTable(perSecond, craftTime)).minWidth(80f).maxWidth(220f).pad(12f).fill();
+        Cell<Table> inputTable = recipeTable.add(this.input.buildTable(perSecond, craftTime)).minWidth(80f).pad(12f).fill();
         inputTable.left();
         
         // TODO not perfect
