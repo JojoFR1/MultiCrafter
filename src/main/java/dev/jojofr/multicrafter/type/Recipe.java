@@ -7,6 +7,7 @@ import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Time;
 import dev.jojofr.multicrafter.MultiCrafterBlock;
+import dev.jojofr.multicrafter.world.AttributeMultiCrafterBlock;
 import mindustry.content.Fx;
 import mindustry.content.TechTree;
 import mindustry.ctype.ContentType;
@@ -24,6 +25,8 @@ import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.Attribute;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValue;
+import mindustry.world.meta.StatValues;
 
 public class Recipe extends UnlockableContent {
     public final IOEntry input, output;
@@ -165,12 +168,13 @@ public class Recipe extends UnlockableContent {
         });
     }
     
-    public Table buildTable(Block block, boolean showAttribute, boolean perSecond) {
-        Table recipeTable = new Table();
-        recipeTable.setBackground(Tex.whiteui);
-        recipeTable.setColor(Pal.darkerGray);
+    public Table buildTable(MultiCrafterBlock block, boolean showAttribute, boolean perSecond) {
+        Table table =  new Table();
+        table.setBackground(Tex.whiteui);
+        table.setColor(Pal.darkerGray);
         
-        if (!this.unlocked()) {
+        Table recipeTable = new Table();
+        if (!unlocked()) {
             recipeTable.setColor(Pal.darkestGray);
             recipeTable.image(Icon.lock).size(100f, 50f).pad(12f).fill();
             
@@ -180,23 +184,29 @@ public class Recipe extends UnlockableContent {
         Cell<Table> inputTable = recipeTable.add(this.input.buildTable(perSecond, craftTime)).minWidth(80f).pad(12f).fill();
         inputTable.left();
         
-        // TODO not perfect
         Table time = new Table();
-        final float[] dur = {0f};
-        time.update(() -> {
-            dur[0] += Time.delta;
-            if (dur[0] >= this.craftTime) dur[0] = 0f;
-        });
-        
         Bar timeBar = new Bar(String.format("%.1f", this.craftTime / 60f) + "s",
             Pal.accent, () -> Interp.smooth.apply((Time.time % this.craftTime) / this.craftTime));
         time.add(timeBar).height(50f).width(250f);
         recipeTable.add(time).pad(12f);
         
-        Cell<Table> outputCell = recipeTable.add(this.output.buildTable(perSecond, craftTime)).minWidth(80f).maxWidth(220f).pad(12f).fill();
+        Cell<Table> outputCell = recipeTable.add(this.output.buildTable(perSecond, craftTime)).minWidth(80f).pad(12f).fill();
         outputCell.right();
         
-        return recipeTable;
+        table.add(recipeTable).growX();
+        
+        if (showAttribute && attribute != null && block instanceof AttributeMultiCrafterBlock attributeBlock) {
+            Table attributeTable = new Table();
+            attributeTable.add("[lightgray] " + (baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities).localized() + ": []");
+            
+            StatValue statValue = StatValues.blocks(attribute, block.floating, boostScale * block.size * block.size, !attributeBlock.displayEfficiency);
+            statValue.display(attributeTable);
+            
+            table.row();
+            table.add(attributeTable).pad(4f).growX();
+        }
+        
+        return table;
     }
     
     public Recipe withWeight(float weight) {

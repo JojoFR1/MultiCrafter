@@ -54,14 +54,14 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
     
     @Override
     public boolean canPlaceOn(Tile tile, Team team, int rotation) {
-        return currentBaseEfficiency + tile.getLinkedTilesAs(this, tempTiles).sumf(other -> other.floor().attributes.get(currentAttribute)) >= currentMinEfficiency;
+        return baseEfficiency + tile.getLinkedTilesAs(this, tempTiles).sumf(other -> other.floor().attributes.get(attribute)) >= minEfficiency;
     }
     
     @Override
     public void setStats() {
         super.setStats();
         
-        stats.add(currentBaseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities, currentAttribute, floating, currentBoostScale * size * size, !displayEfficiency);
+        stats.add(baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities, attribute, floating, boostScale * size * size, !displayEfficiency);
     }
     
     public class AttributeMultiCrafterBuild extends MultiCrafterBuild {
@@ -107,4 +107,7 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
             attrsum = sumAttribute(currentAttribute, tile.x, tile.y);
         }
     }
+    
+    @Override
+    protected boolean hasAttribute() { return true; }
 }

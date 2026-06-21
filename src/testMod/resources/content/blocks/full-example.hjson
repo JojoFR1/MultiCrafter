@@ -45,6 +45,8 @@ boostScale: 1.0
 maxBoost: 1.0
 minEfficiency: -1.0
 
+# If the efficiency (baseEfficiency + tile attribute value) is below minEfficiency, the crafter will not be buildable.
+
 displayEfficiencyScale: 1.0
 displayEfficiency: true
 scaleLiquidConsumption: false

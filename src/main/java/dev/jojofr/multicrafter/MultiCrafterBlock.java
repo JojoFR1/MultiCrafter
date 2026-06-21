@@ -16,6 +16,7 @@ import arc.util.io.Reads;
 import arc.util.io.Writes;
 import dev.jojofr.multicrafter.type.JsonRecipe;
 import dev.jojofr.multicrafter.type.Recipe;
+import dev.jojofr.multicrafter.world.AttributeMultiCrafterBlock;
 import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
@@ -432,22 +433,41 @@ public class MultiCrafterBlock extends Block {
             Table buttonTable = new Table();
             for (Recipe recipe : recipes) {
                 Button button = new Button(Styles.togglet);
-
+                Table buttonContent = new Table();
+                
                 Table recipeTable = new Table();
                 if (!recipe.unlocked()) {
                     recipeTable.image(Icon.lock).pad(4f).fill().grow();
                     recipeTable.addListener(Tooltip.Tooltips.getInstance().create("@locked", Vars.mobile));
+                    
+                    buttonContent.add(recipeTable).pad(4f).growX();
                 } else {
                     recipeTable.add(recipe.input.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
                     recipeTable.image(Icon.right);
                     recipeTable.add(recipe.output.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
-
+                    
+                    buttonContent.add(recipeTable).pad(4f).growX();
+                    
+                    if (hasAttribute() && recipe.attribute != null && block instanceof AttributeMultiCrafterBlock attributeBlock) {
+                        Table attributeTable = new Table();
+                        
+                        float baseEfficiency = !Float.isNaN(recipe.baseEfficiency) ? recipe.baseEfficiency : attributeBlock.baseEfficiency;
+                        attributeTable.add("[lightgray] " + (baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities).localized() + ": []");
+                        
+                        float boostScale = !Float.isNaN(recipe.boostScale) ? recipe.boostScale : attributeBlock.boostScale;
+                        StatValue statValue = StatValues.blocks(recipe.attribute, block.floating, boostScale * size * size, !attributeBlock.displayEfficiency);
+                        statValue.display(attributeTable);
+                        
+                        buttonTable.row();
+                        buttonTable.add(attributeTable).pad(4f).growX();
+                    }
+                    
                     final int finalIndex = index;
                     button.changed(() -> configure(finalIndex));
                     button.update(() -> button.setChecked(currentRecipeIndex == finalIndex));
                 }
                 button.setDisabled(!recipe.unlocked());
-                button.add(recipeTable).pad(4f);
+                button.add(buttonContent).pad(4f);
 
                 buttonTable.add(button).pad(4f).margin(10f).grow();
                 buttonTable.row();
@@ -527,12 +547,11 @@ public class MultiCrafterBlock extends Block {
                 Core.settings.put("multicrafter.show-per-second", b);
                 stats.remove(Stat.output);
                 setOutputStat();
-                
             });
             table.row();
             
             for (Recipe recipe : recipes) {
-                table.add(recipe.buildTable(this, true, perSecond)).pad(4f).grow();
+                table.add(recipe.buildTable(this, hasAttribute(), perSecond)).pad(4f).grow();
                 table.row();
             }
             
@@ -540,4 +559,6 @@ public class MultiCrafterBlock extends Block {
             table.defaults().grow();
         });
     }
+    
+    protected boolean hasAttribute() { return false; }
 }
