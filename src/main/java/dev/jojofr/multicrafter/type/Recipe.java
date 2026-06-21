@@ -22,6 +22,7 @@ import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
+import mindustry.world.meta.Attribute;
 import mindustry.world.meta.Stat;
 
 public class Recipe extends UnlockableContent {
@@ -41,6 +42,13 @@ public class Recipe extends UnlockableContent {
     public float overheatScale = 1f;
     /** [Heat Producer] Maximum possible efficiency after overheating. */
     public float maxEfficiency = 4f;
+    
+    public Attribute attribute = null;
+    public float baseEfficiency = Float.NaN;
+    public float boostScale = Float.NaN;
+    public float maxBoost = Float.NaN;
+    public float minEfficiency = Float.NaN;
+    
     
     public DrawBlock drawer = new DrawDefault();
     
@@ -76,6 +84,12 @@ public class Recipe extends UnlockableContent {
         this.warmupRate = jsonRecipe.warmupRate;
         this.overheatScale = jsonRecipe.overheatScale;
         this.maxEfficiency = jsonRecipe.maxEfficiency;
+        
+        this.attribute = jsonRecipe.attribute;
+        this.baseEfficiency = jsonRecipe.baseEfficiency;
+        this.boostScale = jsonRecipe.boostScale;
+        this.maxBoost = jsonRecipe.maxBoost;
+        this.minEfficiency = jsonRecipe.minEfficiency;
         
         this.unlocked = jsonRecipe.unlocked;
         this.alwaysUnlocked = jsonRecipe.alwaysUnlocked;

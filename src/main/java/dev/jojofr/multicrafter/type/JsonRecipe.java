@@ -29,6 +29,12 @@ public class JsonRecipe {
     public float overheatScale = 1f;
     public float maxEfficiency = 4f;
     
+    @Nullable public Attribute attribute = null;
+    public float baseEfficiency = Float.NaN;
+    public float boostScale = Float.NaN;
+    public float maxBoost = Float.NaN;
+    public float minEfficiency = Float.NaN;
+    
     public boolean unlocked = false;
     public boolean alwaysUnlocked = false;
     @Nullable public ResearchData research = null;
@@ -46,9 +52,8 @@ public class JsonRecipe {
         
         @Override
         public void read(Json json, JsonValue jsonData) {
-            if (jsonData.isString()) {
-                this.parent = jsonData.asString();
-            } else if (jsonData.isObject()) {
+            if (jsonData.isString()) this.parent = jsonData.asString();
+            else if (jsonData.isObject()) {
                 this.parent = jsonData.getString("parent", null);
                 
                 if (jsonData.has("requirements"))

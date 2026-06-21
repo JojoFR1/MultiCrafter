@@ -377,7 +377,8 @@ public class MultiCrafterBlock extends Block {
 
             currentRecipeIndex = index;
             currentRecipe = recipes.get(index);
-            progress = 0;
+            
+            progress = 0f;
             changeRecipeEffect.at(x, y, block.size, block);
             
             // TODO does not work
@@ -476,7 +477,7 @@ public class MultiCrafterBlock extends Block {
             outputHeat = read.f();
             
             currentRecipeIndex = Mathf.clamp(read.i(), 0, recipes.size - 1);
-            currentRecipe = recipes.get(currentRecipeIndex);
+            setCurrentRecipe(currentRecipeIndex);
         }
     }
     
@@ -503,20 +504,8 @@ public class MultiCrafterBlock extends Block {
                 Pal.lightOrange,
                 b::heatOutputFrac
             ));
-        addBar("progress", (MultiCrafterBuild b) -> new Bar(
-
-        // addBar("efficiency", (MultiCrafterBuild b) -> {
-        //     if (b.currentRecipe == null || !b.currentRecipe.hasAttribute()) {
-        //         return null;
-        //     }
-        //
-        //     return new Bar(
-        //         Core.bundle.format("bar.efficiency", (int) (b.efficiencyMultiplier() * 100 * (b.currentRecipe != null ? b.currentRecipe.displayEfficiencyScale : 1f))),
-        //         Pal.lightOrange,
-        //         b::efficiencyMultiplier
-        //     );
-        // });
         
+        addBar("progress", b -> new Bar(
             "bar.loadprogress",
             Pal.accent,
             b::progress

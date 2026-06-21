@@ -1,5 +1,9 @@
 # Mandatory, defines the block as a multicrafter
 type: MultiCrafter
+### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
+# You can also define the block as a multicrafter with attribute support. YOU CANNOT USE BOTH TYPE!
+type: AttributeMultiCrafter
+### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
 # You can define any vanilla block variable below, as long as it is supported by the game. All values are examples.
 size: 2
@@ -25,12 +29,28 @@ drawer: {
 }
 
 
-## The library specific variables, all default values. You do not need to define all of them, only the ones you want to change.
+##### The library specific variables, all default values. You do not need to define all of them, only the ones you want to change.
 
 ### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
+
 # If true, the selection menu will be disabled and the recipe will be selected based off the input and weights.
 # The recipe will only change if the input changes and that the current crafting is done.
 autoSelectRecipe: false
+
+## AttributeMultiCrafter only vvv
+# Same variables as the vanilla AttributeCrafter
+attribute: heat
+baseEfficiency: 1.0
+boostScale: 1.0
+maxBoost: 1.0
+minEfficiency: -1.0
+
+displayEfficiencyScale: 1.0
+displayEfficiency: true
+scaleLiquidConsumption: false
+
+## AttributeMultiCrafter only ^^^
+
 ### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
 # /!\ The field 'recipes' won't work as it is only intended for internal and Java mod use. Using it will not work!
@@ -90,20 +110,22 @@ jsonRecipes: [
         maxEfficiency: 4
 
         ### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
-        # Attributes are per recipe. Same variables as the vanilla AttributeCrafter.
-        # By default, it is defined as null (or in JSON... nothing?) or not present. Making your block not an AttributeCrafter.
-        # The value 'null' is only a representation of the default Java value, it is not a valid value (will cause a NullPointerException).
-        # If you want to disable the attribute, do not define it at all.
+        ## AttributeMultiCrafter only vvv
+
+        ## All values will take precedence over the block values, if defined. If not defined, the block values will be used.
+
+        # The values below are considered 'not defined', but they are not valid values! They are only a representation of the default Java value.
+        # If you want to use the block value, do not define them at all
+        # If you want to override the block value, define them with a valid value (not NaN or null).
         attribute: null
-        # This line is to avoid a crash when loading the testing mod, ignore it.
+        # The 'none' value is only to make the test mod work, please ignore.
         attribute: none
-        baseEfficiency: 1.0
-        boostScale: 1.0
-        maxBoost: 1.0
-        minEfficiency: -1.0
-        displayEfficiencyScale: 1.0
-        displayEfficiency: true
-        scaleLiquidConsumption: false
+        baseEfficiency: NaN
+        boostScale: NaN
+        maxBoost: NaN
+        minEfficiency: NaN
+
+        ## AttributeMultiCrafter only ^^^
         ### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
         # If false, the recipe will need to be researched to unlock. Useful for recipes that needs items unlocked later in your progression.

@@ -6,7 +6,6 @@ import mindustry.game.Team;
 import mindustry.graphics.Pal;
 import mindustry.ui.Bar;
 import mindustry.world.Tile;
-import mindustry.world.blocks.production.AttributeCrafter;
 import mindustry.world.meta.Attribute;
 import mindustry.world.meta.Stat;
 
@@ -16,9 +15,17 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
     public float boostScale = 1f;
     public float maxBoost = 1f;
     public float minEfficiency = -1f;
+    
     public float displayEfficiencyScale = 1f;
     public boolean displayEfficiency = true;
     public boolean scaleLiquidConsumption = false;
+    
+    private Attribute currentAttribute = attribute;
+    private float currentBaseEfficiency = baseEfficiency;
+    private float currentBoostScale = boostScale;
+    private float currentMaxBoost = maxBoost;
+    private float currentMinEfficiency = minEfficiency;
+    
     
     public AttributeMultiCrafterBlock(String name) { super(name); }
     
@@ -29,7 +36,7 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
         if (!displayEfficiency) return;
         
         drawPlaceText(Core.bundle.format("bar.efficiency",
-            (int) ((baseEfficiency + Math.min(maxBoost, boostScale * sumAttribute(attribute, x, y))) * 100f)), x, y, valid);
+            (int) ((currentBaseEfficiency + Math.min(currentMaxBoost, currentBoostScale * sumAttribute(currentAttribute, x, y))) * 100f)), x, y, valid);
     }
     
     @Override
@@ -47,14 +54,14 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
     
     @Override
     public boolean canPlaceOn(Tile tile, Team team, int rotation) {
-        return baseEfficiency + tile.getLinkedTilesAs(this, tempTiles).sumf(other -> other.floor().attributes.get(attribute)) >= minEfficiency;
+        return currentBaseEfficiency + tile.getLinkedTilesAs(this, tempTiles).sumf(other -> other.floor().attributes.get(currentAttribute)) >= currentMinEfficiency;
     }
     
     @Override
     public void setStats() {
         super.setStats();
         
-        stats.add(baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities, attribute, floating, boostScale * size * size, !displayEfficiency);
+        stats.add(currentBaseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities, currentAttribute, floating, currentBoostScale * size * size, !displayEfficiency);
     }
     
     public class AttributeMultiCrafterBuild extends MultiCrafterBuild {
@@ -66,7 +73,7 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
         }
         
         public float efficiencyMultiplier() {
-            return baseEfficiency + Math.min(maxBoost, boostScale * attrsum) + attribute.env();
+            return currentBaseEfficiency + Math.min(currentMaxBoost, currentBoostScale * attrsum) + currentAttribute.env();
         }
         
         @Override
@@ -84,14 +91,20 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
         public void onProximityUpdate() {
             super.onProximityUpdate();
             
-            attrsum = sumAttribute(attribute, tile.x, tile.y);
+            attrsum = sumAttribute(currentAttribute, tile.x, tile.y);
         }
         
         @Override
         protected void setCurrentRecipe(int index) {
             super.setCurrentRecipe(index);
             
-            attrsum = sumAttribute(attribute, tile.x, tile.y);
+            currentAttribute = currentRecipe.attribute != null ? currentRecipe.attribute : attribute;
+            currentBaseEfficiency = !Float.isNaN(currentRecipe.baseEfficiency) ? currentRecipe.baseEfficiency : baseEfficiency;
+            currentBoostScale = !Float.isNaN(currentRecipe.boostScale) ? currentRecipe.boostScale : boostScale;
+            currentMaxBoost = !Float.isNaN(currentRecipe.maxBoost) ? currentRecipe.maxBoost : maxBoost;
+            currentMinEfficiency = !Float.isNaN(currentRecipe.minEfficiency) ? currentRecipe.minEfficiency : minEfficiency;
+            
+            attrsum = sumAttribute(currentAttribute, tile.x, tile.y);
         }
     }
 }
