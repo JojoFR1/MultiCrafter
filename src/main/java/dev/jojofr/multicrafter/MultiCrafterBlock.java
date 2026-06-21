@@ -42,6 +42,8 @@ import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.BlockFlag;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValue;
+import mindustry.world.meta.StatValues;
 
 /*
  *  - Item, liquid, power and heat input seems to work fine
