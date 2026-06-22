@@ -103,7 +103,7 @@ public class MultiCrafterBlock extends Block {
             if (recipe.hasLiquids()) hasLiquids = true;
             if (recipe.hasPower()) hasPower = true;
             if (recipe.output.hasPower()) outputsPower = true;
-            if (recipe.input.hasPower()) consumesPower = true;
+            consumesPower = recipe.input.hasPower();
             
             drawArrow = rotate = rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads());
             rotateDraw = !rotate;
@@ -116,29 +116,29 @@ public class MultiCrafterBlock extends Block {
     
     // TODO change it based of recipe?
     protected void setupConsumers() {
-        boolean hasItems = false;
-        boolean hasLiquids = false;
-        boolean hasPower = false;
+        boolean consumeItems = false;
+        boolean consumeLiquids = false;
+        boolean consumePower = false;
         
         for (Recipe recipe : recipes) {
-            if (recipe.input.hasItems()) hasItems = true;
-            if (recipe.input.hasLiquids()) hasLiquids = true;
-            if (recipe.input.hasPower()) hasPower = true;
+            if (recipe.input.hasItems()) consumeItems = true;
+            if (recipe.input.hasLiquids()) consumeLiquids = true;
+            if (recipe.input.hasPower()) consumePower = true;
         }
         
-        if (hasItems) {
+        if (consumeItems) {
             consume(new ConsumeItemDynamic(
                 (MultiCrafterBuild build) -> build.currentRecipe == null ? ItemStack.empty : build.currentRecipe.input.items
             ));
         }
         
-        if (hasLiquids) {
+        if (consumeLiquids) {
             consume(new ConsumeLiquidsDynamic(
                 (MultiCrafterBuild build) -> build.currentRecipe == null ? LiquidStack.empty : build.currentRecipe.input.liquids
             ));
         }
         
-        if (hasPower) {
+        if (consumePower) {
             consume(new ConsumePowerDynamic(build ->
                 ((MultiCrafterBuild) build).currentRecipe == null ? 0f : ((MultiCrafterBuild) build).currentRecipe.input.power) {
                 @Override
