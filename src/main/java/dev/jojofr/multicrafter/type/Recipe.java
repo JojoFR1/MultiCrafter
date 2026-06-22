@@ -216,6 +216,12 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
+    public Recipe withDrawer(DrawBlock drawer) {
+        this.drawer = drawer;
+        return this;
+    }
+    
+    
     public Recipe isUnlocked() {
         this.unlocked = true;
         return this;
