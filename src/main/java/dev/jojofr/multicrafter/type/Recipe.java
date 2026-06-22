@@ -52,8 +52,8 @@ public class Recipe extends UnlockableContent {
         this.details = Core.bundle.getOrNull(getContentTypeName() + "." + this.name + ".details");
         this.credit = Core.bundle.getOrNull(getContentTypeName() + "." + this.name + ".credit");
         
-        this.input = input;
-        this.output = output;
+        this.input = input.removeDuplicate(name);
+        this.output = output.removeDuplicate(name);
         this.craftTime = craftTime;
     }
     

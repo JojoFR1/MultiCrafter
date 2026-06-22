@@ -1,6 +1,8 @@
 package dev.jojofr.multicrafter.type;
 
 import arc.scene.ui.layout.Table;
+import arc.struct.Seq;
+import arc.util.Log;
 import dev.jojofr.multicrafter.meta.SimpleStatValues;
 import mindustry.type.*;
 import mindustry.world.blocks.payloads.Payload;
@@ -58,6 +60,42 @@ public class IOEntry {
         SimpleStatValues.payloads(false, tooltip, payloads).display(materialTable);
         
         return materialTable;
+    }
+    
+    public IOEntry removeDuplicate(String name) {
+        Seq<ItemStack> uniqueItems = new Seq<>();
+        Seq<LiquidStack> uniqueLiquids = new Seq<>();
+        Seq<PayloadStack> uniquePayloads = new Seq<>();
+        
+        for (ItemStack stack : items) {
+            if (uniqueItems.contains(other -> other.item == stack.item)) {
+                Log.warn("Duplicate item '@' found in IOEntry for recipe '@', ignoring.", stack.item.name, name);
+                continue;
+            }
+            uniqueItems.add(stack);
+        }
+        
+        for (LiquidStack stack : liquids) {
+            if (uniqueLiquids.contains(other -> other.liquid == stack.liquid)) {
+                Log.warn("Duplicate liquid '@' found in IOEntry for recipe '@', ignoring.", stack.liquid.name, name);
+                continue;
+            }
+            uniqueLiquids.add(stack);
+        }
+        
+        for (PayloadStack stack : payloads) {
+            if (uniquePayloads.contains(other -> other.item == stack.item)) {
+                Log.warn("Duplicate payload '@' found in IOEntry for recipe '@', ignoring.", stack.item.name, name);
+                continue;
+            }
+            uniquePayloads.add(stack);
+        }
+        
+        items = uniqueItems.toArray(ItemStack.class);
+        liquids = uniqueLiquids.toArray(LiquidStack.class);
+        payloads = uniquePayloads.toArray(PayloadStack.class);
+        
+        return this;
     }
     
     public boolean isEmpty() {
