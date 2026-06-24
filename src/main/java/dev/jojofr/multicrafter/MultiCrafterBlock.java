@@ -9,7 +9,6 @@ import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.Seq;
 import arc.util.Eachable;
-import arc.util.Log;
 import arc.util.Strings;
 import arc.util.Time;
 import arc.util.io.Reads;
@@ -19,6 +18,7 @@ import dev.jojofr.multicrafter.type.Recipe;
 import dev.jojofr.multicrafter.world.AttributeMultiCrafterBlock;
 import mindustry.Vars;
 import mindustry.content.Fx;
+import mindustry.core.UI;
 import mindustry.entities.Effect;
 import mindustry.entities.units.BuildPlan;
 import mindustry.gen.Building;
@@ -507,25 +507,52 @@ public class MultiCrafterBlock extends Block {
     public void setBars() {
         super.setBars();
         
-        if (hasPower)
-            addBar("power", (MultiCrafterBuild b) -> new Bar(
-                b.currentRecipe.output.hasPower() ? Core.bundle.format("bar.poweroutput", Strings.fixed(b.getPowerProduction() * 60f * b.timeScale(), 1)) : "bar.power",
+        removeBar("power");
+        addBar("power", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.input.hasPower() || consPower == null) {
+                return null;
+            }
+            
+            return new Bar(
+                consPower.buffered ? Core.bundle.format("bar.poweramount", Float.isNaN(b.power.status * consPower.capacity) ? "<ERROR>" : UI.formatAmount((int) (b.power.status * consPower.capacity))) :
+                    "bar.power",
                 Pal.powerBar,
                 () -> b.efficiency
-            ));
-        
-        if (recipes.contains(recipe -> recipe.input.hasHeat()))
-            addBar("heat", (MultiCrafterBuild b) -> new Bar(
+            );
+        });
+        addBar("power-output", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.output.hasPower()) {
+                return null;
+            }
+            
+            return new Bar(
+                Core.bundle.format("bar.poweroutput", Strings.fixed(b.getPowerProduction() * 60f * b.timeScale(), 1)),
+                Pal.powerBar,
+                () -> b.efficiency
+            );
+        });
+        addBar("heat", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.input.hasHeat()) {
+                return null;
+            }
+            
+            return new Bar(
                 Core.bundle.format("bar.heatpercent", (int) (b.heat + 0.01f), (int) (b.efficiencyScale() * 100 + 0.01f)),
                 Pal.lightOrange,
                 b::heatFrac
-            ));
-        if (recipes.contains(recipe -> recipe.output.hasHeat()))
-            addBar("heat-output", (MultiCrafterBuild b) -> new Bar(
+            );
+        });
+        addBar("heat-output", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.output.hasHeat()) {
+                return null;
+            }
+            
+            return new Bar(
                 "bar.heat",
                 Pal.lightOrange,
                 b::heatOutputFrac
-            ));
+            );
+        });
         
         addBar("progress", b -> new Bar(
             "bar.loadprogress",
