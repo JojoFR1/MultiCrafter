@@ -197,8 +197,11 @@ public class Recipe extends UnlockableContent {
         
         if (showAttribute && attribute != null && block instanceof AttributeMultiCrafterBlock attributeBlock) {
             Table attributeTable = new Table();
+            
+            float baseEfficiency = !Float.isNaN(this.baseEfficiency) ? this.baseEfficiency : attributeBlock.baseEfficiency;
             attributeTable.add("[lightgray] " + (baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities).localized() + ": []");
             
+            float boostScale = !Float.isNaN(this.boostScale) ? this.boostScale : attributeBlock.boostScale;
             StatValue statValue = StatValues.blocks(attribute, block.floating, boostScale * block.size * block.size, !attributeBlock.displayEfficiency);
             statValue.display(attributeTable);
             
