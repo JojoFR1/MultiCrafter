@@ -85,7 +85,7 @@ public class MultiCrafterBlock extends Block {
         flags = EnumSet.of(BlockFlag.factory);
         // drawArrow = false;
         
-        config(Integer.class, MultiCrafterBuild::setCurrentRecipe);
+        config(Integer.class, (build, value) -> ((MultiCrafterBuild) build).setCurrentRecipe(value));
     }
     
     @Override
@@ -120,7 +120,6 @@ public class MultiCrafterBlock extends Block {
         super.init();
     }
     
-    // TODO change it based of recipe?
     protected void setupConsumers() {
         boolean consumeItems = false;
         boolean consumeLiquids = false;
@@ -374,19 +373,17 @@ public class MultiCrafterBlock extends Block {
             drawer.drawLight(this);
         }
         
-        protected void setCurrentRecipe(int index) {
+        protected void setCurrentRecipe(int index) { setCurrentRecipe(index, true); }
+        protected void setCurrentRecipe(int index, boolean showEffect) {
             if (index == currentRecipeIndex) return;
-
+            
             currentRecipeIndex = index;
             currentRecipe = recipes.get(index);
             
             progress = 0f;
-            changeRecipeEffect.at(x, y, block.size, block);
+            if (showEffect) changeRecipeEffect.at(x, y, block.size, block);
             
-            // TODO does not work
-            // this.block.removeConsumers(c -> true);
-            // setupConsumers();
-            // reinitializeConsumers();
+            Vars.ui.hudfrag.blockfrag.rebuild();
         }
         
         @Override
@@ -459,8 +456,8 @@ public class MultiCrafterBlock extends Block {
                         StatValue statValue = StatValues.blocks(recipe.attribute, block.floating, boostScale * size * size, !attributeBlock.displayEfficiency);
                         statValue.display(attributeTable);
                         
-                        buttonTable.row();
-                        buttonTable.add(attributeTable).pad(4f).growX();
+                        buttonContent.row();
+                        buttonContent.add(attributeTable).pad(4f).growX();
                     }
                     
                     final int finalIndex = index;
@@ -538,8 +535,8 @@ public class MultiCrafterBlock extends Block {
             heat = read.f();
             outputHeat = read.f();
             
-            currentRecipeIndex = Mathf.clamp(read.i(), 0, recipes.size - 1);
-            setCurrentRecipe(currentRecipeIndex);
+            int index = Mathf.clamp(read.i(), 0, recipes.size - 1);
+            setCurrentRecipe(index, false);
         }
     }
     
@@ -618,8 +615,7 @@ public class MultiCrafterBlock extends Block {
             boolean perSecond = Core.settings.getBool("multicrafter.show-per-second");
             table.check(Core.bundle.format("ui.show-per-second"), perSecond, b -> {
                 Core.settings.put("multicrafter.show-per-second", b);
-                stats.remove(Stat.output);
-                setOutputStat();
+                Vars.ui.content.show(this);
             });
             table.row();
             
