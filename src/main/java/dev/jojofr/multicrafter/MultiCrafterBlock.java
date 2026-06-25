@@ -1,12 +1,14 @@
 package dev.jojofr.multicrafter;
 
 import arc.Core;
+import arc.func.Func;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.scene.ui.Button;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
+import arc.struct.OrderedMap;
 import arc.struct.Seq;
 import arc.util.Eachable;
 import arc.util.Strings;
@@ -46,12 +48,7 @@ import mindustry.world.meta.StatValue;
 import mindustry.world.meta.StatValues;
 
 /*
- *  - Item, liquid, power and heat input seems to work fine
- *  - Item, liquid, power and heat output seems to work fine
- *  - Configuration (aka. select menu) for recipes
  * TODO: there's a lot
- *  - Bars (the UI + update)
- *  - Multiple liquids bars
  *  - Support for payloads
  *  - Examples/Documentation
  */
@@ -71,6 +68,8 @@ public class MultiCrafterBlock extends Block {
     public boolean ignoreLiquidFullness = false;
     
     public DrawBlock drawer = new DrawDefault();
+    
+    private final OrderedMap<String, Bar> liquidBarMap = new OrderedMap<>();
     
     public MultiCrafterBlock(String name) {
         super(name);
@@ -480,6 +479,47 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
+        public void displayBars(Table table) {
+            if (currentRecipe == null) return;
+            
+            var liquidBarPos = barMap.get("liquid");
+            boolean liquidAdded = false;
+            for (Func<Building, Bar> bar : this.block.listBars()) {
+                if (currentRecipe.hasLiquids() && !liquidAdded && bar.equals(liquidBarPos)) {
+                    for (LiquidStack liquid : currentRecipe.input.liquids) {
+                        Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
+                                () -> liquid.liquid.localizedName,
+                                liquid.liquid::barColor,
+                                () -> this.liquids.get(liquid.liquid) / liquid.amount
+                            ));
+                        
+                        table.add(liquidBar).growX();
+                        table.row();
+                    }
+                    
+                    for (LiquidStack liquid : currentRecipe.output.liquids) {
+                        Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
+                            () -> liquid.liquid.localizedName,
+                            liquid.liquid::barColor,
+                            () -> this.liquids.get(liquid.liquid) / liquid.amount
+                        ));
+                        
+                        table.add(liquidBar).growX();
+                        table.row();
+                    }
+                    liquidAdded = true;
+                    continue;
+                }
+                
+                Bar result = (Bar) bar.get(this);
+                if (result != null) {
+                    table.add(result).growX();
+                    table.row();
+                }
+            }
+        }
+        
+        @Override
         public void write(Writes write) {
             super.write(write);
             write.f(progress);
@@ -508,6 +548,10 @@ public class MultiCrafterBlock extends Block {
         super.setBars();
         
         removeBar("power");
+        removeBar("liquid");
+        
+        addBar("liquid", b -> null);
+        
         addBar("power", (MultiCrafterBuild b) -> {
             if (b.currentRecipe == null || !b.currentRecipe.input.hasPower() || consPower == null) {
                 return null;
