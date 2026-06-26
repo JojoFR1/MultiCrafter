@@ -142,6 +142,11 @@ tasks.register('copyTestToMods', Copy) {
     from jarTest into gameDataDir.dir('mods') rename { renamedJar }
 }
 
+tasks.register('removeMods', Delete) {
+    delete gameDataDir.file("mods/${project.name}.jar")
+    delete gameDataDir.file("mods/${project.name}-test.jar")
+}
+
 tasks.register('run', JavaExec) {
     dependsOn 'downloadGame'
     dependsOn 'copyLibToMods'
@@ -163,9 +168,7 @@ tasks.register('runMobile', JavaExec) {
 }
 
 tasks.register('runNoMod', JavaExec) {
-    dependsOn 'downloadGame'
-    gameDataDir.file("mods/${project.name}.jar").asFile.delete()
-    gameDataDir.file("mods/${project.name}-test.jar").asFile.delete()
+    dependsOn 'downloadGame', 'removeMods'
 
     environment 'MINDUSTRY_DATA_DIR', gameDataDir.asFile.absolutePath
     mainClass = '-jar'
