@@ -1,9 +1,24 @@
+#======================================================================================================================#
+# This file contains all the variables and their default values that can be used in the library.
+# You are not supposed to use this file as is, it is only for reference. You can copy the variables you want to use in
+#   your own block file and adjust the values to your needs.
+# You can also add any vanilla block (the base 'Block') variable, as long as it is supported by the game (the game
+#   will log a warn and ignore any unsupported variable).
+# Please read all the comments, as they contain important information about the variables and their usage.
+#======================================================================================================================#
+
+#======================================================================================================================#
+# Small tips to convert from ticks to seconds and vice versa:
+#     Ticks --> Seconds: ticks / 60 = seconds
+#       example: 80 ticks / 60 = 1.33 seconds
+#     Seconds --> Ticks: seconds * 60 = ticks
+#       example: 1.33 seconds * 60 = 80 ticks
+#======================================================================================================================#
+
 # Mandatory, defines the block as a multicrafter
 type: MultiCrafter
-### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
 # You can also define the block as a multicrafter with attribute support. YOU CANNOT USE BOTH TYPE!
 type: AttributeMultiCrafter
-### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
 # You can define any vanilla block variable below, as long as it is supported by the game. All values are examples.
 size: 2
@@ -12,9 +27,7 @@ itemCapacity: 15
 drawer: {
     type: DrawDefault
 }
-
-## The library specific variables
-# Special DrawRecipe, you cannot have the two versions (above and below) at the same time, it is just a choice.
+# A special drawer, 'DrawRecipe', can be used to draw the recipes drawer at its place. You CANNOT have the two versions (above and below) at the same time, it is just a choice.
 drawer: {
     type: DrawMulti
     drawers: [
@@ -31,10 +44,8 @@ drawer: {
 
 ##### The library specific variables, all default values. You do not need to define all of them, only the ones you want to change.
 
-### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
-
 # If true, the selection menu will be disabled and the recipe will be selected based off the input and weights.
-# The recipe will only change if the input changes and that the current crafting is done.
+# This system is experimental and may not work as expected in all cases.
 autoSelectRecipe: false
 
 ## AttributeMultiCrafter only vvv
@@ -53,29 +64,21 @@ scaleLiquidConsumption: false
 
 ## AttributeMultiCrafter only ^^^
 
-### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
-
 # /!\ The field 'recipes' won't work as it is only intended for internal and Java mod use. Using it will not work!
 jsonRecipes: [
     # This is one recipe, defined in between two braces {}.
     {
-        # Will cause a conflict if you have multiple recipes with the same name, make sure to use a unique name.
+        # The internal name of the recipe. Make sure to use a unique name.
         name: empty-recipe
-        # The name displayed in-game instead of the internal name (above). It is preferred to use bundles for localization.
-        # For bundles: "recipe.name.key", key can be: 'name', 'description', 'details' or 'credit'.
+        # The name displayed in-game instead of the internal name (above). It is recommended to use bundles for localization.
+        # For bundles: "recipe.name.key=value", key can be: 'name', 'description', 'details' or 'credit'.
         localizedName: "Empty Recipe"
 
-        ### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
-        # When 'autoSelectRecipe' is true, this weight will influence which recipe will be selected if the crafter has:
-        #   - Multiple items of different recipes
-        #   - The same item in multiple recipes
+        # When 'autoSelectRecipe' is true, this weight will influence which recipe will be selected in case of multiple valid recipes.
         # The higher weighted recipe will be selected.
         weight: 1.0
-        ### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
-        # Value is per tick! Multiply the desired value (in seconds) by 60 to get the correct amount (the game run at 60 ticks per second).
-        #   From ticks to seconds: 80 / 60 = 1.33 seconds
-        #   From seconds to ticks: 1.33 * 60 = 80 ticks
+        # The time, in tick, it takes to craft the recipe.
         craftTime: 80
         input: {
             items: []
@@ -106,21 +109,20 @@ jsonRecipes: [
         updateEffectSpread: 4
         warmupSpeed: 0.019
 
-        # Only for heat based block
+        # Only for recipes with heat.
         warmupRate: 0.15
         overheatScale: 1
         maxEfficiency: 4
 
-        ### vvv NOT YET AVAILABLE AS OF 1.2.0 vvv ###
         ## AttributeMultiCrafter only vvv
 
         ## All values will take precedence over the block values, if defined. If not defined, the block values will be used.
 
         # The values below are considered 'not defined', but they are not valid values! They are only a representation of the default Java value.
-        # If you want to use the block value, do not define them at all
-        # If you want to override the block value, define them with a valid value (not NaN or null).
+        # If you want to use the block value, do not define them at all.
+        # If you want to override the block value, define them with a valid value (not NaN or 'null').
         attribute: null
-        # The 'none' value is only to make the test mod work, please ignore.
+        # The 'none' value is only to make the test mod work, please ignore. It does not exist in the game and will be ignored.
         attribute: none
         baseEfficiency: NaN
         boostScale: NaN
@@ -128,12 +130,15 @@ jsonRecipes: [
         minEfficiency: NaN
 
         ## AttributeMultiCrafter only ^^^
-        ### ^^^ NOT YET AVAILABLE AS OF 1.2.0 ^^^ ###
 
         # If false, the recipe will need to be researched to unlock. Useful for recipes that needs items unlocked later in your progression.
         unlocked: false
         # If true, the recipe will always be unlocked, even after a research tree reset.
         alwaysUnlocked: false
+
+        # If you have previously defined your recipe as unlocked and loaded the game, then later switched to locked,
+        #   the recipe will not automatically be locked. You will need to reset the research tree to lock it again, or lock this specific recipe using the console.
+        # To make a recipe locked, in the console: Vars.content.getByName(ContentType.typeid_UNUSED, "modname-recipename").clearUnlock()
 
         # Any unlockable content, including any other recipes from this or other block (must have been loaded before!). The content *has* to be in the research tree.
         research: core-shard
