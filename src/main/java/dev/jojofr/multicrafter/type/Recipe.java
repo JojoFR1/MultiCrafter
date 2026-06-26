@@ -18,7 +18,6 @@ import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
 import mindustry.io.SaveVersion;
 import mindustry.type.ItemStack;
-import mindustry.type.LiquidStack;
 import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.draw.DrawBlock;
