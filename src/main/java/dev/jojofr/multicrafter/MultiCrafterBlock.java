@@ -129,6 +129,8 @@ public class MultiCrafterBlock extends Block {
             if (recipe.input.hasItems()) consumeItems = true;
             if (recipe.input.hasLiquids()) consumeLiquids = true;
             if (recipe.input.hasPower()) consumePower = true;
+            
+            if (consumeItems && consumeLiquids && consumePower) break;
         }
         
         if (consumeItems) {
@@ -188,20 +190,8 @@ public class MultiCrafterBlock extends Block {
         @Override
         public void updateTile() {
             if (autoSelectRecipe && (efficiency <= 0f || progress <= 0f)) {
-                Recipe bestRecipe = null;
-                int bestIndex = -1;
-                
-                for (int i = 0; i < recipes.size; i++) {
-                    Recipe recipe = recipes.get(i);
-                    if (recipe.unlocked() && recipe.hasInput(this)) {
-                        if (bestRecipe == null || recipe.weight > bestRecipe.weight) {
-                            bestRecipe = recipe;
-                            bestIndex = i;
-                        }
-                    }
-                }
-                
-                if (bestRecipe != null && bestIndex != currentRecipeIndex) setCurrentRecipe(bestIndex);
+                Recipe autoRecipe = currentAutoRecipe();
+                if (autoRecipe != null) setCurrentRecipe(autoRecipe, true);
             }
             
             if (currentRecipe == null) return;
@@ -314,6 +304,32 @@ public class MultiCrafterBlock extends Block {
             return enabled;
         }
         
+        public Recipe currentAutoRecipe() {
+            Recipe bestRecipe = null;
+            float bestWeight = Float.NEGATIVE_INFINITY;
+            
+            outer:
+            for (Recipe recipe : recipes) {
+                if (!recipe.unlocked()) continue;
+                
+                if (recipe.input.hasItems()) for (ItemStack item : recipe.input.items)
+                    if (items.get(item.item) < item.amount) continue outer;
+                
+                if (recipe.input.hasLiquids()) for (LiquidStack liquid : recipe.input.liquids)
+                    if (liquids.get(liquid.liquid) < liquid.amount) continue outer;
+                
+                if (recipe.input.hasPower() && power.status < 0.99f) continue;
+                if (recipe.input.hasHeat() && heat < recipe.input.heat) continue;
+                
+                if (recipe.weight > bestWeight) {
+                    bestRecipe = recipe;
+                    bestWeight = recipe.weight;
+                }
+            }
+            
+            return bestRecipe;
+        }
+        
         @Override
         public float calculateHeat(float[] sideHeat) {
             return super.calculateHeat(sideHeat);
@@ -378,7 +394,10 @@ public class MultiCrafterBlock extends Block {
             if (index == currentRecipeIndex) return;
             
             currentRecipeIndex = index;
-            currentRecipe = recipes.get(index);
+            setCurrentRecipe(recipes.get(index), showEffect);
+        }
+        protected void setCurrentRecipe(Recipe recipe, boolean showEffect) {
+            currentRecipe = recipe;
             
             progress = 0f;
             if (showEffect) changeRecipeEffect.at(x, y, block.size, block);

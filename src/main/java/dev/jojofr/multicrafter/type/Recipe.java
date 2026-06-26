@@ -301,20 +301,6 @@ public class Recipe extends UnlockableContent {
     
     public boolean hasPayloads() { return input != null && input.hasPayloads() || output != null && output.hasPayloads(); }
     
-    public boolean hasInput(MultiCrafterBlock.MultiCrafterBuild building) {
-        if (input.hasItems()) {
-            for (ItemStack stack : input.items) if (building.items.get(stack.item) < stack.amount) return false;
-        }
-        
-        if (input.hasLiquids()) {
-            for (LiquidStack stack : input.liquids) if (building.liquids.get(stack.liquid) < stack.amount) return false;
-        }
-        
-        if (input.hasHeat() && building.heat < input.heat) return false;
-        
-        return true;
-    }
-    
     @Override
     public ContentType getContentType() {
         return ContentType.typeid_UNUSED;
