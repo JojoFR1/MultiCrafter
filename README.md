@@ -27,19 +27,19 @@ You can then import the downloaded JAR file in game by putting it in the `mods` 
 
 ### Library
 
-#### JSON
-
-You can add the library as a dependency in your mod by adding the following to your `mod.(h)json`:
+To use the library in your own mod, you can add it as a dependency in your `mod.(h)json` by adding the following:
 
 ```json
 "dependencies": ["multicrafter"]
 ```
 
-This will make user of your mod require the library to be installed. You can then use the type `MultiCrafter` in your JSON block definitions.
+This will make user of your mod require the library to be installed.
+
+#### JSON
+
+You can simply use the type `MultiCrafter` or `AttributeMultiCrafter` in your JSON block definitions.
 
 #### Java
-
-You need to follow the JSON instructions above to make sure your users have the library installed.
 
 Internally, your mod will need the library as a dependency by adding the following to your `build.gradle`:
 
@@ -54,15 +54,17 @@ ivy {
 Then, add the following to your dependencies:
 
 ```gradle
-compileOnly 'JojoFR1:MultiCrafter:v1.2.1'
+compileOnly 'JojoFR1:MultiCrafter:v1.3.0'
 ```
 
-## Planned/Known Issues
+## Contributing
 
-- (Small issue) Recipes defined in JSON does not appear in the mod "Content" tab, as they are defined post-content loading.
-This is a minor issue, and no known workaround exists for now.
-- (Plans) Better recipe selection UI, maybe add an icon for recipes.
+I am open to any contributions, feel free to open issues for bug reports, feature request or any questions you may have.
+You can also open pull requests if you want to directly contribute to the library.
 
+If you simply want to talk, I created a forum post for the library in the official Mindustry Discord server, you can find it in the `#modding-forum` channel.
+
+**⚠️ Please make sure to have the latest version installed before reporting any bugs, as the modder may be using new features or the bug may have already been fixed.**
 
 ## Building
 
@@ -88,14 +90,6 @@ You can simply take the generated (mod) JAR file and put it in the `mods` folder
 
 For development purposes, you can run the mod directly in a local, separate instance, of Mindustry from the
 command line using: `./gradlew run` or `./gradlew runAndroid` for Android testing (doesn't require the Android jar).
-
-## Contributing
-
-I am open to any contributions.
-
-Feel free to open issues for bug reports, feature request or any questions you may have.
-
-You can also open pull requests if you want to directly contribute to the library.
 
 ## Credits
 

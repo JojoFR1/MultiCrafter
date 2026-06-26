@@ -9,11 +9,14 @@ import mindustry.game.Objectives;
 import mindustry.type.ItemStack;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
+import mindustry.world.meta.Attribute;
 
 public class JsonRecipe {
     public String name = "empty-recipe";
     public String localizedName = "Empty Recipe";
+    
     public IOEntry input = new IOEntry(), output = new IOEntry();
+    public float weight = 1f;
     
     public float craftTime = 80f;
     public Effect craftEffect = Fx.none;
@@ -25,6 +28,12 @@ public class JsonRecipe {
     public float warmupRate = 0.15f;
     public float overheatScale = 1f;
     public float maxEfficiency = 4f;
+    
+    @Nullable public Attribute attribute = null;
+    public float baseEfficiency = Float.NaN;
+    public float boostScale = Float.NaN;
+    public float maxBoost = Float.NaN;
+    public float minEfficiency = Float.NaN;
     
     public boolean unlocked = false;
     public boolean alwaysUnlocked = false;
@@ -43,9 +52,8 @@ public class JsonRecipe {
         
         @Override
         public void read(Json json, JsonValue jsonData) {
-            if (jsonData.isString()) {
-                this.parent = jsonData.asString();
-            } else if (jsonData.isObject()) {
+            if (jsonData.isString()) this.parent = jsonData.asString();
+            else if (jsonData.isObject()) {
                 this.parent = jsonData.getString("parent", null);
                 
                 if (jsonData.has("requirements"))

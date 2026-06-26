@@ -6,6 +6,8 @@ import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Time;
+import dev.jojofr.multicrafter.MultiCrafterBlock;
+import dev.jojofr.multicrafter.world.AttributeMultiCrafterBlock;
 import mindustry.content.Fx;
 import mindustry.content.TechTree;
 import mindustry.ctype.ContentType;
@@ -20,12 +22,16 @@ import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
+import mindustry.world.meta.Attribute;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValue;
+import mindustry.world.meta.StatValues;
 
 public class Recipe extends UnlockableContent {
     public final IOEntry input, output;
+    public float weight = 1f;
     
-    public float craftTime;
+    public float craftTime = 80f;
     public Effect craftEffect = Fx.none;
     public Effect updateEffect = Fx.none;
     public float updateEffectChance = 0.04f;
@@ -36,14 +42,21 @@ public class Recipe extends UnlockableContent {
     public float warmupRate = 0.15f;
     /** [Heat Producer] After heat meets this requirement, excess heat will be scaled by this number. */
     public float overheatScale = 1f;
-    /** [Heat Producer] Maximum possible efficiency after overheat. */
+    /** [Heat Producer] Maximum possible efficiency after overheating. */
     public float maxEfficiency = 4f;
+    
+    public Attribute attribute = null;
+    public float baseEfficiency = Float.NaN;
+    public float boostScale = Float.NaN;
+    public float maxBoost = Float.NaN;
+    public float minEfficiency = Float.NaN;
+    
     
     public DrawBlock drawer = new DrawDefault();
     
     public Recipe(String name) { this(name, new IOEntry(), new IOEntry()); }
     public Recipe(String name, IOEntry input) { this(name, input, new IOEntry()); }
-    public Recipe(String name, IOEntry input, IOEntry output) { this(name, input, output, 80); }
+    public Recipe(String name, IOEntry input, IOEntry output) { this(name, input, output, 80f); }
     public Recipe(String name, IOEntry input, IOEntry output, float craftTime) {
         super(name);
         
@@ -59,8 +72,9 @@ public class Recipe extends UnlockableContent {
     
     public Recipe(JsonRecipe jsonRecipe, Block owner) {
         this(prefixName(jsonRecipe.name, owner), jsonRecipe.input, jsonRecipe.output, jsonRecipe.craftTime);
-        
         if (this.minfo == null) this.minfo = owner.minfo;
+        
+        this.weight = jsonRecipe.weight;
         
         if (this.localizedName == null || this.localizedName.isEmpty())
             this.localizedName = jsonRecipe.localizedName;
@@ -72,6 +86,12 @@ public class Recipe extends UnlockableContent {
         this.warmupRate = jsonRecipe.warmupRate;
         this.overheatScale = jsonRecipe.overheatScale;
         this.maxEfficiency = jsonRecipe.maxEfficiency;
+        
+        this.attribute = jsonRecipe.attribute;
+        this.baseEfficiency = jsonRecipe.baseEfficiency;
+        this.boostScale = jsonRecipe.boostScale;
+        this.maxBoost = jsonRecipe.maxBoost;
+        this.minEfficiency = jsonRecipe.minEfficiency;
         
         this.unlocked = jsonRecipe.unlocked;
         this.alwaysUnlocked = jsonRecipe.alwaysUnlocked;
@@ -134,43 +154,66 @@ public class Recipe extends UnlockableContent {
     public void setStats() {
         stats.add(Stat.output, table -> {
             table.row();
-            table.add(buildTable()).pad(4f).grow();
+            boolean perSecond = Core.settings.getBool("multicrafter.show-per-second");
+            table.check("Show per second? ", perSecond, b -> {
+                Core.settings.put("multicrafter.show-per-second", b);
+                stats.remove(Stat.output);
+                setStats();
+            });
+            table.row();
+            
+            table.add(buildTable(null, false, perSecond)).pad(4f).grow();
             table.defaults().grow();
         });
     }
     
-    public Table buildTable() {
-        Table recipeTable = new Table();
-        recipeTable.setBackground(Tex.whiteui);
-        recipeTable.setColor(Pal.darkerGray);
+    public Table buildTable(MultiCrafterBlock block, boolean showAttribute, boolean perSecond) {
+        Table table =  new Table();
+        table.setBackground(Tex.whiteui);
+        table.setColor(Pal.darkerGray);
         
-        if (!this.unlocked()) {
+        Table recipeTable = new Table();
+        if (!unlocked()) {
             recipeTable.setColor(Pal.darkestGray);
             recipeTable.image(Icon.lock).size(100f, 50f).pad(12f).fill();
             
             return recipeTable;
         }
         
-        Cell<Table> inputTable = recipeTable.add(this.input.buildTable()).width(100f).pad(12f).fill();
+        Cell<Table> inputTable = recipeTable.add(this.input.buildTable(perSecond, craftTime)).minWidth(80f).pad(12f).fill();
         inputTable.left();
         
-        // TODO not perfect
         Table time = new Table();
-        final float[] dur = {0f};
-        time.update(() -> {
-            dur[0] += Time.delta;
-            if (dur[0] >= this.craftTime) dur[0] = 0f;
-        });
-        
         Bar timeBar = new Bar(String.format("%.1f", this.craftTime / 60f) + "s",
             Pal.accent, () -> Interp.smooth.apply((Time.time % this.craftTime) / this.craftTime));
         time.add(timeBar).height(50f).width(250f);
         recipeTable.add(time).pad(12f);
         
-        Cell<Table> outputCell = recipeTable.add(this.output.buildTable()).width(100f).pad(12f).fill();
+        Cell<Table> outputCell = recipeTable.add(this.output.buildTable(perSecond, craftTime)).minWidth(80f).pad(12f).fill();
         outputCell.right();
         
-        return recipeTable;
+        table.add(recipeTable).growX();
+        
+        if (showAttribute && attribute != null && block instanceof AttributeMultiCrafterBlock attributeBlock) {
+            Table attributeTable = new Table();
+            
+            float baseEfficiency = !Float.isNaN(this.baseEfficiency) ? this.baseEfficiency : attributeBlock.baseEfficiency;
+            attributeTable.add("[lightgray] " + (baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities).localized() + ": []");
+            
+            float boostScale = !Float.isNaN(this.boostScale) ? this.boostScale : attributeBlock.boostScale;
+            StatValue statValue = StatValues.blocks(attribute, block.floating, boostScale * block.size * block.size, !attributeBlock.displayEfficiency);
+            statValue.display(attributeTable);
+            
+            table.row();
+            table.add(attributeTable).pad(4f).growX();
+        }
+        
+        return table;
+    }
+    
+    public Recipe withWeight(float weight) {
+        this.weight = weight;
+        return this;
     }
     
     public Recipe withCraftTime(float craftTime) {
@@ -186,9 +229,7 @@ public class Recipe extends UnlockableContent {
     public Recipe withUpdateEffect(Effect updateEffect) {
         return withUpdateEffect(updateEffect, 0.04f, 4f);
     }
-    public Recipe withUpdateEffect(Effect updateEffect, float chance) {
-        return withUpdateEffect(updateEffect, chance, 4f);
-    }
+    public Recipe withUpdateEffect(Effect updateEffect, float chance) { return withUpdateEffect(updateEffect, chance, 4f); }
     public Recipe withUpdateEffect(Effect updateEffect, float chance, float spread) {
         this.updateEffect = updateEffect;
         this.updateEffectChance = chance;
@@ -216,12 +257,6 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
-    public Recipe withDrawer(DrawBlock drawer) {
-        this.drawer = drawer;
-        return this;
-    }
-    
-    
     public Recipe isUnlocked() {
         this.unlocked = true;
         return this;
@@ -229,6 +264,21 @@ public class Recipe extends UnlockableContent {
     
     public Recipe isLocked() {
         this.unlocked = false;
+        return this;
+    }
+    
+    public Recipe isAlwaysUnlocked() {
+        this.alwaysUnlocked = true;
+        return this;
+    }
+    
+    public Recipe isNotAlwaysUnlocked() {
+        this.alwaysUnlocked = false;
+        return this;
+    }
+    
+    public Recipe withDrawer(DrawBlock drawer) {
+        this.drawer = drawer;
         return this;
     }
     
@@ -248,9 +298,7 @@ public class Recipe extends UnlockableContent {
         return input != null && input.hasHeat() || output != null && output.hasHeat();
     }
     
-    public boolean hasPayloads() {
-        return input != null && input.hasPayloads() || output != null && output.hasPayloads();
-    }
+    public boolean hasPayloads() { return input != null && input.hasPayloads() || output != null && output.hasPayloads(); }
     
     @Override
     public ContentType getContentType() {

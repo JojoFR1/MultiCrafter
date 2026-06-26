@@ -18,9 +18,10 @@ jobs:
         distribution: temurin
 
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v5
+      uses: gradle/actions/setup-gradle@v6
       with:
         cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+        cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
     - name: Build Mod Jar
       run: ./gradlew deploy --configuration-cache

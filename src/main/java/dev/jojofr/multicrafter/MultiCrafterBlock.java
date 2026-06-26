@@ -1,12 +1,14 @@
 package dev.jojofr.multicrafter;
 
 import arc.Core;
+import arc.func.Func;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.scene.ui.Button;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
+import arc.struct.OrderedMap;
 import arc.struct.Seq;
 import arc.util.Eachable;
 import arc.util.Strings;
@@ -15,8 +17,10 @@ import arc.util.io.Reads;
 import arc.util.io.Writes;
 import dev.jojofr.multicrafter.type.JsonRecipe;
 import dev.jojofr.multicrafter.type.Recipe;
+import dev.jojofr.multicrafter.world.AttributeMultiCrafterBlock;
 import mindustry.Vars;
 import mindustry.content.Fx;
+import mindustry.core.UI;
 import mindustry.entities.Effect;
 import mindustry.entities.units.BuildPlan;
 import mindustry.gen.Building;
@@ -40,14 +44,11 @@ import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.BlockFlag;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValue;
+import mindustry.world.meta.StatValues;
 
 /*
- *  - Item, liquid, power and heat input seems to work fine
- *  - Item, liquid, power and heat output seems to work fine
- *  - Configuration (aka. select menu) for recipes
  * TODO: there's a lot
- *  - Bars (the UI + update)
- *  - Multiple liquids bars
  *  - Support for payloads
  *  - Examples/Documentation
  */
@@ -60,12 +61,15 @@ public class MultiCrafterBlock extends Block {
     public transient Seq<Recipe> recipes = new Seq<>();
     /** Only intended for internal use and JSON parsing */
     public Seq<JsonRecipe> jsonRecipes = new Seq<>();
+    public boolean autoSelectRecipe = false;
     
     public int[] liquidOutputDirections = {-1};
     public boolean dumpExtraLiquid = true;
     public boolean ignoreLiquidFullness = false;
     
     public DrawBlock drawer = new DrawDefault();
+    
+    private final OrderedMap<String, Bar> liquidBarMap = new OrderedMap<>();
     
     public MultiCrafterBlock(String name) {
         super(name);
@@ -81,7 +85,7 @@ public class MultiCrafterBlock extends Block {
         flags = EnumSet.of(BlockFlag.factory);
         // drawArrow = false;
         
-        config(Integer.class, MultiCrafterBuild::setCurrentRecipe);
+        config(Integer.class, (build, value) -> ((MultiCrafterBuild) build).setCurrentRecipe(value));
     }
     
     @Override
@@ -97,6 +101,8 @@ public class MultiCrafterBlock extends Block {
         if (recipes.isEmpty()) {
             throw new IllegalStateException("The block "+ name +" does not have recipes! It must have at least one recipe.");
         }
+        
+        configurable = !autoSelectRecipe;
         
         for (Recipe recipe : recipes) {
             if (recipe.hasItems()) hasItems = true;
@@ -114,7 +120,6 @@ public class MultiCrafterBlock extends Block {
         super.init();
     }
     
-    // TODO change it based of recipe?
     protected void setupConsumers() {
         boolean consumeItems = false;
         boolean consumeLiquids = false;
@@ -124,6 +129,8 @@ public class MultiCrafterBlock extends Block {
             if (recipe.input.hasItems()) consumeItems = true;
             if (recipe.input.hasLiquids()) consumeLiquids = true;
             if (recipe.input.hasPower()) consumePower = true;
+            
+            if (consumeItems && consumeLiquids && consumePower) break;
         }
         
         if (consumeItems) {
@@ -182,6 +189,11 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public void updateTile() {
+            if (autoSelectRecipe && (efficiency <= 0f || progress <= 0f)) {
+                Recipe autoRecipe = currentAutoRecipe();
+                if (autoRecipe != null) setCurrentRecipe(autoRecipe, true);
+            }
+            
             if (currentRecipe == null) return;
             
             if (currentRecipe.input.hasHeat()) heat = calculateHeat(sideHeat);
@@ -267,6 +279,15 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
+        public float efficiencyScale() {
+            if (currentRecipe == null) return 0f;
+            if (!currentRecipe.input.hasHeat()) return super.efficiencyScale();
+            
+            float over = Math.max(heat - currentRecipe.input.heat, 0f);
+            return Math.min(Mathf.clamp(heat / currentRecipe.input.heat) + over / currentRecipe.input.heat * currentRecipe.overheatScale, currentRecipe.maxEfficiency);
+        }
+        
+        @Override
         public boolean shouldConsume() {
             if (currentRecipe == null) return false;
             
@@ -283,6 +304,32 @@ public class MultiCrafterBlock extends Block {
             return enabled;
         }
         
+        public Recipe currentAutoRecipe() {
+            Recipe bestRecipe = null;
+            float bestWeight = Float.NEGATIVE_INFINITY;
+            
+            outer:
+            for (Recipe recipe : recipes) {
+                if (!recipe.unlocked()) continue;
+                
+                if (recipe.input.hasItems()) for (ItemStack item : recipe.input.items)
+                    if (items.get(item.item) < item.amount) continue outer;
+                
+                if (recipe.input.hasLiquids()) for (LiquidStack liquid : recipe.input.liquids)
+                    if (liquids.get(liquid.liquid) < liquid.amount) continue outer;
+                
+                if (recipe.input.hasPower() && power.status < 0.99f) continue;
+                if (recipe.input.hasHeat() && heat < recipe.input.heat) continue;
+                
+                if (recipe.weight > bestWeight) {
+                    bestRecipe = recipe;
+                    bestWeight = recipe.weight;
+                }
+            }
+            
+            return bestRecipe;
+        }
+        
         @Override
         public float calculateHeat(float[] sideHeat) {
             return super.calculateHeat(sideHeat);
@@ -290,11 +337,35 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public boolean acceptItem(Building source, Item item) {
+            if (autoSelectRecipe) {
+                boolean valid = false;
+                for (Recipe recipe : recipes) {
+                    if (recipe.unlocked() && recipe.input.hasItems() && recipe.input.acceptItem(item)) {
+                        valid = true;
+                        break;
+                    }
+                }
+                
+                return valid && items.get(item) < itemCapacity;
+            }
+            
             return currentRecipe != null && currentRecipe.input.hasItems() && currentRecipe.input.acceptItem(item) && items.get(item) < itemCapacity;
         }
         
         @Override
         public boolean acceptLiquid(Building source, Liquid liquid) {
+            if (autoSelectRecipe) {
+                boolean valid = false;
+                for (Recipe recipe : recipes) {
+                    if (recipe.unlocked() && recipe.input.hasLiquids() && recipe.input.acceptLiquid(liquid)) {
+                        valid = true;
+                        break;
+                    }
+                }
+                
+                return valid && liquids.get(liquid) < liquidCapacity;
+            }
+            
             return currentRecipe != null && currentRecipe.input.hasLiquids() && currentRecipe.input.acceptLiquid(liquid) && liquids.get(liquid) < liquidCapacity;
         }
         
@@ -318,18 +389,20 @@ public class MultiCrafterBlock extends Block {
             drawer.drawLight(this);
         }
         
-        protected void setCurrentRecipe(int index) {
+        protected void setCurrentRecipe(int index) { setCurrentRecipe(index, true); }
+        protected void setCurrentRecipe(int index, boolean showEffect) {
             if (index == currentRecipeIndex) return;
             
             currentRecipeIndex = index;
-            currentRecipe = recipes.get(index);
-            progress = 0;
-            changeRecipeEffect.at(x, y, block.size, block);
+            setCurrentRecipe(recipes.get(index), showEffect);
+        }
+        protected void setCurrentRecipe(Recipe recipe, boolean showEffect) {
+            currentRecipe = recipe;
             
-            // TODO does not work
-            // this.block.removeConsumers(c -> true);
-            // setupConsumers();
-            // reinitializeConsumers();
+            progress = 0f;
+            if (showEffect) changeRecipeEffect.at(x, y, block.size, block);
+            
+            Vars.ui.hudfrag.blockfrag.rebuild();
         }
         
         @Override
@@ -356,15 +429,6 @@ public class MultiCrafterBlock extends Block {
         @Override
         public float heatRequirement() { return currentRecipe != null ? currentRecipe.input.heat : 0f; }
         
-        @Override
-        public float efficiencyScale() {
-            if (currentRecipe == null) return 0f;
-            if (!currentRecipe.input.hasHeat()) return super.efficiencyScale();
-            
-            float over = Math.max(heat - currentRecipe.input.heat, 0f);
-            return Math.min(Mathf.clamp(heat / currentRecipe.input.heat) + over / currentRecipe.input.heat * currentRecipe.overheatScale, currentRecipe.maxEfficiency);
-        }
-        
         public float warmupTarget() {
             if (currentRecipe == null) return 0f;
             if (!currentRecipe.input.hasHeat()) return 1f;
@@ -380,27 +444,47 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public void buildConfiguration(Table table) {
+            if (autoSelectRecipe) return;
             int index = 0;
             
             Table buttonTable = new Table();
             for (Recipe recipe : recipes) {
                 Button button = new Button(Styles.togglet);
-
+                Table buttonContent = new Table();
+                
                 Table recipeTable = new Table();
                 if (!recipe.unlocked()) {
                     recipeTable.image(Icon.lock).pad(4f).fill().grow();
                     recipeTable.addListener(Tooltip.Tooltips.getInstance().create("@locked", Vars.mobile));
+                    
+                    buttonContent.add(recipeTable).pad(4f).growX();
                 } else {
-                    recipeTable.add(recipe.input.buildTable(false)).pad(4f);
+                    recipeTable.add(recipe.input.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
                     recipeTable.image(Icon.right);
-                    recipeTable.add(recipe.output.buildTable(false)).pad(4f);
-
+                    recipeTable.add(recipe.output.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
+                    
+                    buttonContent.add(recipeTable).pad(4f).growX();
+                    
+                    if (hasAttribute() && recipe.attribute != null && block instanceof AttributeMultiCrafterBlock attributeBlock) {
+                        Table attributeTable = new Table();
+                        
+                        float baseEfficiency = !Float.isNaN(recipe.baseEfficiency) ? recipe.baseEfficiency : attributeBlock.baseEfficiency;
+                        attributeTable.add("[lightgray] " + (baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities).localized() + ": []");
+                        
+                        float boostScale = !Float.isNaN(recipe.boostScale) ? recipe.boostScale : attributeBlock.boostScale;
+                        StatValue statValue = StatValues.blocks(recipe.attribute, block.floating, boostScale * size * size, !attributeBlock.displayEfficiency);
+                        statValue.display(attributeTable);
+                        
+                        buttonContent.row();
+                        buttonContent.add(attributeTable).pad(4f).growX();
+                    }
+                    
                     final int finalIndex = index;
                     button.changed(() -> configure(finalIndex));
                     button.update(() -> button.setChecked(currentRecipeIndex == finalIndex));
                 }
                 button.setDisabled(!recipe.unlocked());
-                button.add(recipeTable).pad(4f);
+                button.add(buttonContent).pad(4f);
 
                 buttonTable.add(button).pad(4f).margin(10f).grow();
                 buttonTable.row();
@@ -408,6 +492,47 @@ public class MultiCrafterBlock extends Block {
             }
             
             table.add(buttonTable);
+        }
+        
+        @Override
+        public void displayBars(Table table) {
+            if (currentRecipe == null) return;
+            
+            var liquidBarPos = barMap.get("liquid");
+            boolean liquidAdded = false;
+            for (Func<Building, Bar> bar : this.block.listBars()) {
+                if (currentRecipe.hasLiquids() && !liquidAdded && bar.equals(liquidBarPos)) {
+                    for (LiquidStack liquid : currentRecipe.input.liquids) {
+                        Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
+                                () -> liquid.liquid.localizedName,
+                                liquid.liquid::barColor,
+                                () -> this.liquids.get(liquid.liquid) / liquid.amount
+                            ));
+                        
+                        table.add(liquidBar).growX();
+                        table.row();
+                    }
+                    
+                    for (LiquidStack liquid : currentRecipe.output.liquids) {
+                        Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
+                            () -> liquid.liquid.localizedName,
+                            liquid.liquid::barColor,
+                            () -> this.liquids.get(liquid.liquid) / liquid.amount
+                        ));
+                        
+                        table.add(liquidBar).growX();
+                        table.row();
+                    }
+                    liquidAdded = true;
+                    continue;
+                }
+                
+                Bar result = (Bar) bar.get(this);
+                if (result != null) {
+                    table.add(result).growX();
+                    table.row();
+                }
+            }
         }
         
         @Override
@@ -429,8 +554,8 @@ public class MultiCrafterBlock extends Block {
             heat = read.f();
             outputHeat = read.f();
             
-            currentRecipeIndex = Mathf.clamp(read.i(), 0, recipes.size - 1);
-            currentRecipe = recipes.get(currentRecipeIndex);
+            int index = Mathf.clamp(read.i(), 0, recipes.size - 1);
+            setCurrentRecipe(index, false);
         }
     }
     
@@ -438,27 +563,58 @@ public class MultiCrafterBlock extends Block {
     public void setBars() {
         super.setBars();
         
-        if (hasPower)
-            addBar("power", (MultiCrafterBuild b) -> new Bar(
-                b.currentRecipe.output.hasPower() ? Core.bundle.format("bar.poweroutput", Strings.fixed(b.getPowerProduction() * 60f * b.timeScale(), 1)) : "bar.power",
+        removeBar("power");
+        removeBar("liquid");
+        
+        addBar("liquid", b -> null);
+        
+        addBar("power", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.input.hasPower() || consPower == null) {
+                return null;
+            }
+            
+            return new Bar(
+                consPower.buffered ? Core.bundle.format("bar.poweramount", Float.isNaN(b.power.status * consPower.capacity) ? "<ERROR>" : UI.formatAmount((int) (b.power.status * consPower.capacity))) :
+                    "bar.power",
                 Pal.powerBar,
                 () -> b.efficiency
-            ));
-        
-        if (recipes.contains(recipe -> recipe.input.hasHeat()))
-            addBar("heat", (MultiCrafterBuild b) -> new Bar(
+            );
+        });
+        addBar("power-output", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.output.hasPower()) {
+                return null;
+            }
+            
+            return new Bar(
+                Core.bundle.format("bar.poweroutput", Strings.fixed(b.getPowerProduction() * 60f * b.timeScale(), 1)),
+                Pal.powerBar,
+                () -> b.efficiency
+            );
+        });
+        addBar("heat", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.input.hasHeat()) {
+                return null;
+            }
+            
+            return new Bar(
                 Core.bundle.format("bar.heatpercent", (int) (b.heat + 0.01f), (int) (b.efficiencyScale() * 100 + 0.01f)),
                 Pal.lightOrange,
                 b::heatFrac
-            ));
-        if (recipes.contains(recipe -> recipe.output.hasHeat()))
-            addBar("heat-output", (MultiCrafterBuild b) -> new Bar(
+            );
+        });
+        addBar("heat-output", (MultiCrafterBuild b) -> {
+            if (b.currentRecipe == null || !b.currentRecipe.output.hasHeat()) {
+                return null;
+            }
+            
+            return new Bar(
                 "bar.heat",
                 Pal.lightOrange,
                 b::heatOutputFrac
-            ));
+            );
+        });
         
-        addBar("progress", (MultiCrafterBuild b) -> new Bar(
+        addBar("progress", b -> new Bar(
             "bar.loadprogress",
             Pal.accent,
             b::progress
@@ -468,11 +624,22 @@ public class MultiCrafterBlock extends Block {
     @Override
     public void setStats() {
         super.setStats();
+        setOutputStat();
+    }
+    
+    protected void setOutputStat() {
         stats.add(Stat.output, table -> {
+            // Add a toggle to show in per second or total amount
+            table.row();
+            boolean perSecond = Core.settings.getBool("multicrafter.show-per-second");
+            table.check(Core.bundle.format("ui.show-per-second"), perSecond, b -> {
+                Core.settings.put("multicrafter.show-per-second", b);
+                Vars.ui.content.show(this);
+            });
             table.row();
             
             for (Recipe recipe : recipes) {
-                table.add(recipe.buildTable()).pad(4f).grow();
+                table.add(recipe.buildTable(this, hasAttribute(), perSecond)).pad(4f).grow();
                 table.row();
             }
             
@@ -480,4 +647,6 @@ public class MultiCrafterBlock extends Block {
             table.defaults().grow();
         });
     }
+    
+    protected boolean hasAttribute() { return false; }
 }
