@@ -26,6 +26,8 @@ repositories {
         patternLayout {artifact '/[organisation]/[module]/releases/download/master/[revision].jar'}
         metadataSources { artifact() }
     }
+
+    maven { url 'https://jitpack.io' }
 }
 
 sourceSets {
@@ -41,6 +43,8 @@ dependencies {
     def useLatest = false //set to "true" to always depend on the newest version of mindustry
 
     compileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
+
+    compileOnly 'com.github.EB-wilson:TooManyItems:3.2'
 
     testModImplementation sourceSets.main.output
     testModCompileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"

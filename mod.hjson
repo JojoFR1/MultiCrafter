@@ -5,6 +5,7 @@ version: "1.3.0"
 
 java: true
 main: "dev.jojofr.multicrafter.MultiCrafterMod"
+recipeEntry: "dev.jojofr.multicrafter.tmi.MultiCrafterRecipeEntry"
 
 displayName: "MultiCrafter"
 author:
