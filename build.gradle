@@ -37,8 +37,8 @@ sourceSets {
     }
 }
 
-def mindustryVersion = 'v158'
-def mindustryGameVersion = 'v158.1'
+def mindustryVersion = 'v159'
+def mindustryGameVersion = 'v159.6'
 dependencies {
     def useLatest = false //set to "true" to always depend on the newest version of mindustry
 
