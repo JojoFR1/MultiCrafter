@@ -27,6 +27,7 @@ import mindustry.gen.Building;
 import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
 import mindustry.graphics.Pal;
+import mindustry.logic.LAccess;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
@@ -564,6 +565,12 @@ public class MultiCrafterBlock extends Block {
                     table.row();
                 }
             }
+        }
+        
+        @Override
+        public double sense(LAccess sensor) {
+            if (sensor == LAccess.progress) return progress;
+            return super.sense(sensor);
         }
         
         @Override
