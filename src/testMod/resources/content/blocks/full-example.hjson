@@ -114,6 +114,10 @@ jsonRecipes: [
         overheatScale: 1
         maxEfficiency: 4
 
+        # If true, the crafter will output a random item from the output list, like a Separator/Disassembler.
+        # Only support items, all other output types will be forbidden and will thrown an error if defined.
+        randomOutput: false
+
         ## AttributeMultiCrafter only vvv
 
         ## All values will take precedence over the block values, if defined. If not defined, the block values will be used.
