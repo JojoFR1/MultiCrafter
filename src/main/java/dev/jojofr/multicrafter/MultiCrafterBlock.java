@@ -67,6 +67,8 @@ public class MultiCrafterBlock extends Block {
     public boolean dumpExtraLiquid = true;
     public boolean ignoreLiquidFullness = false;
     
+    public boolean hasRandomOutputRecipes = false;
+    
     public DrawBlock drawer = new DrawDefault();
     
     private final OrderedMap<String, Bar> liquidBarMap = new OrderedMap<>();
@@ -109,6 +111,7 @@ public class MultiCrafterBlock extends Block {
             if (recipe.hasLiquids()) hasLiquids = true;
             if (recipe.hasPower()) hasPower = true;
             if (recipe.output.hasPower()) outputsPower = true;
+            if (recipe.randomOutput) hasRandomOutputRecipes = true;
             consumesPower = recipe.input.hasPower();
             
             drawArrow = rotate = rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads());
@@ -179,12 +182,14 @@ public class MultiCrafterBlock extends Block {
         public int currentRecipeIndex;
         public Effect changeRecipeEffect = Fx.placeBlock;
         
+        public int seed;
+        
         @Override
         public void created() {
-            super.created();
-            
             this.currentRecipeIndex = 0;
             this.currentRecipe = recipes.get(0);
+            
+            if (hasRandomOutputRecipes) this.seed = Mathf.randomSeed(tile.pos(), 0, Integer.MAX_VALUE - 1);
         }
         
         @Override
@@ -228,7 +233,32 @@ public class MultiCrafterBlock extends Block {
         }
         
         public void craft() {
+            progress %= 1f;
+            
+            Item randomItem = null;
+            if (currentRecipe.randomOutput) {
+                int sum = 0;
+                for (ItemStack item : currentRecipe.output.items) sum += item.amount;
+                
+                int i = Mathf.randomSeed(seed++, 0, sum - 1);
+                int count = 0;
+                
+                for (ItemStack stack : currentRecipe.output.items) {
+                    if (i >= count && i < count + stack.amount) {
+                        randomItem = stack.item;
+                        break;
+                    }
+                    count += stack.amount;
+                }
+            }
+            
             consume();
+            
+            if (randomItem != null && items.get(randomItem) < itemCapacity) {
+                offload(randomItem);
+                return;
+            }
+            
             
             for (ItemStack output : currentRecipe.output.items) {
                 for (int i = 0; i < output.amount; i++) {
@@ -461,7 +491,8 @@ public class MultiCrafterBlock extends Block {
                 } else {
                     recipeTable.add(recipe.input.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
                     recipeTable.image(Icon.right);
-                    recipeTable.add(recipe.output.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
+                    if (recipe.randomOutput) recipeTable.add(recipe.output.buildTableRandom(false, true, currentRecipe.craftTime)).pad(4f);
+                    else recipeTable.add(recipe.output.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
                     
                     buttonContent.add(recipeTable).pad(4f).growX();
                     
@@ -543,6 +574,8 @@ public class MultiCrafterBlock extends Block {
             write.f(heat);
             write.f(outputHeat);
             
+            write.i(seed);
+            
             write.i(currentRecipeIndex);
         }
         
@@ -554,9 +587,14 @@ public class MultiCrafterBlock extends Block {
             heat = read.f();
             outputHeat = read.f();
             
+            if (revision >= 1) seed = read.i();
+            
             int index = Mathf.clamp(read.i(), 0, recipes.size - 1);
             setCurrentRecipe(index, false);
         }
+        
+        @Override
+        public byte version() { return 1; }
     }
     
     @Override
@@ -624,10 +662,7 @@ public class MultiCrafterBlock extends Block {
     @Override
     public void setStats() {
         super.setStats();
-        setOutputStat();
-    }
-    
-    protected void setOutputStat() {
+        
         stats.add(Stat.output, table -> {
             // Add a toggle to show in per second or total amount
             table.row();

@@ -73,6 +73,25 @@ public class IOEntry {
         return table;
     }
     
+    public Table buildTableRandom(boolean perSecond, float craftTime) { return buildTableRandom(true, perSecond, craftTime); }
+    public Table buildTableRandom(boolean tooltip, boolean perSecond, float craftTime) {
+        Table table = new Table();
+        Table materialTable = new Table();
+        
+        SimpleStatValues.count = 0;
+        SimpleStatValues.perSecond = perSecond;
+        SimpleStatValues.craftTime = craftTime;
+        
+        int sum = 0;
+        for (ItemStack stack : items) sum += stack.amount;
+        
+        SimpleStatValues.itemsPercent(false, tooltip, sum, items).display(materialTable);
+        
+        table.add(materialTable);
+        
+        return table;
+    }
+    
     public IOEntry removeDuplicate(String name) {
         Seq<ItemStack> uniqueItems = new Seq<>();
         Seq<LiquidStack> uniqueLiquids = new Seq<>();

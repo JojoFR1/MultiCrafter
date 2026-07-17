@@ -34,8 +34,18 @@ public class SimpleStatValues {
     public static StatValue items(boolean displayName, ItemStack... stacks) { return items(displayName, true, stacks); }
     public static StatValue items(boolean displayName, boolean tooltip, ItemStack... stacks) {
         return table -> {
-            for(ItemStack stack : stacks){
+            for (ItemStack stack : stacks){
                 table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(4f);
+                if (++count % 5 == 0) table.row();
+            }
+        };
+    }
+    
+    public static StatValue itemsPercent(boolean displayName, int sum, ItemStack... stacks) { return itemsPercent(displayName, true, sum, stacks); }
+    public static StatValue itemsPercent(boolean displayName, boolean tooltip, int sum, ItemStack... stacks) {
+        return table -> {
+            for (ItemStack stack : stacks) {
+                table.add(displayItemPercent(stack.item, (int) ((float) stack.amount / sum * 100), displayName, tooltip)).padRight(4f);
                 if (++count % 5 == 0) table.row();
             }
         };
@@ -96,6 +106,20 @@ public class SimpleStatValues {
         Table t = new Table();
         t.add(stack(item.uiIcon, amount, item, tooltip));
         if(showName) t.add(item.localizedName).padLeft(4 + amount > 99 ? 4 : 0);
+        return t;
+    }
+    
+    public static Table displayItemPercent(UnlockableContent item, int percent, boolean showName) { return displayPayloads(item, percent, showName, true); }
+    public static Table displayItemPercent(UnlockableContent item, int percent, boolean showName, boolean tooltip) {
+        Table t = new Table();
+        Stack stack = stack(item.uiIcon, 0, item, tooltip);
+        stack.add(new Table(o -> {
+            o.left().bottom();
+            o.add((showName ? item.localizedName + "\n" : "") + "[lightgray]" + percent + "%").padLeft(2).padRight(5).style(Styles.outlineLabel);
+            o.pack();
+        }));
+        
+        t.add(stack);
         return t;
     }
     

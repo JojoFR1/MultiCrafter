@@ -51,6 +51,7 @@ public class Recipe extends UnlockableContent {
     public float maxBoost = Float.NaN;
     public float minEfficiency = Float.NaN;
     
+    public boolean randomOutput = false;
     
     public DrawBlock drawer = new DrawDefault();
     
@@ -92,6 +93,11 @@ public class Recipe extends UnlockableContent {
         this.boostScale = jsonRecipe.boostScale;
         this.maxBoost = jsonRecipe.maxBoost;
         this.minEfficiency = jsonRecipe.minEfficiency;
+        
+        this.randomOutput = jsonRecipe.randomOutput;
+        if (randomOutput && (output.hasLiquids() || output.hasPower() ||output.hasHeat() || output.hasPayloads()))
+            throw new IllegalArgumentException("Recipe '" + this.name + "' is set to random output, but has non-item outputs. Random output only works with items.");
+        
         
         this.unlocked = jsonRecipe.unlocked;
         this.alwaysUnlocked = jsonRecipe.alwaysUnlocked;
@@ -189,7 +195,8 @@ public class Recipe extends UnlockableContent {
         time.add(timeBar).height(50f).width(250f);
         recipeTable.add(time).pad(12f);
         
-        Cell<Table> outputCell = recipeTable.add(this.output.buildTable(perSecond, craftTime)).minWidth(80f).pad(12f).fill();
+        Cell<Table> outputCell = (randomOutput ? recipeTable.add(this.output.buildTableRandom(perSecond, craftTime))
+                                                : recipeTable.add(this.output.buildTable(perSecond, craftTime))).minWidth(80f).pad(12f).fill();
         outputCell.right();
         
         table.add(recipeTable).growX();
@@ -254,6 +261,14 @@ public class Recipe extends UnlockableContent {
     
     public Recipe withWarmupRate(float warmupRate) {
         this.warmupRate = warmupRate;
+        return this;
+    }
+    
+    public Recipe isRandomOutput() {
+        if (output.hasLiquids() || output.hasPower() || output.hasHeat() || output.hasPayloads())
+            throw new IllegalArgumentException("Recipe '" + this.name + "' is set to random output, but has non-item outputs. Random output only works with items.");
+        
+        this.randomOutput = true;
         return this;
     }
     

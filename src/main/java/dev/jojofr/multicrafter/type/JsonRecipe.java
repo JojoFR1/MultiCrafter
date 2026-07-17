@@ -35,6 +35,8 @@ public class JsonRecipe {
     public float maxBoost = Float.NaN;
     public float minEfficiency = Float.NaN;
     
+    public boolean randomOutput = false;
+    
     public boolean unlocked = false;
     public boolean alwaysUnlocked = false;
     @Nullable public ResearchData research = null;
