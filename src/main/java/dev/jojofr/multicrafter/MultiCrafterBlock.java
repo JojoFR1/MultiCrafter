@@ -2,17 +2,18 @@ package dev.jojofr.multicrafter;
 
 import arc.Core;
 import arc.func.Func;
+import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.TextureRegion;
+import arc.math.Angles;
 import arc.math.Mathf;
+import arc.math.geom.Vec2;
 import arc.scene.ui.Button;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
 import arc.struct.OrderedMap;
 import arc.struct.Seq;
-import arc.util.Eachable;
-import arc.util.Strings;
-import arc.util.Time;
+import arc.util.*;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import dev.jojofr.multicrafter.type.JsonRecipe;
@@ -23,23 +24,23 @@ import mindustry.content.Fx;
 import mindustry.core.UI;
 import mindustry.entities.Effect;
 import mindustry.entities.units.BuildPlan;
-import mindustry.gen.Building;
-import mindustry.gen.Icon;
-import mindustry.gen.Sounds;
+import mindustry.gen.*;
+import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.logic.LAccess;
-import mindustry.type.Item;
-import mindustry.type.ItemStack;
-import mindustry.type.Liquid;
-import mindustry.type.LiquidStack;
+import mindustry.type.*;
 import mindustry.ui.Bar;
 import mindustry.ui.Styles;
 import mindustry.world.Block;
 import mindustry.world.blocks.heat.HeatBlock;
 import mindustry.world.blocks.heat.HeatConsumer;
+import mindustry.world.blocks.payloads.BuildPayload;
 import mindustry.world.blocks.payloads.Payload;
+import mindustry.world.blocks.payloads.PayloadBlock;
+import mindustry.world.blocks.payloads.UnitPayload;
 import mindustry.world.consumers.ConsumeItemDynamic;
 import mindustry.world.consumers.ConsumeLiquidsDynamic;
+import mindustry.world.consumers.ConsumePayloadDynamic;
 import mindustry.world.consumers.ConsumePowerDynamic;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
@@ -68,12 +69,19 @@ public class MultiCrafterBlock extends Block {
     public boolean dumpExtraLiquid = true;
     public boolean ignoreLiquidFullness = false;
     
+    public float payloadSpeed = 0.7f;
+    public float payloadRotateSpeed = 5f;
+    
+    public String regionSuffix = "";
+    public TextureRegion topRegion, outRegion, inRegion;
+    
     public boolean hasRandomOutputRecipes = false;
     
     public DrawBlock drawer = new DrawDefault();
     
     private final OrderedMap<String, Bar> liquidBarMap = new OrderedMap<>();
     
+    @SuppressWarnings("rawtypes")
     public MultiCrafterBlock(String name) {
         super(name);
         
@@ -95,6 +103,20 @@ public class MultiCrafterBlock extends Block {
     public void load() {
         super.load();
         drawer.load(this);
+        
+        topRegion = findFactoryRegion("-top");
+        outRegion =  findFactoryRegion("-out");
+        inRegion =  findFactoryRegion("-in");
+    }
+    
+    // From Mindustry PayloadBlock
+    protected TextureRegion findFactoryRegion(String suf){
+        TextureRegion region = Core.atlas.find(name + suf);
+        
+        if(!region.found() && minfo.mod != null) region = Core.atlas.find(minfo.mod.name + "-factory" + suf + "-" + size + regionSuffix);
+        if(!region.found()) region = Core.atlas.find("factory" + suf + "-" + size + regionSuffix);
+        
+        return region;
     }
     
     @Override
@@ -112,8 +134,10 @@ public class MultiCrafterBlock extends Block {
             if (recipe.hasLiquids()) hasLiquids = true;
             if (recipe.hasPower()) hasPower = true;
             if (recipe.output.hasPower()) outputsPower = true;
-            if (recipe.randomOutput) hasRandomOutputRecipes = true;
             consumesPower = recipe.input.hasPower();
+            if (recipe.input.hasPayloads()) acceptsPayload = true;
+            if (recipe.output.hasPayloads()) outputsPayload = true;
+            if (recipe.randomOutput) hasRandomOutputRecipes = true;
             
             drawArrow = rotate = rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads());
             rotateDraw = !rotate;
@@ -124,17 +148,20 @@ public class MultiCrafterBlock extends Block {
         super.init();
     }
     
+    @SuppressWarnings("rawtypes")
     protected void setupConsumers() {
         boolean consumeItems = false;
         boolean consumeLiquids = false;
         boolean consumePower = false;
+        boolean consumePayloads = false;
         
         for (Recipe recipe : recipes) {
             if (recipe.input.hasItems()) consumeItems = true;
             if (recipe.input.hasLiquids()) consumeLiquids = true;
             if (recipe.input.hasPower()) consumePower = true;
+            if (recipe.input.hasPayloads()) consumePayloads = true;
             
-            if (consumeItems && consumeLiquids && consumePower) break;
+            if (consumeItems && consumeLiquids && consumePower && consumePayloads) break;
         }
         
         if (consumeItems) {
@@ -163,14 +190,36 @@ public class MultiCrafterBlock extends Block {
                 }
             });
         }
+        
+        if (consumePayloads) {
+            consume(new ConsumePayloadDynamic((MultiCrafterBuild build) -> build.currentRecipe == null ? new Seq<>() : build.currentRecipe.input.payloads));
+        }
+    }
+    
+    public static void pushOutput(Payload payload, float progress){
+        float thresh = 0.55f;
+        if(progress >= thresh){
+            boolean legStep = payload instanceof UnitPayload u && u.unit.type.allowLegStep;
+            float size = payload.size(), radius = size/2f, x = payload.x(), y = payload.y(), scl = Mathf.clamp(((progress - thresh) / (1f - thresh)) * 1.1f);
+            
+            Groups.unit.intersect(x - size/2f, y - size/2f, size, size, u -> {
+                float dst = u.dst(payload);
+                float rs = radius + u.hitSize/2f;
+                if(u.isGrounded() && u.type.allowLegStep == legStep && dst < rs){
+                    u.vel.add(Tmp.v1.set(u.x - x, u.y - y).setLength(Math.min(rs - dst, 1f)).scl(scl));
+                }
+            });
+        }
     }
     
     @Override public void drawPlanRegion(BuildPlan plan, Eachable<BuildPlan> list) { drawer.drawPlan(this, plan, list); }
     @Override public void getRegionsToOutline(Seq<TextureRegion> out) { drawer.getRegionsToOutline(this, out); }
     @Override protected TextureRegion[] icons() { return drawer.finalIcons(this); }
     
-    // TODO Payload support
-    public class MultiCrafterBuild extends Building implements HeatBlock, HeatConsumer {
+    public class MultiCrafterBuild<T extends Payload> extends Building implements HeatBlock, HeatConsumer {
+        public Recipe currentRecipe;
+        public int currentRecipeIndex;
+        
         public float progress;
         public float totalProgress;
         public float warmup;
@@ -179,8 +228,15 @@ public class MultiCrafterBlock extends Block {
         public float outputHeat;
         public float[] sideHeat = new float[4];
         
-        public Recipe currentRecipe;
-        public int currentRecipeIndex;
+        public @Nullable T payload;
+        public PayloadSeq payloadInput = new PayloadSeq();
+        public PayloadSeq payloadOutput = new PayloadSeq();
+        public boolean payloadOutgoing;
+        
+        public Vec2 payVector = new Vec2();
+        public float payRotation;
+        public boolean carried;
+        
         public Effect changeRecipeEffect = Fx.placeBlock;
         
         public int seed;
@@ -198,6 +254,16 @@ public class MultiCrafterBlock extends Block {
             if (autoSelectRecipe && (efficiency <= 0f || progress <= 0f)) {
                 Recipe autoRecipe = currentAutoRecipe();
                 if (autoRecipe != null) setCurrentRecipe(autoRecipe, true);
+            }
+            
+            if (payload != null) {
+                if (payloadOutgoing) moveOutPayload();
+                else if (moveInPayload()) {
+                    payloadInput.add(payload.content(), 1);
+                    payload = null;
+                }
+            } else if (currentRecipe != null && currentRecipe.output.hasPayloads() && payloadOutput.any()) {
+                spawnOutputPayload();
             }
             
             if (currentRecipe == null) return;
@@ -267,6 +333,11 @@ public class MultiCrafterBlock extends Block {
                 }
             }
             
+            if (currentRecipe.output.hasPayloads())
+                for (PayloadStack stack : currentRecipe.output.payloads) {
+                    payloadOutput.add(stack.item, stack.amount);
+                }
+            
             if (wasVisible) {
                 currentRecipe.craftEffect.at(x, y);
             }
@@ -335,6 +406,35 @@ public class MultiCrafterBlock extends Block {
             return enabled;
         }
         
+        @Override
+        public void pickedUp() {
+            carried = true;
+        }
+        
+        @Override
+        public void drawTeamTop() {
+            carried = false;
+        }
+        
+        @Override
+        public Payload takePayload() {
+            T t = payload;
+            payload = null;
+            return t;
+        }
+        
+        @Override
+        public void onRemoved() {
+            super.onRemoved();
+            if (payload != null && !carried) payload.dump();
+        }
+        
+        @Override
+        public void onDestroyed() {
+            if (payload != null) payload.destroyed();
+            super.onDestroyed();
+        }
+        
         public Recipe currentAutoRecipe() {
             Recipe bestRecipe = null;
             float bestWeight = Float.NEGATIVE_INFINITY;
@@ -364,6 +464,37 @@ public class MultiCrafterBlock extends Block {
         @Override
         public float calculateHeat(float[] sideHeat) {
             return super.calculateHeat(sideHeat);
+        }
+        
+        @Override
+        @SuppressWarnings("unchecked")
+        public void handlePayload(Building source, Payload payload) {
+            this.payload = (T) payload;
+            this.payloadOutgoing = false;
+            this.payVector.set(source).sub(this).clamp(-size * Vars.tilesize / 2f, -size * Vars.tilesize / 2f, size * Vars.tilesize / 2f, size * Vars.tilesize / 2f);
+            this.payRotation = payload.rotation();
+            
+            updatePayload();
+        }
+        
+        // TODO handle? give user choice?
+        public boolean acceptUnitPayload(Unit unit) {
+            return false;
+        }
+        
+        @Override
+        public boolean canControlSelect(Unit unit) {
+            return !unit.spawnedByCore && unit.type.allowedInPayloads && this.payload == null && acceptUnitPayload(unit) && unit.tileOn() != null && unit.tileOn().build == this;
+        }
+        
+        @Override
+        @SuppressWarnings("unchecked")
+        public void onControlSelect(Unit player) {
+            float x = player.x;
+            float y = player.y;
+            handleUnitPayload(player, p -> payload = (T) p);
+            this.payVector.set(x, y).sub(this).clamp(-size * Vars.tilesize / 2f, -size * Vars.tilesize / 2f, size * Vars.tilesize / 2f, size * Vars.tilesize / 2f);
+            this.payRotation = player.rotation();
         }
         
         @Override
@@ -403,7 +534,10 @@ public class MultiCrafterBlock extends Block {
         // TODO capacity
         @Override
         public boolean acceptPayload(Building source, Payload payload) {
-            return currentRecipe != null && currentRecipe.input.hasPayloads() && currentRecipe.input.acceptPayload(payload);
+            if (currentRecipe == null || !currentRecipe.input.hasPayloads() || this.payload != null) return false;
+            
+            PayloadStack reqs = currentRecipe.input.payloads.find(p -> p.item == payload.content());
+            return reqs != null && payloadInput.get(payload.content()) < reqs.amount;
         }
         
         @Override
@@ -412,7 +546,27 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
-        public void draw() { drawer.draw(this); }
+        public void draw() {
+            drawer.draw(this);
+            
+            // Draw payload input conveyors
+            if (currentRecipe != null && currentRecipe.hasPayloads()) {
+                for (int i = 0; i < 4; i++) {
+                    if (blends(i) && i != rotation) {
+                        if (currentRecipe.input.hasPayloads()) Draw.rect(inRegion, x, y, (i * 90) - 180);
+                        if (currentRecipe.output.hasPayloads()) Draw.rect(outRegion, x, y, (i * 90) - 180);
+                    }
+                }
+                Draw.z(Layer.blockOver);
+                
+                payRotation = rotdeg();
+                drawPayload();
+                
+                Draw.z(Layer.blockOver + 0.1f);
+                
+                Draw.rect(topRegion, x, y);
+            }
+        }
         
         @Override
         public void drawLight() {
@@ -465,6 +619,105 @@ public class MultiCrafterBlock extends Block {
             if (!currentRecipe.input.hasHeat()) return 1f;
             
             return Mathf.clamp(heat / currentRecipe.input.heat);
+        }
+        
+        @Override
+        public PayloadSeq getPayloads() {
+            return payloadInput;
+        }
+        
+        public boolean blends(int direction){
+            return PayloadBlock.blends(this, direction);
+        }
+        
+        public void updatePayload(){
+            if(payload != null){
+                payload.set(x + payVector.x, y + payVector.y, payRotation);
+            }
+        }
+        
+        /** @return true if the payload is in position. */
+        public boolean moveInPayload() {
+            return moveInPayload(true);
+        }
+        /** @return true if the payload is in position. */
+        public boolean moveInPayload(boolean rotate) {
+            if(payload == null) return false;
+            
+            updatePayload();
+            
+            if(rotate) payRotation = Angles.moveToward(payRotation, block.rotate ? rotdeg() : 90f, payloadRotateSpeed * delta());
+            payVector.approach(Vec2.ZERO, payloadSpeed * delta());
+            
+            return hasArrived();
+        }
+        
+        public void moveOutPayload() {
+            if(payload == null) return;
+            
+            updatePayload();
+            
+            Vec2 dest = Tmp.v1.trns(rotdeg(), size * Vars.tilesize/2f);
+            
+            payRotation = Angles.moveToward(payRotation, rotdeg(), payloadRotateSpeed * delta());
+            payVector.approach(dest, payloadSpeed * delta());
+            
+            Building front = front();
+            boolean canDump = front == null || !front.tile.solid();
+            boolean canMove = front != null && (front.block.outputsPayload || front.block.acceptsPayload);
+            
+            if(canDump && !canMove) pushOutput(payload, 1f - (payVector.dst(dest) / (size * Vars.tilesize / 2f)));
+            
+            if(payVector.within(dest, 0.001f)) {
+                payVector.clamp(-size * Vars.tilesize / 2f, -size * Vars.tilesize / 2f, size * Vars.tilesize / 2f, size * Vars.tilesize / 2f);
+                
+                if(canMove) if(movePayload(payload)) payload = null;
+                else if(canDump) dumpPayload();
+            }
+        }
+        
+        @SuppressWarnings("unchecked")
+        public void spawnOutputPayload() {
+            for (PayloadStack stack : currentRecipe.output.payloads) {
+                if (payloadOutput.get(stack.item) > 0) {
+                    Payload created = stack.item instanceof Block b ? new BuildPayload(b, team) :
+                                        stack.item instanceof UnitType u ? new UnitPayload(u.create(team)) : null;
+                    if (created == null) continue;
+                    
+                    created.set(x, y, rotdeg());
+                    this.payload = (T) created;
+                    this.payloadOutgoing = true;
+                    this.payVector.set(0f, 0f);
+                    this.payRotation = rotdeg();
+                    payloadOutput.remove(stack.item, 1);
+                    break;
+                }
+            }
+        }
+        
+        public void dumpPayload(){
+            //translate payload forward slightly
+            float tx = Angles.trnsx(payload.rotation(), 0.1f), ty = Angles.trnsy(payload.rotation(), 0.1f);
+            payload.set(payload.x() + tx, payload.y() + ty, payload.rotation());
+            
+            if(payload.dump()){
+                payload = null;
+            }else{
+                payload.set(payload.x() - tx, payload.y() - ty, payload.rotation());
+            }
+        }
+        
+        public boolean hasArrived(){
+            return payVector.isZero(0.01f);
+        }
+        
+        public void drawPayload(){
+            if(payload != null){
+                updatePayload();
+                
+                Draw.z(Layer.blockOver);
+                payload.draw();
+            }
         }
         
         @Override
@@ -581,6 +834,14 @@ public class MultiCrafterBlock extends Block {
             write.f(heat);
             write.f(outputHeat);
             
+            Payload.write(payload, write);
+            payloadInput.write(write);
+            payloadOutput.write(write);
+            write.bool(payloadOutgoing);
+            write.f(payVector.x);
+            write.f(payVector.y);
+            write.f(payRotation);
+            
             write.i(seed);
             
             write.i(currentRecipeIndex);
@@ -594,7 +855,16 @@ public class MultiCrafterBlock extends Block {
             heat = read.f();
             outputHeat = read.f();
             
-            if (revision >= 1) seed = read.i();
+            if (revision >= 1) {
+                payload = Payload.read(read);
+                payloadInput.read(read);
+                payloadOutput.read(read);
+                payloadOutgoing = read.bool();
+                payVector.set(read.f(), read.f());
+                payRotation = read.f();
+                
+                seed = read.i();
+            }
             
             int index = Mathf.clamp(read.i(), 0, recipes.size - 1);
             setCurrentRecipe(index, false);
@@ -604,6 +874,7 @@ public class MultiCrafterBlock extends Block {
         public byte version() { return 1; }
     }
     
+    @SuppressWarnings("rawtypes")
     @Override
     public void setBars() {
         super.setBars();

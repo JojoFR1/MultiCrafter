@@ -8,6 +8,7 @@ import arc.scene.ui.Image;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Stack;
 import arc.scene.ui.layout.Table;
+import arc.struct.Seq;
 import arc.util.Nullable;
 import arc.util.Scaling;
 import arc.util.Strings;
@@ -82,9 +83,9 @@ public class SimpleStatValues {
         };
     }
     
-    public static StatValue payloads(PayloadStack... stacks) { return payloads(true, stacks); }
-    public static StatValue payloads(boolean displayName, PayloadStack... stacks) { return payloads(displayName, true, stacks); }
-    public static StatValue payloads(boolean displayName, boolean tooltip, PayloadStack... stacks) {
+    public static StatValue payloads(Seq<PayloadStack> stacks) { return payloads(true, stacks); }
+    public static StatValue payloads(boolean displayName, Seq<PayloadStack> stacks) { return payloads(displayName, true, stacks); }
+    public static StatValue payloads(boolean displayName, boolean tooltip, Seq<PayloadStack> stacks) {
         return table -> {
             for(PayloadStack stack : stacks){
                 table.add(displayPayloads(stack.item, stack.amount, displayName, tooltip)).padRight(4f);

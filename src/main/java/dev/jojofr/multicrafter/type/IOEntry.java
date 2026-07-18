@@ -15,7 +15,7 @@ public class IOEntry {
     public LiquidStack[] liquids = {};
     public float power = 0;
     public float heat = 0;
-    public PayloadStack[] payloads = {};
+    public Seq<PayloadStack> payloads = new Seq<>();
     
     public IOEntry() {}
     
@@ -40,7 +40,7 @@ public class IOEntry {
     }
     
     public IOEntry withPayloads(PayloadStack... payloads) {
-        this.payloads = payloads;
+        this.payloads = new Seq<>(payloads);
         return this;
     }
     
@@ -123,13 +123,13 @@ public class IOEntry {
         
         items = uniqueItems.toArray(ItemStack.class);
         liquids = uniqueLiquids.toArray(LiquidStack.class);
-        payloads = uniquePayloads.toArray(PayloadStack.class);
+        payloads = uniquePayloads;
         
         return this;
     }
     
     public boolean isEmpty() {
-        return items.length == 0 && liquids.length == 0 && power <= 0 && heat <= 0 && payloads.length == 0;
+        return items.length == 0 && liquids.length == 0 && power <= 0 && heat <= 0 && payloads.size == 0;
     }
     
     public boolean hasItems() {
@@ -159,7 +159,7 @@ public class IOEntry {
     }
     
     public boolean hasPayloads() {
-        return payloads.length > 0;
+        return payloads.size > 0;
     }
     
     public boolean acceptPayload(Payload payload) {
