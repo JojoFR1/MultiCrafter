@@ -70,9 +70,10 @@ public class Recipe extends UnlockableContent {
         this.craftTime = craftTime;
     }
     
+    // TODO minfo.mod is not available after loadContent, and JSON is processed after loadContent
     public Recipe(JsonRecipe jsonRecipe, Block owner) {
         this(prefixName(jsonRecipe.name, owner), jsonRecipe.input, jsonRecipe.output, jsonRecipe.craftTime);
-        if (this.minfo == null) this.minfo = owner.minfo;
+        // if (this.minfo == null) this.minfo = owner.minfo;
         
         this.weight = jsonRecipe.weight;
         
@@ -104,7 +105,7 @@ public class Recipe extends UnlockableContent {
             
             TechTree.TechNode parent = TechTree.all.find(techNode ->
                 techNode.content.name.equals(researchName)
-                || techNode.content.name.equals(this.minfo.mod.name +"-"+ researchName)
+                // || techNode.content.name.equals(this.minfo.mod.name +"-"+ researchName)
                 || techNode.content.name.equals(SaveVersion.mapFallback(researchName))
             );
             
