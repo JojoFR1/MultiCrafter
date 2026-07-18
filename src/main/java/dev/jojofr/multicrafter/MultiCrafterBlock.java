@@ -49,16 +49,7 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatValue;
 import mindustry.world.meta.StatValues;
 
-/*
- * TODO: there's a lot
- *  - Support for payloads
- *  - Examples/Documentation
- */
-/*
- TODO observations from a heat/power input/output test in one single block
-  - the selection menu is too big with multiple recipes, maybe look into making it a scrollable container? (also need to test for big input/output too)
-  - another small ui issue, the arrow for "input -> output" is not centered since the amount of input/output items can vary (and specify craft time)
- */
+// TODO improve the selection menu
 public class MultiCrafterBlock extends Block {
     public transient Seq<Recipe> recipes = new Seq<>();
     /** Only intended for internal use and JSON parsing */
