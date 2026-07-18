@@ -87,7 +87,8 @@ jsonRecipes: [
             # Power consumption is per second, so it will consume: x power amount * 60 ticks * craftTime seconds, for a single craft.
             power: 0 # Value is per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
             heat: 0
-            // payloads: [] # NOT SUPPORTED YET! IT WON'T DO ANYTHING!
+            # Payloads is experimental and may not work as expected in all cases. Expect bugs and issues with payloads.
+            payloads: []
         }
         output: {
             items: []
@@ -96,7 +97,8 @@ jsonRecipes: [
             # Power consumption is per second, so it will consume: x power amount * 60 ticks * craftTime seconds, for a single craft.
             power: 0 # Value is per tick! Divide the desired amount by 60 to get the correct amount (the game run at 60 ticks per second)
             heat: 0
-            // payloads: [] # NOT SUPPORTED YET! IT WON'T DO ANYTHING!
+            # Payloads is experimental and may not work as expected in all cases. Expect bugs and issues with payloads.
+            payloads: []
         }
         # Example for amount to amount/tick conversion:
         #     10 water/second = 10 / 60 = 0.167 water/tick
