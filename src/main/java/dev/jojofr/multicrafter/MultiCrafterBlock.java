@@ -124,10 +124,14 @@ public class MultiCrafterBlock extends Block {
             if (recipe.hasItems()) hasItems = true;
             if (recipe.hasLiquids()) hasLiquids = true;
             if (recipe.hasPower()) hasPower = true;
-            if (recipe.output.hasPower()) outputsPower = true;
+            
             consumesPower = recipe.input.hasPower();
             if (recipe.input.hasPayloads()) acceptsPayload = true;
+            
+            if (recipe.output.hasLiquids()) outputsLiquid = true;
+            if (recipe.output.hasPower()) outputsPower = true;
             if (recipe.output.hasPayloads()) outputsPayload = true;
+            
             if (recipe.randomOutput) hasRandomOutputRecipes = true;
             
             drawArrow = rotate = rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads());
