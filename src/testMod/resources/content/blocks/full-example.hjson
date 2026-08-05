@@ -117,7 +117,7 @@ jsonRecipes: [
         maxEfficiency: 4
 
         # If true, the crafter will output a random item from the output list, like a Separator/Disassembler.
-        # Only support items, all other output types will be forbidden and will thrown an error if defined.
+        # Only support items, all other output types will be forbidden and will throw an error if defined.
         randomOutput: false
 
         ## AttributeMultiCrafter only vvv

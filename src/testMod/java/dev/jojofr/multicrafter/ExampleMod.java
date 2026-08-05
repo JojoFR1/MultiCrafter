@@ -2,11 +2,11 @@ package dev.jojofr.multicrafter;
 
 import mindustry.mod.Mod;
 
-public class TestMod extends Mod {
+public class ExampleMod extends Mod {
     
     @Override
     public void loadContent() {
-        TestBlock.load();
+        ExampleBlocks.load();
         TestTechTree.load();
     }
 }

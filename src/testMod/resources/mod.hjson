@@ -1,14 +1,16 @@
 name: "multicrafter-test"
+repo: "JojoFR1/MultiCrafter"
 minGameVersion: 157
-version: "1.0.0"
+version: "1.4.1"
 
 java: true
-main: "dev.jojofr.multicrafter.TestMod"
+main: "dev.jojofr.multicrafter.ExampleMod"
 
-displayName: "MultiCrafter Test"
+displayName: "MultiCrafter Example"
 author: "Jojo"
-subtitle: "A test mod for MultiCrafter."
-description: "A development mod for testing the MultiCrafter library mod."
+subtitle: "An example and testing mod for MultiCrafter library."
+description: "A development mod for testing and giving Java documentation for the MultiCrafter library."
 
+hideBrowser: true
 hidden: false
 dependencies: ["multicrafter"]
