@@ -5,6 +5,9 @@ interface Injected { @Inject ExecOperations getExecOperations() }
 group = 'dev.jojofr.multicrafter'
 version = '1.4.1'
 
+def mindustryVersion = 'v159'
+def mindustryGameVersion = 'v159.7'
+
 java {
     targetCompatibility = JavaVersion.VERSION_17
     sourceCompatibility = JavaVersion.VERSION_17
@@ -16,15 +19,18 @@ repositories {
     //Downloads the server-release JAR file from Mindustry releases; does not use any real repository. Surprisingly, this is the most reliable option.
     ivy {
         url = 'https://github.com/'
-        patternLayout {artifact '/[organisation]/[module]/releases/download/[revision]/dependencies.jar'}
+        patternLayout {
+            artifact(
+                (mindustryVersion == 'latest' ? '/[organisation]/[module]/releases/[revision]/download/dependencies.jar' : // Latest stable release
+                mindustryVersion == 'be' ? '/[organisation]/[module]/releases/download/master/[revision].jar' : // Latest BE build
+                '/[organisation]/[module]/releases/download/[revision]/dependencies.jar')) // Specific release
+        }
         metadataSources { artifact() }
-    }
 
-    //"Latest" option to depend on BE builds.
-    ivy {
-        url = 'https://github.com/'
-        patternLayout {artifact '/[organisation]/[module]/releases/download/master/[revision].jar'}
-        metadataSources { artifact() }
+        content {
+            if (mindustryVersion == 'be') includeVersion("Anuken", "MindustryBuilds", "latest")
+            else includeVersion("Anuken", "Mindustry", mindustryVersion)
+        }
     }
 
     maven { url = 'https://jitpack.io' }
@@ -37,17 +43,13 @@ sourceSets {
     }
 }
 
-def mindustryVersion = 'v159'
-def mindustryGameVersion = 'v159.7'
 dependencies {
-    def useLatest = false //set to "true" to always depend on the newest version of mindustry
-
-    compileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
+    compileOnly mindustryVersion == 'be' ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
 
     compileOnly 'com.github.EB-wilson:TooManyItems:3.2'
 
     testModImplementation sourceSets.main.output
-    testModCompileOnly useLatest ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
+    testModCompileOnly mindustryVersion == 'be' ? 'Anuken:MindustryBuilds:latest' : "Anuken:Mindustry:$mindustryVersion"
 }
 
 
