@@ -211,6 +211,11 @@ public class MultiCrafterBlock extends Block {
     @Override public void getRegionsToOutline(Seq<TextureRegion> out) { drawer.getRegionsToOutline(this, out); }
     @Override protected TextureRegion[] icons() { return drawer.finalIcons(this); }
     
+    public void addRecipe(Recipe recipe, Recipe... recipes) {
+        this.recipes.add(recipe);
+        this.recipes.addAll(recipes);
+    }
+    
     public class MultiCrafterBuild<T extends Payload> extends Building implements HeatBlock, HeatConsumer {
         public Recipe currentRecipe;
         public int currentRecipeIndex;
