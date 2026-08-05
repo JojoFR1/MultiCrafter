@@ -137,7 +137,7 @@ public class IOEntry {
     }
     
     public boolean acceptItem(Item item) {
-        for (ItemStack stack : items) if (item.equals(stack.item)) return true;
+        for (ItemStack stack : items) if (item == stack.item) return true;
         return false;
     }
     
@@ -146,7 +146,7 @@ public class IOEntry {
     }
     
     public boolean acceptLiquid(Liquid liquid) {
-        for (LiquidStack stack : liquids) if (liquid.equals(stack.liquid)) return true;
+        for (LiquidStack stack : liquids) if (liquid == stack.liquid) return true;
         return false;
     }
     
@@ -163,7 +163,12 @@ public class IOEntry {
     }
     
     public boolean acceptPayload(Payload payload) {
-        for (PayloadStack stack : payloads) if (payload.equals(stack.item)) return true;
+        for (PayloadStack stack : payloads) if (payload.content() == stack.item) return true;
         return false;
+    }
+    
+    public int getPayloadRequirements(Payload payload) {
+        for (PayloadStack stack : payloads) if (payload.content() == stack.item) return stack.amount;
+        return 0;
     }
 }

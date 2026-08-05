@@ -100,16 +100,6 @@ public class MultiCrafterBlock extends Block {
         inRegion =  findFactoryRegion("-in");
     }
     
-    // From Mindustry PayloadBlock
-    protected TextureRegion findFactoryRegion(String suf){
-        TextureRegion region = Core.atlas.find(name + suf);
-        
-        if(!region.found() && minfo.mod != null) region = Core.atlas.find(minfo.mod.name + "-factory" + suf + "-" + size + regionSuffix);
-        if(!region.found()) region = Core.atlas.find("factory" + suf + "-" + size + regionSuffix);
-        
-        return region;
-    }
-    
     @Override
     public void init() {
         for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(new Recipe(jsonRecipe, this));
@@ -125,7 +115,7 @@ public class MultiCrafterBlock extends Block {
             if (recipe.hasLiquids()) hasLiquids = true;
             if (recipe.hasPower()) hasPower = true;
             
-            consumesPower = recipe.input.hasPower();
+            if (recipe.input.hasPower()) consumesPower = true;
             if (recipe.input.hasPayloads()) acceptsPayload = true;
             
             if (recipe.output.hasLiquids()) outputsLiquid = true;
@@ -216,7 +206,17 @@ public class MultiCrafterBlock extends Block {
         this.recipes.addAll(recipes);
     }
     
-    public class MultiCrafterBuild<T extends Payload> extends Building implements HeatBlock, HeatConsumer {
+    // From Mindustry PayloadBlock
+    protected TextureRegion findFactoryRegion(String suf){
+        TextureRegion region = Core.atlas.find(name + suf);
+        
+        if(!region.found() && minfo.mod != null) region = Core.atlas.find(minfo.mod.name + "-factory" + suf + "-" + size + regionSuffix);
+        if(!region.found()) region = Core.atlas.find("factory" + suf + "-" + size + regionSuffix);
+        
+        return region;
+    }
+    
+    public class MultiCrafterBuild extends Building implements HeatBlock, HeatConsumer {
         public Recipe currentRecipe;
         public int currentRecipeIndex;
         
@@ -228,7 +228,7 @@ public class MultiCrafterBlock extends Block {
         public float outputHeat;
         public float[] sideHeat = new float[4];
         
-        public @Nullable T payload;
+        public @Nullable Payload payload;
         public PayloadSeq payloadInput = new PayloadSeq();
         public PayloadSeq payloadOutput = new PayloadSeq();
         public boolean payloadOutgoing;
@@ -253,7 +253,7 @@ public class MultiCrafterBlock extends Block {
         public void updateTile() {
             if (autoSelectRecipe && (efficiency <= 0f || progress <= 0f)) {
                 Recipe autoRecipe = currentAutoRecipe();
-                if (autoRecipe != null) setCurrentRecipe(autoRecipe, true);
+                if (autoRecipe != null && autoRecipe != currentRecipe) setCurrentRecipe(autoRecipe, true);
             }
             
             if (payload != null) {
@@ -300,8 +300,6 @@ public class MultiCrafterBlock extends Block {
         }
         
         public void craft() {
-            progress %= 1f;
-            
             Item randomItem = null;
             if (currentRecipe.randomOutput) {
                 int sum = 0;
@@ -371,7 +369,7 @@ public class MultiCrafterBlock extends Block {
             if (currentRecipe.output.hasLiquids()) {
                 max = 0f;
                 for (LiquidStack liquid : currentRecipe.output.liquids) {
-                    float value = (liquidCapacity - liquids.get(liquid.liquid) / (liquid.amount * edelta()));
+                    float value = (liquidCapacity - liquids.get(liquid.liquid)) / (liquid.amount * edelta());
                     scaling = Math.min(scaling, value);
                     max = Math.max(max, value);
                 }
@@ -418,7 +416,7 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public Payload takePayload() {
-            T t = payload;
+            Payload t = payload;
             payload = null;
             return t;
         }
@@ -467,9 +465,8 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
-        @SuppressWarnings("unchecked")
         public void handlePayload(Building source, Payload payload) {
-            this.payload = (T) payload;
+            this.payload = payload;
             this.payloadOutgoing = false;
             this.payVector.set(source).sub(this).clamp(-size * Vars.tilesize / 2f, -size * Vars.tilesize / 2f, size * Vars.tilesize / 2f, size * Vars.tilesize / 2f);
             this.payRotation = payload.rotation();
@@ -488,11 +485,10 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
-        @SuppressWarnings("unchecked")
         public void onControlSelect(Unit player) {
             float x = player.x;
             float y = player.y;
-            handleUnitPayload(player, p -> payload = (T) p);
+            handleUnitPayload(player, p -> payload = p);
             this.payVector.set(x, y).sub(this).clamp(-size * Vars.tilesize / 2f, -size * Vars.tilesize / 2f, size * Vars.tilesize / 2f, size * Vars.tilesize / 2f);
             this.payRotation = player.rotation();
         }
@@ -531,13 +527,23 @@ public class MultiCrafterBlock extends Block {
             return currentRecipe != null && currentRecipe.input.hasLiquids() && currentRecipe.input.acceptLiquid(liquid) && liquids.get(liquid) < liquidCapacity;
         }
         
-        // TODO capacity
         @Override
         public boolean acceptPayload(Building source, Payload payload) {
-            if (currentRecipe == null || !currentRecipe.input.hasPayloads() || this.payload != null) return false;
+            if (autoSelectRecipe) {
+                boolean valid = false;
+                int payloadCapacity = 0;
+                for (Recipe recipe : recipes) {
+                    if (recipe.unlocked() && recipe.input.hasPayloads() && recipe.input.acceptPayload(payload)) {
+                        valid = true;
+                        payloadCapacity = recipe.input.getPayloadRequirements(payload);
+                        break;
+                    }
+                }
+                
+                return valid && payloadInput.get(payload.content()) < payloadCapacity;
+            }
             
-            PayloadStack reqs = currentRecipe.input.payloads.find(p -> p.item == payload.content());
-            return reqs != null && payloadInput.get(payload.content()) < reqs.amount;
+            return currentRecipe != null && currentRecipe.input.hasPayloads() && currentRecipe.input.acceptPayload(payload) && payloadInput.get(payload.content()) < currentRecipe.input.getPayloadRequirements(payload);
         }
         
         @Override
@@ -547,7 +553,7 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public void draw() {
-            drawer.draw(this);
+                drawer.draw(this);
             
             // Draw payload input conveyors
             if (currentRecipe != null && currentRecipe.hasPayloads()) {
@@ -676,7 +682,6 @@ public class MultiCrafterBlock extends Block {
             }
         }
         
-        @SuppressWarnings("unchecked")
         public void spawnOutputPayload() {
             for (PayloadStack stack : currentRecipe.output.payloads) {
                 if (payloadOutput.get(stack.item) > 0) {
@@ -685,7 +690,7 @@ public class MultiCrafterBlock extends Block {
                     if (created == null) continue;
                     
                     created.set(x, y, rotdeg());
-                    this.payload = (T) created;
+                    this.payload = created;
                     this.payloadOutgoing = true;
                     this.payVector.set(0f, 0f);
                     this.payRotation = rotdeg();
@@ -786,7 +791,7 @@ public class MultiCrafterBlock extends Block {
             var liquidBarPos = barMap.get("liquid");
             boolean liquidAdded = false;
             for (Func<Building, Bar> bar : this.block.listBars()) {
-                if (currentRecipe.hasLiquids() && !liquidAdded && bar.equals(liquidBarPos)) {
+                if (currentRecipe.hasLiquids() && !liquidAdded && bar == liquidBarPos) {
                     for (LiquidStack liquid : currentRecipe.input.liquids) {
                         Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
                                 () -> liquid.liquid.localizedName,
@@ -874,7 +879,6 @@ public class MultiCrafterBlock extends Block {
         public byte version() { return 1; }
     }
     
-    @SuppressWarnings("rawtypes")
     @Override
     public void setBars() {
         super.setBars();

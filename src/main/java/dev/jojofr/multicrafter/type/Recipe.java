@@ -71,10 +71,9 @@ public class Recipe extends UnlockableContent {
         this.craftTime = craftTime;
     }
     
-    // TODO minfo.mod is not available after loadContent, and JSON is processed after loadContent
     public Recipe(JsonRecipe jsonRecipe, Block owner) {
         this(prefixName(jsonRecipe.name, owner), jsonRecipe.input, jsonRecipe.output, jsonRecipe.craftTime);
-        // if (this.minfo == null) this.minfo = owner.minfo;
+        if (this.minfo == null) this.minfo = owner.minfo;
         
         this.weight = jsonRecipe.weight;
         
@@ -99,7 +98,6 @@ public class Recipe extends UnlockableContent {
         if (randomOutput && (output.hasLiquids() || output.hasPower() ||output.hasHeat() || output.hasPayloads()))
             throw new IllegalArgumentException("Recipe '" + this.name + "' is set to random output, but has non-item outputs. Random output only works with items.");
         
-        
         this.unlocked = jsonRecipe.unlocked;
         this.alwaysUnlocked = jsonRecipe.alwaysUnlocked;
         
@@ -111,7 +109,7 @@ public class Recipe extends UnlockableContent {
             
             TechTree.TechNode parent = TechTree.all.find(techNode ->
                 techNode.content.name.equals(researchName)
-                // || techNode.content.name.equals(this.minfo.mod.name +"-"+ researchName)
+                || (this.minfo != null && this.minfo.mod != null && techNode.content.name.equals(this.minfo.mod.name +"-"+ researchName))
                 || techNode.content.name.equals(SaveVersion.mapFallback(researchName))
             );
             
