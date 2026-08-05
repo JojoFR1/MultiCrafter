@@ -94,5 +94,5 @@ command line using: `./gradlew run` or `./gradlew runAndroid` for Android testin
 ## Credits
 
 - [Jojo](https://github.com/JojoFR1) | Author and maintainer of this library.
-- Patou | Created the mod icon.
+- [Patou](https://github.com/Patou-todoG) | Created the mod icon.
 - [liplum](https://github.com/liplum) | Original author of the deprecated MultiCrafterLib, which this library is a rewrite of.
