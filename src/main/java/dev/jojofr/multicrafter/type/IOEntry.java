@@ -18,6 +18,9 @@ public class IOEntry {
     public Seq<PayloadStack> payloads = new Seq<>();
     
     public IOEntry() {}
+    public IOEntry(ItemStack[] items) { this.items = items; }
+    public IOEntry(LiquidStack[] liquids) { this.liquids = liquids; }
+    public IOEntry(ItemStack[] items, LiquidStack[] liquids) { this.items = items; this.liquids = liquids; }
     
     public IOEntry withItems(ItemStack... items) {
         this.items = items;

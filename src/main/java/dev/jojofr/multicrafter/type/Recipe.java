@@ -71,69 +71,6 @@ public class Recipe extends UnlockableContent {
         this.craftTime = craftTime;
     }
     
-    public Recipe(JsonRecipe jsonRecipe, Block owner) {
-        this(prefixName(jsonRecipe.name, owner), jsonRecipe.input, jsonRecipe.output, jsonRecipe.craftTime);
-        if (this.minfo == null) this.minfo = owner.minfo;
-        
-        this.weight = jsonRecipe.weight;
-        
-        if (this.localizedName == null || this.localizedName.isEmpty())
-            this.localizedName = jsonRecipe.localizedName;
-        this.craftEffect = jsonRecipe.craftEffect;
-        this.updateEffect = jsonRecipe.updateEffect;
-        this.updateEffectChance = jsonRecipe.updateEffectChance;
-        this.updateEffectSpread = jsonRecipe.updateEffectSpread;
-        this.warmupSpeed = jsonRecipe.warmupSpeed;
-        this.warmupRate = jsonRecipe.warmupRate;
-        this.overheatScale = jsonRecipe.overheatScale;
-        this.maxEfficiency = jsonRecipe.maxEfficiency;
-        
-        this.attribute = jsonRecipe.attribute;
-        this.baseEfficiency = jsonRecipe.baseEfficiency;
-        this.boostScale = jsonRecipe.boostScale;
-        this.maxBoost = jsonRecipe.maxBoost;
-        this.minEfficiency = jsonRecipe.minEfficiency;
-        
-        this.randomOutput = jsonRecipe.randomOutput;
-        if (randomOutput && (output.hasLiquids() || output.hasPower() ||output.hasHeat() || output.hasPayloads()))
-            throw new IllegalArgumentException("Recipe '" + this.name + "' is set to random output, but has non-item outputs. Random output only works with items.");
-        
-        this.unlocked = jsonRecipe.unlocked;
-        this.alwaysUnlocked = jsonRecipe.alwaysUnlocked;
-        
-        if (jsonRecipe.research != null && jsonRecipe.research.parent != null) {
-            String researchName = jsonRecipe.research.parent;
-            
-            TechTree.TechNode lastNode = TechTree.all.find(node -> node.content == this);
-            if (lastNode != null) lastNode.remove();
-            
-            TechTree.TechNode parent = TechTree.all.find(techNode ->
-                techNode.content.name.equals(researchName)
-                || (this.minfo != null && this.minfo.mod != null && techNode.content.name.equals(this.minfo.mod.name +"-"+ researchName))
-                || techNode.content.name.equals(SaveVersion.mapFallback(researchName))
-            );
-            
-            if (parent == null) {
-                Log.warn("Content '@' isn't in the tech tree, but '@' requires it.", researchName, this.name);
-                return;
-            }
-            
-            ItemStack[] requirements = jsonRecipe.research.requirements != null ? jsonRecipe.research.requirements
-                                     : jsonRecipe.researchRequirements != null ? jsonRecipe.researchRequirements
-                                     : researchRequirements();
-            TechTree.TechNode node = new TechTree.TechNode(null, this, requirements);
-            if (jsonRecipe.research.objectives != null && jsonRecipe.research.objectives.length > 0)
-                node.objectives.addAll(jsonRecipe.research.objectives);
-            
-            if (!parent.children.contains(node)) parent.children.add(node);
-            
-            node.parent = parent;
-            node.planet = parent.planet;
-        }
-        
-        this.drawer = jsonRecipe.drawer;
-    }
-    
     @Override
     public void postInit() {
         if(databaseCategory == null || databaseCategory.isEmpty()) databaseCategory = getContentTypeName();
@@ -321,14 +258,5 @@ public class Recipe extends UnlockableContent {
     
     protected String getContentTypeName() {
         return "recipe";
-    }
-    
-    private static String prefixName(String name, Block owner) {
-        if (owner == null || owner.minfo == null || owner.minfo.mod == null) return name;
-        
-        String modName = owner.minfo.mod.name;
-        String prefix = modName + "-";
-        
-        return name.startsWith(prefix) ? name : prefix + name;
     }
 }

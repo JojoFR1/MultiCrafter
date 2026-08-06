@@ -101,7 +101,7 @@ public class MultiCrafterBlock extends Block {
     
     @Override
     public void init() {
-        for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(new Recipe(jsonRecipe, this));
+        for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(jsonRecipe.build(this));
         
         if (recipes.isEmpty()) {
             throw new IllegalStateException("The block "+ name +" does not have recipes! It must have at least one recipe.");
