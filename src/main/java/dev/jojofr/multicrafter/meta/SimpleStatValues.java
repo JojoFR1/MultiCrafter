@@ -2,7 +2,6 @@ package dev.jojofr.multicrafter.meta;
 
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
-import arc.math.Mathf;
 import arc.scene.style.TextureRegionDrawable;
 import arc.scene.ui.Image;
 import arc.scene.ui.Tooltip;
