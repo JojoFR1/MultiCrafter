@@ -546,7 +546,7 @@ public class MultiCrafterBlock extends Block {
         
         @Override
         public void draw() {
-                drawer.draw(this);
+            drawer.draw(this);
             
             // Draw payload input conveyors
             if (currentRecipe != null && currentRecipe.hasPayloads()) {
