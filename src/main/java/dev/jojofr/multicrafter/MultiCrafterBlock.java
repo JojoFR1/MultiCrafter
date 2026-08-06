@@ -53,7 +53,7 @@ import mindustry.world.meta.StatValues;
 public class MultiCrafterBlock extends Block {
     public transient Seq<Recipe> recipes = new Seq<>();
     /** Only intended for internal use and JSON parsing */
-    public Seq<JsonRecipe> jsonRecipes = new Seq<>();
+    public Seq<JsonRecipe> jsonRecipes;
     public boolean autoSelectRecipe = false;
     
     public int[] liquidOutputDirections = {-1};
@@ -101,11 +101,13 @@ public class MultiCrafterBlock extends Block {
     
     @Override
     public void init() {
-        for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(jsonRecipe.build(this));
-        
-        if (recipes.isEmpty()) {
-            throw new IllegalStateException("The block "+ name +" does not have recipes! It must have at least one recipe.");
+        if (jsonRecipes != null) {
+            for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(jsonRecipe.build(this));
+            jsonRecipes = null;
         }
+        
+        if (recipes.isEmpty())
+            throw new IllegalStateException("The block "+ name +" does not have recipes! It must have at least one recipe.");
         
         configurable = !autoSelectRecipe;
         
