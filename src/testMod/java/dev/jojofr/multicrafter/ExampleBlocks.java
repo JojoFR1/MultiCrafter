@@ -38,8 +38,7 @@ public class ExampleBlocks {
             autoSelectRecipe = false;
             
             /// Adding a recipe
-            // This is the new way to add a recipe, it is recommended over manipulating the recipes list directly. NOT AVAILABLE AS OF 1.4.1
-            addRecipe(
+            recipes.addAll(
                 // Multiple ways to create a recipe, the order is: name, input, output, craftTime.
                 // The letters 'A', 'B', 'C', 'D', 'E', and 'F' are just to differentiate the recipes, you can use any name you want.
                 new Recipe("empty-recipeA"),
@@ -100,9 +99,6 @@ public class ExampleBlocks {
                 // Inputs and outputs are defined in the constructor, they do not have a builder setter.
             );
             
-            // This is the legacy way to add a recipe, it is still supported but not recommended.
-            recipes.add(new Recipe("empty-recipeF"));
-            
             requirements(Category.crafting, ItemStack.with(Items.copper, 10));
         }};
         attributeExampleBlock = new AttributeMultiCrafterBlock("example-attribute-multi") {{
@@ -124,7 +120,7 @@ public class ExampleBlocks {
             maxBoost = 1.0f;
             minEfficiency = -1.0f;
             
-            addRecipe(
+            recipes.add(
                 new Recipe("empty-recipe-attribute") {{
                     //// All values will take precedence over the block values, if defined. If not defined, the block values will be used.
                     

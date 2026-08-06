@@ -72,7 +72,6 @@ public class MultiCrafterBlock extends Block {
     
     private final OrderedMap<String, Bar> liquidBarMap = new OrderedMap<>();
     
-    @SuppressWarnings("rawtypes")
     public MultiCrafterBlock(String name) {
         super(name);
         
@@ -133,7 +132,6 @@ public class MultiCrafterBlock extends Block {
         super.init();
     }
     
-    @SuppressWarnings("rawtypes")
     protected void setupConsumers() {
         boolean consumeItems = false;
         boolean consumeLiquids = false;
@@ -200,11 +198,6 @@ public class MultiCrafterBlock extends Block {
     @Override public void drawPlanRegion(BuildPlan plan, Eachable<BuildPlan> list) { drawer.drawPlan(this, plan, list); }
     @Override public void getRegionsToOutline(Seq<TextureRegion> out) { drawer.getRegionsToOutline(this, out); }
     @Override protected TextureRegion[] icons() { return drawer.finalIcons(this); }
-    
-    public void addRecipe(Recipe recipe, Recipe... recipes) {
-        this.recipes.add(recipe);
-        this.recipes.addAll(recipes);
-    }
     
     // From Mindustry PayloadBlock
     protected TextureRegion findFactoryRegion(String suf){
