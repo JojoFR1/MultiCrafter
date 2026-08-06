@@ -199,6 +199,11 @@ public class MultiCrafterBlock extends Block {
     @Override public void getRegionsToOutline(Seq<TextureRegion> out) { drawer.getRegionsToOutline(this, out); }
     @Override protected TextureRegion[] icons() { return drawer.finalIcons(this); }
     
+    public void addRecipe(Recipe recipe, Recipe... recipes) {
+        this.recipes.add(recipe);
+        this.recipes.addAll(recipes);
+    }
+    
     // From Mindustry PayloadBlock
     protected TextureRegion findFactoryRegion(String suf){
         TextureRegion region = Core.atlas.find(name + suf);
