@@ -439,7 +439,7 @@ public class MultiCrafterBlock extends Block {
             
             outer:
             for (Recipe recipe : recipes) {
-                if (!recipe.unlocked()) continue;
+                if (!recipe.unlockedNow()) continue;
                 
                 if (recipe.input.hasItems()) for (ItemStack item : recipe.input.items)
                     if (items.get(item.item) < item.amount) continue outer;
@@ -498,7 +498,7 @@ public class MultiCrafterBlock extends Block {
             if (autoSelectRecipe) {
                 boolean valid = false;
                 for (Recipe recipe : recipes) {
-                    if (recipe.unlocked() && recipe.input.hasItems() && recipe.input.acceptItem(item)) {
+                    if (recipe.unlockedNow() && recipe.input.hasItems() && recipe.input.acceptItem(item)) {
                         valid = true;
                         break;
                     }
@@ -515,7 +515,7 @@ public class MultiCrafterBlock extends Block {
             if (autoSelectRecipe) {
                 boolean valid = false;
                 for (Recipe recipe : recipes) {
-                    if (recipe.unlocked() && recipe.input.hasLiquids() && recipe.input.acceptLiquid(liquid)) {
+                    if (recipe.unlockedNow() && recipe.input.hasLiquids() && recipe.input.acceptLiquid(liquid)) {
                         valid = true;
                         break;
                     }
@@ -533,7 +533,7 @@ public class MultiCrafterBlock extends Block {
                 boolean valid = false;
                 int payloadCapacity = 0;
                 for (Recipe recipe : recipes) {
-                    if (recipe.unlocked() && recipe.input.hasPayloads() && recipe.input.acceptPayload(payload)) {
+                    if (recipe.unlockedNow() && recipe.input.hasPayloads() && recipe.input.acceptPayload(payload)) {
                         valid = true;
                         payloadCapacity = recipe.input.getPayloadRequirements(payload);
                         break;
@@ -742,7 +742,7 @@ public class MultiCrafterBlock extends Block {
                 Table buttonContent = new Table();
                 
                 Table recipeTable = new Table();
-                if (!recipe.unlocked()) {
+                if (!recipe.unlockedNow()) {
                     recipeTable.image(Icon.lock).pad(4f).fill().grow();
                     recipeTable.addListener(Tooltip.Tooltips.getInstance().create("@locked", Vars.mobile));
                     
@@ -773,7 +773,7 @@ public class MultiCrafterBlock extends Block {
                     button.changed(() -> configure(finalIndex));
                     button.update(() -> button.setChecked(currentRecipeIndex == finalIndex));
                 }
-                button.setDisabled(!recipe.unlocked());
+                button.setDisabled(!recipe.unlockedNow());
                 button.add(buttonContent).pad(4f);
 
                 buttonTable.add(button).pad(4f).margin(10f).grow();

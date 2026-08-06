@@ -26,7 +26,7 @@ public class MultiCrafterRecipeParser extends RecipeParser<MultiCrafterBlock> {
         for (var recipe : multiCrafterBlock.recipes) {
             Recipe tmiRecipe;
             
-            if (!recipe.unlocked()) {
+            if (!recipe.unlockedNow()) {
                 tmiRecipe = new Recipe(RecipeType.getFactory(), TooManyItems.itemsManager.getItem(multiCrafterBlock), 0f);
                 
                 tmiRecipe.setSubInfo(table -> {

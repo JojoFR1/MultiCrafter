@@ -178,7 +178,7 @@ public class Recipe extends UnlockableContent {
         table.setColor(Pal.darkerGray);
         
         Table recipeTable = new Table();
-        if (!unlocked()) {
+        if (!unlockedNow()) {
             recipeTable.setColor(Pal.darkestGray);
             recipeTable.image(Icon.lock).size(100f, 50f).pad(12f).fill();
             
