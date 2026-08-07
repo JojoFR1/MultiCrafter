@@ -169,6 +169,11 @@ public class Recipe extends UnlockableContent {
         return table;
     }
     
+    public Recipe withLocalizedName(String localizedName) {
+        this.localizedName = localizedName;
+        return this;
+    }
+    
     public Recipe withWeight(float weight) {
         this.weight = weight;
         return this;
@@ -215,31 +220,27 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
-    public Recipe isRandomOutput() {
+    public Recipe isRandomOutput() { return isRandomOutput(true); }
+    public Recipe isNotRandomOutput() { return isRandomOutput(false); }
+    public Recipe isRandomOutput(boolean randomOutput) {
         if (output.hasLiquids() || output.hasPower() || output.hasHeat() || output.hasPayloads())
             throw new IllegalArgumentException("Recipe '" + this.name + "' is set to random output, but has non-item outputs. Random output only works with items.");
         
-        this.randomOutput = true;
+        this.randomOutput = randomOutput;
         return this;
     }
     
-    public Recipe isUnlocked() {
-        this.unlocked = true;
+    public Recipe isUnlocked() { return isUnlocked(true); }
+    public Recipe isLocked() { return isUnlocked(false); }
+    public Recipe isUnlocked(boolean unlocked) {
+        this.unlocked = unlocked;
         return this;
     }
     
-    public Recipe isLocked() {
-        this.unlocked = false;
-        return this;
-    }
-    
-    public Recipe isAlwaysUnlocked() {
-        this.alwaysUnlocked = true;
-        return this;
-    }
-    
-    public Recipe isNotAlwaysUnlocked() {
-        this.alwaysUnlocked = false;
+    public Recipe isAlwaysUnlocked() { return isAlwaysUnlocked(true); }
+    public Recipe isNotAlwaysUnlocked() { return isAlwaysUnlocked(false); }
+    public Recipe isAlwaysUnlocked(boolean alwaysUnlocked) {
+        this.alwaysUnlocked = alwaysUnlocked;
         return this;
     }
     
