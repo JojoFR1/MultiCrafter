@@ -52,16 +52,22 @@ public class Recipe extends UnlockableContent {
     
     public DrawBlock drawer = new DrawDefault();
     
-    public Recipe(String name) { this(name, new IOEntry(), new IOEntry(), 80f); }
     
-    public Recipe(String name, Cons<IOEntry> input) { this(name, configure(input), new IOEntry(), 80f); }
-    @Deprecated(since = "1.5.0") public Recipe(String name, IOEntry input) { this(name, input, new IOEntry()); }
+    private static final Cons<IOEntry> EMPTY_CONS = e -> {};
     
-    public Recipe(String name, Cons<IOEntry> input, Cons<IOEntry> output) { this(name, configure(input), configure(output), 80f); }
-    @Deprecated(since = "1.5.0") public Recipe(String name, IOEntry input, IOEntry output) { this(name, input, output, 80f); }
+    public Recipe(String name) { this(name, EMPTY_CONS, EMPTY_CONS, 80f); }
     
+    @Deprecated(since = "1.5.0")
+    public Recipe(String name, IOEntry input) { this(name, input, new IOEntry(), 80f); }
+    public Recipe(String name, Cons<IOEntry> input) { this(name, input, EMPTY_CONS, 80f); }
     
-    public Recipe(String name, IOEntry input, IOEntry output, float craftTime) {
+    @Deprecated(since = "1.5.0")
+    public Recipe(String name, IOEntry input, IOEntry output) { this(name, input, output, 80f); }
+    public Recipe(String name, Cons<IOEntry> input, Cons<IOEntry> output) { this(name, input, output, 80f); }
+    
+    @Deprecated(since = "1.5.0")
+    public Recipe(String name, IOEntry input, IOEntry output, float craftTime) { this(name, in -> in.copy(input), out -> out.copy(output), craftTime); }
+    public Recipe(String name, Cons<IOEntry> input, Cons<IOEntry> output, float craftTime) {
         super(name);
         
         this.localizedName = Core.bundle.get(getContentTypeName() + "." + this.name + ".name", this.name);
@@ -69,8 +75,8 @@ public class Recipe extends UnlockableContent {
         this.details = Core.bundle.getOrNull(getContentTypeName() + "." + this.name + ".details");
         this.credit = Core.bundle.getOrNull(getContentTypeName() + "." + this.name + ".credit");
         
-        this.input = input.removeDuplicate(name);
-        this.output = output.removeDuplicate(name);
+        this.input = configure(input).removeDuplicate(name);
+        this.output = configure(output).removeDuplicate(name);
         this.craftTime = craftTime;
     }
     

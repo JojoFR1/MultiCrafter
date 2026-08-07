@@ -22,6 +22,14 @@ public class IOEntry {
     public IOEntry(LiquidStack[] liquids) { this.liquids = liquids; }
     public IOEntry(ItemStack[] items, LiquidStack[] liquids) { this.items = items; this.liquids = liquids; }
     
+    public void copy(IOEntry other) {
+        this.items = other.items;
+        this.liquids = other.liquids;
+        this.power = other.power;
+        this.heat = other.heat;
+        this.payloads = other.payloads;
+    }
+    
     public IOEntry withItems(ItemStack... items) {
         this.items = items;
         return this;
