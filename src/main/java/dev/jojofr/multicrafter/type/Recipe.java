@@ -1,6 +1,7 @@
 package dev.jojofr.multicrafter.type;
 
 import arc.Core;
+import arc.func.Cons;
 import arc.math.Interp;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
@@ -22,6 +23,7 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatValue;
 import mindustry.world.meta.StatValues;
 
+@SuppressWarnings("DeprecatedIsStillUsed")
 public class Recipe extends UnlockableContent {
     public final IOEntry input, output;
     public float weight = 1f;
@@ -50,9 +52,15 @@ public class Recipe extends UnlockableContent {
     
     public DrawBlock drawer = new DrawDefault();
     
-    public Recipe(String name) { this(name, new IOEntry(), new IOEntry()); }
-    public Recipe(String name, IOEntry input) { this(name, input, new IOEntry()); }
-    public Recipe(String name, IOEntry input, IOEntry output) { this(name, input, output, 80f); }
+    public Recipe(String name) { this(name, new IOEntry(), new IOEntry(), 80f); }
+    
+    public Recipe(String name, Cons<IOEntry> input) { this(name, configure(input), new IOEntry(), 80f); }
+    @Deprecated(since = "1.5.0") public Recipe(String name, IOEntry input) { this(name, input, new IOEntry()); }
+    
+    public Recipe(String name, Cons<IOEntry> input, Cons<IOEntry> output) { this(name, configure(input), configure(output), 80f); }
+    @Deprecated(since = "1.5.0") public Recipe(String name, IOEntry input, IOEntry output) { this(name, input, output, 80f); }
+    
+    
     public Recipe(String name, IOEntry input, IOEntry output, float craftTime) {
         super(name);
         
@@ -64,6 +72,12 @@ public class Recipe extends UnlockableContent {
         this.input = input.removeDuplicate(name);
         this.output = output.removeDuplicate(name);
         this.craftTime = craftTime;
+    }
+    
+    private static IOEntry configure(Cons<IOEntry> configurator) {
+        IOEntry entry = new IOEntry();
+        if (configurator != null) configurator.get(entry);
+        return entry;
     }
     
     @Override
