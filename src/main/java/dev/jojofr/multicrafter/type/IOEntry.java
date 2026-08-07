@@ -27,8 +27,18 @@ public class IOEntry {
         return this;
     }
     
+    public IOEntry withItems(Object... items) {
+        this.items = ItemStack.with(items);
+        return this;
+    }
+    
     public IOEntry withLiquids(LiquidStack... liquids) {
         this.liquids = liquids;
+        return this;
+    }
+    
+    public IOEntry withLiquids(Object... liquids) {
+        this.liquids = LiquidStack.with(liquids);
         return this;
     }
     
@@ -44,6 +54,12 @@ public class IOEntry {
     
     public IOEntry withPayloads(PayloadStack... payloads) {
         this.payloads = new Seq<>(payloads);
+        return this;
+    }
+    
+    public IOEntry withPayloads(Object... payloads) {
+        PayloadStack[] stacks = PayloadStack.with(payloads);
+        this.payloads = new Seq<>(stacks);
         return this;
     }
     
