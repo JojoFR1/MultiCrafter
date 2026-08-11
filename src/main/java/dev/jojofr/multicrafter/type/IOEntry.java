@@ -12,11 +12,11 @@ import mindustry.world.blocks.payloads.Payload;
  * Represents the input or output of a recipe, with items, liquids, power, heat and payloads.
  */
 public class IOEntry {
-    private @Nullable ItemStack[] items;
-    private @Nullable LiquidStack[] liquids;
+    public @Nullable ItemStack[] items;
+    public @Nullable LiquidStack[] liquids;
     public float power = 0;
     public float heat = 0;
-    private @Nullable Seq<PayloadStack> payloads;
+    public @Nullable Seq<PayloadStack> payloads;
     
     public IOEntry() {}
     public IOEntry(ItemStack[] items) { this.items = items; }
