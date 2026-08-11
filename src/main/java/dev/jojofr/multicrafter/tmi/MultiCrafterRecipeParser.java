@@ -4,6 +4,7 @@ import arc.struct.Seq;
 import dev.jojofr.multicrafter.MultiCrafterBlock;
 import mindustry.type.ItemStack;
 import mindustry.type.LiquidStack;
+import mindustry.type.PayloadStack;
 import mindustry.world.Block;
 import org.jetbrains.annotations.NotNull;
 import tmi.TooManyItems;
@@ -41,6 +42,7 @@ public class MultiCrafterRecipeParser extends RecipeParser<MultiCrafterBlock> {
             // Input
             for (ItemStack item : recipe.input.getItems()) tmiRecipe.addMaterialInteger(TooManyItems.itemsManager.getItem(item.item), item.amount);
             for (LiquidStack liquid : recipe.input.getLiquids()) tmiRecipe.addMaterialFloat(TooManyItems.itemsManager.getItem(liquid.liquid), liquid.amount);
+            for (PayloadStack payload : recipe.input.getPayloads()) tmiRecipe.addMaterialInteger(TooManyItems.itemsManager.getItem(payload.item), payload.amount);
             
             if (recipe.input.hasPower()) tmiRecipe.addMaterialPersec(PowerMark.INSTANCE, recipe.input.power).setType(RecipeItemType.POWER);
             if (recipe.input.hasHeat()) tmiRecipe.addMaterialPersec(HeatMark.INSTANCE, recipe.input.heat).setType(RecipeItemType.POWER).floatFormat();
@@ -48,6 +50,7 @@ public class MultiCrafterRecipeParser extends RecipeParser<MultiCrafterBlock> {
             // Output
             for (ItemStack item : recipe.output.getItems()) tmiRecipe.addProductionInteger(TooManyItems.itemsManager.getItem(item.item), item.amount);
             for (LiquidStack liquid : recipe.output.getLiquids()) tmiRecipe.addProductionFloat(TooManyItems.itemsManager.getItem(liquid.liquid), liquid.amount);
+            for (PayloadStack payload : recipe.output.getPayloads()) tmiRecipe.addProductionInteger(TooManyItems.itemsManager.getItem(payload.item), payload.amount);
             
             if (recipe.output.hasPower()) tmiRecipe.addProductionPersec(PowerMark.INSTANCE, recipe.output.power).setType(RecipeItemType.POWER);
             if (recipe.output.hasHeat()) tmiRecipe.addProductionPersec(HeatMark.INSTANCE, recipe.output.heat).setType(RecipeItemType.POWER).floatFormat();
