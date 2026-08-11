@@ -189,9 +189,7 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
-    public Recipe withUpdateEffect(Effect updateEffect) {
-        return withUpdateEffect(updateEffect, 0.04f, 4f);
-    }
+    public Recipe withUpdateEffect(Effect updateEffect) { return withUpdateEffect(updateEffect, 0.04f, 4f); }
     public Recipe withUpdateEffect(Effect updateEffect, float chance) { return withUpdateEffect(updateEffect, chance, 4f); }
     public Recipe withUpdateEffect(Effect updateEffect, float chance, float spread) {
         this.updateEffect = updateEffect;

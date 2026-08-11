@@ -109,23 +109,25 @@ public class MultiCrafterBlock extends Block {
         configurable = !autoSelectRecipe;
         
         for (Recipe recipe : recipes) {
-            if (recipe.hasItems()) hasItems = true;
-            if (recipe.hasLiquids()) hasLiquids = true;
-            if (recipe.hasPower()) hasPower = true;
+            if (!hasItems && recipe.hasItems()) hasItems = true;
+            if (!hasLiquids && recipe.hasLiquids()) hasLiquids = true;
+            if (!hasPower && recipe.hasPower()) hasPower = true;
             
-            if (recipe.input.hasPower()) consumesPower = true;
-            if (recipe.input.hasPayloads()) acceptsPayload = true;
+            if (!consumesPower && recipe.input.hasPower()) consumesPower = true;
+            if (!acceptsPayload && recipe.input.hasPayloads()) acceptsPayload = true;
             
-            if (recipe.output.hasLiquids()) outputsLiquid = true;
-            if (recipe.output.hasPower()) outputsPower = true;
-            if (recipe.output.hasPayloads()) outputsPayload = true;
-            if (recipe.output.hasUnits()) commandable = true;
+            if (!outputsLiquid && recipe.output.hasLiquids()) outputsLiquid = true;
+            if (!outputsPower && recipe.output.hasPower()) outputsPower = true;
+            if (!outputsPayload && recipe.output.hasPayloads()) outputsPayload = true;
+            if (!commandable && recipe.output.hasUnits()) commandable = true;
             
-            if (recipe.randomOutput) hasRandomOutputRecipes = true;
+            if (!hasRandomOutputRecipes && recipe.randomOutput) hasRandomOutputRecipes = true;
             
             drawArrow = rotate = rotate || (recipe.output.hasHeat() || recipe.output.hasPayloads());
             rotateDraw = !rotate;
         }
+        
+        if (outputsPower) flags = flags.with(BlockFlag.generator);
         
         setupConsumers();
         

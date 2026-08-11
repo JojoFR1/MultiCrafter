@@ -72,6 +72,7 @@ public class JsonRecipe {
         }
     }
     
+    @SuppressWarnings("deprecation")
     public Recipe build(Block owner) {
         Recipe recipe = new Recipe(prefixName(this.name, owner), this.input, this.output, this.craftTime);
         if (recipe.minfo == null) recipe.minfo = owner.minfo;
