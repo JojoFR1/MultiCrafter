@@ -151,13 +151,13 @@ public class MultiCrafterBlock extends Block {
         
         if (consumeItems) {
             consume(new ConsumeItemDynamic(
-                (MultiCrafterBuild build) -> build.currentRecipe == null ? ItemStack.empty : build.currentRecipe.input.items
+                (MultiCrafterBuild build) -> build.currentRecipe == null ? ItemStack.empty : build.currentRecipe.input.getItems()
             ));
         }
         
         if (consumeLiquids) {
             consume(new ConsumeLiquidsDynamic(
-                (MultiCrafterBuild build) -> build.currentRecipe == null ? LiquidStack.empty : build.currentRecipe.input.liquids
+                (MultiCrafterBuild build) -> build.currentRecipe == null ? LiquidStack.empty : build.currentRecipe.input.getLiquids()
             ));
         }
         
@@ -177,7 +177,7 @@ public class MultiCrafterBlock extends Block {
         }
         
         if (consumePayloads) {
-            consume(new ConsumePayloadDynamic((MultiCrafterBuild build) -> build.currentRecipe == null ? new Seq<>() : build.currentRecipe.input.payloads));
+            consume(new ConsumePayloadDynamic((MultiCrafterBuild build) -> build.currentRecipe == null ? new Seq<>() : build.currentRecipe.input.getPayloads()));
         }
     }
     
@@ -280,7 +280,7 @@ public class MultiCrafterBlock extends Block {
                 
                 if (currentRecipe.output.hasLiquids()) {
                     float increase = getProgressIncrease(1f);
-                    for (LiquidStack liquid : currentRecipe.output.liquids) {
+                    for (LiquidStack liquid : currentRecipe.output.getLiquids()) {
                         handleLiquid(this, liquid.liquid, Math.min(liquid.amount * increase, liquidCapacity - liquids.get(liquid.liquid)));
                     }
                 }
@@ -303,12 +303,12 @@ public class MultiCrafterBlock extends Block {
             Item randomItem = null;
             if (currentRecipe.randomOutput) {
                 int sum = 0;
-                for (ItemStack item : currentRecipe.output.items) sum += item.amount;
+                for (ItemStack item : currentRecipe.output.getItems()) sum += item.amount;
                 
                 int i = Mathf.randomSeed(seed++, 0, sum - 1);
                 int count = 0;
                 
-                for (ItemStack stack : currentRecipe.output.items) {
+                for (ItemStack stack : currentRecipe.output.getItems()) {
                     if (i >= count && i < count + stack.amount) {
                         randomItem = stack.item;
                         break;
@@ -325,14 +325,14 @@ public class MultiCrafterBlock extends Block {
             }
             
             
-            for (ItemStack output : currentRecipe.output.items) {
+            for (ItemStack output : currentRecipe.output.getItems()) {
                 for (int i = 0; i < output.amount; i++) {
                     offload(output.item);
                 }
             }
             
             if (currentRecipe.output.hasPayloads())
-                for (PayloadStack stack : currentRecipe.output.payloads) {
+                for (PayloadStack stack : currentRecipe.output.getPayloads()) {
                     payloadOutput.add(stack.item, stack.amount);
                 }
             
@@ -347,15 +347,15 @@ public class MultiCrafterBlock extends Block {
             if (currentRecipe == null) return;
             
             if (currentRecipe.output.hasItems() && timer(timerDump, dumpTime / timeScale)) {
-                for (ItemStack output : currentRecipe.output.items) {
+                for (ItemStack output : currentRecipe.output.getItems()) {
                     dump(output.item);
                 }
             }
             
             if (currentRecipe.output.hasLiquids()) {
-                for (int i = 0; i < currentRecipe.output.liquids.length; i++) {
+                for (int i = 0; i < currentRecipe.output.getLiquids().length; i++) {
                     int direction = liquidOutputDirections.length > i ? liquidOutputDirections[i] : -1;
-                    dumpLiquid(currentRecipe.output.liquids[i].liquid, 2f, direction);
+                    dumpLiquid(currentRecipe.output.getLiquids()[i].liquid, 2f, direction);
                 }
             }
         }
@@ -368,7 +368,7 @@ public class MultiCrafterBlock extends Block {
             float scaling = 1f;
             if (currentRecipe.output.hasLiquids()) {
                 max = 0f;
-                for (LiquidStack liquid : currentRecipe.output.liquids) {
+                for (LiquidStack liquid : currentRecipe.output.getLiquids()) {
                     float value = (liquidCapacity - liquids.get(liquid.liquid)) / (liquid.amount * edelta());
                     scaling = Math.min(scaling, value);
                     max = Math.max(max, value);
@@ -391,7 +391,7 @@ public class MultiCrafterBlock extends Block {
         public boolean shouldConsume() {
             if (currentRecipe == null) return false;
             
-            for (ItemStack item : currentRecipe.output.items) {
+            for (ItemStack item : currentRecipe.output.getItems()) {
                 if (items.get(item.item) + item.amount > itemCapacity) {
                     return false;
                 }
@@ -441,10 +441,10 @@ public class MultiCrafterBlock extends Block {
             for (Recipe recipe : recipes) {
                 if (!recipe.unlockedNow()) continue;
                 
-                if (recipe.input.hasItems()) for (ItemStack item : recipe.input.items)
+                if (recipe.input.hasItems()) for (ItemStack item : recipe.input.getItems())
                     if (items.get(item.item) < item.amount) continue outer;
                 
-                if (recipe.input.hasLiquids()) for (LiquidStack liquid : recipe.input.liquids)
+                if (recipe.input.hasLiquids()) for (LiquidStack liquid : recipe.input.getLiquids())
                     if (liquids.get(liquid.liquid) < liquid.amount) continue outer;
                 
                 if (recipe.input.hasPower() && power.status < 0.99f) continue;
@@ -683,7 +683,7 @@ public class MultiCrafterBlock extends Block {
         }
         
         public void spawnOutputPayload() {
-            for (PayloadStack stack : currentRecipe.output.payloads) {
+            for (PayloadStack stack : currentRecipe.output.getPayloads()) {
                 if (payloadOutput.get(stack.item) > 0) {
                     Payload created = stack.item instanceof Block b ? new BuildPayload(b, team) :
                                         stack.item instanceof UnitType u ? new UnitPayload(u.create(team)) : null;
@@ -792,7 +792,7 @@ public class MultiCrafterBlock extends Block {
             boolean liquidAdded = false;
             for (Func<Building, Bar> bar : this.block.listBars()) {
                 if (currentRecipe.hasLiquids() && !liquidAdded && bar == liquidBarPos) {
-                    for (LiquidStack liquid : currentRecipe.input.liquids) {
+                    for (LiquidStack liquid : currentRecipe.input.getLiquids()) {
                         Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
                                 () -> liquid.liquid.localizedName,
                                 liquid.liquid::barColor,
@@ -803,7 +803,7 @@ public class MultiCrafterBlock extends Block {
                         table.row();
                     }
                     
-                    for (LiquidStack liquid : currentRecipe.output.liquids) {
+                    for (LiquidStack liquid : currentRecipe.output.getLiquids()) {
                         Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
                             () -> liquid.liquid.localizedName,
                             liquid.liquid::barColor,

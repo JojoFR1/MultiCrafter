@@ -39,15 +39,15 @@ public class MultiCrafterRecipeParser extends RecipeParser<MultiCrafterBlock> {
             } else tmiRecipe = new Recipe(RecipeType.getFactory(), TooManyItems.itemsManager.getItem(multiCrafterBlock), recipe.craftTime);
             
             // Input
-            for (ItemStack item : recipe.input.items) tmiRecipe.addMaterialInteger(TooManyItems.itemsManager.getItem(item.item), item.amount);
-            for (LiquidStack liquid : recipe.input.liquids) tmiRecipe.addMaterialFloat(TooManyItems.itemsManager.getItem(liquid.liquid), liquid.amount);
+            for (ItemStack item : recipe.input.getItems()) tmiRecipe.addMaterialInteger(TooManyItems.itemsManager.getItem(item.item), item.amount);
+            for (LiquidStack liquid : recipe.input.getLiquids()) tmiRecipe.addMaterialFloat(TooManyItems.itemsManager.getItem(liquid.liquid), liquid.amount);
             
             if (recipe.input.hasPower()) tmiRecipe.addMaterialPersec(PowerMark.INSTANCE, recipe.input.power).setType(RecipeItemType.POWER);
             if (recipe.input.hasHeat()) tmiRecipe.addMaterialPersec(HeatMark.INSTANCE, recipe.input.heat).setType(RecipeItemType.POWER).floatFormat();
             
             // Output
-            for (ItemStack item : recipe.output.items) tmiRecipe.addProductionInteger(TooManyItems.itemsManager.getItem(item.item), item.amount);
-            for (LiquidStack liquid : recipe.output.liquids) tmiRecipe.addProductionFloat(TooManyItems.itemsManager.getItem(liquid.liquid), liquid.amount);
+            for (ItemStack item : recipe.output.getItems()) tmiRecipe.addProductionInteger(TooManyItems.itemsManager.getItem(item.item), item.amount);
+            for (LiquidStack liquid : recipe.output.getLiquids()) tmiRecipe.addProductionFloat(TooManyItems.itemsManager.getItem(liquid.liquid), liquid.amount);
             
             if (recipe.output.hasPower()) tmiRecipe.addProductionPersec(PowerMark.INSTANCE, recipe.output.power).setType(RecipeItemType.POWER);
             if (recipe.output.hasHeat()) tmiRecipe.addProductionPersec(HeatMark.INSTANCE, recipe.output.heat).setType(RecipeItemType.POWER).floatFormat();

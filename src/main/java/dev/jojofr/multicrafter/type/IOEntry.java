@@ -3,6 +3,7 @@ package dev.jojofr.multicrafter.type;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import arc.util.Log;
+import arc.util.Nullable;
 import dev.jojofr.multicrafter.meta.SimpleStatValues;
 import mindustry.type.*;
 import mindustry.world.blocks.payloads.Payload;
@@ -11,11 +12,11 @@ import mindustry.world.blocks.payloads.Payload;
  * Represents the input or output of a recipe, with items, liquids, power, heat and payloads.
  */
 public class IOEntry {
-    public ItemStack[] items = {};
-    public LiquidStack[] liquids = {};
+    private @Nullable ItemStack[] items;
+    private @Nullable LiquidStack[] liquids;
     public float power = 0;
     public float heat = 0;
-    public Seq<PayloadStack> payloads = new Seq<>();
+    private @Nullable Seq<PayloadStack> payloads;
     
     public IOEntry() {}
     public IOEntry(ItemStack[] items) { this.items = items; }
@@ -155,47 +156,43 @@ public class IOEntry {
         return this;
     }
     
-    public boolean isEmpty() {
-        return items.length == 0 && liquids.length == 0 && power <= 0 && heat <= 0 && payloads.size == 0;
-    }
+    public boolean isEmpty() { return (items == null || items.length == 0) && (liquids == null || liquids.length == 0) && power <= 0 && heat <= 0 && (payloads == null || payloads.size == 0); }
     
-    public boolean hasItems() {
-        return items.length > 0;
-    }
-    
+    public boolean hasItems() { return items != null && items.length > 0; }
     public boolean acceptItem(Item item) {
+        if (items == null) return false;
+        
         for (ItemStack stack : items) if (item == stack.item) return true;
         return false;
     }
     
-    public boolean hasLiquids() {
-        return liquids.length > 0;
-    }
-    
+    public boolean hasLiquids() { return liquids != null && liquids.length > 0; }
     public boolean acceptLiquid(Liquid liquid) {
+        if (liquids == null) return false;
+        
         for (LiquidStack stack : liquids) if (liquid == stack.liquid) return true;
         return false;
     }
     
-    public boolean hasPower() {
-        return power > 0;
-    }
+    public boolean hasPower() { return power > 0; }
+    public boolean hasHeat() { return heat > 0; }
     
-    public boolean hasHeat() {
-        return heat > 0;
-    }
-    
-    public boolean hasPayloads() {
-        return payloads.size > 0;
-    }
-    
+    public boolean hasPayloads() { return payloads != null && payloads.size > 0; }
     public boolean acceptPayload(Payload payload) {
+        if (payloads == null) return false;
+        
         for (PayloadStack stack : payloads) if (payload.content() == stack.item) return true;
         return false;
     }
     
     public int getPayloadRequirements(Payload payload) {
+        if (payloads == null) return 0;
+        
         for (PayloadStack stack : payloads) if (payload.content() == stack.item) return stack.amount;
         return 0;
     }
+    
+    public ItemStack[] getItems() { return items == null ? ItemStack.empty : items; }
+    public LiquidStack[] getLiquids() { return liquids == null ? LiquidStack.empty : liquids; }
+    public Seq<PayloadStack> getPayloads() { return payloads == null ? new Seq<>(0) : payloads; }
 }
