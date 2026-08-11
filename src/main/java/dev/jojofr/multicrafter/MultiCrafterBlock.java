@@ -27,6 +27,7 @@ import mindustry.entities.units.BuildPlan;
 import mindustry.gen.*;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
+import mindustry.io.TypeIO;
 import mindustry.logic.LAccess;
 import mindustry.type.*;
 import mindustry.ui.Bar;
@@ -34,10 +35,7 @@ import mindustry.ui.Styles;
 import mindustry.world.Block;
 import mindustry.world.blocks.heat.HeatBlock;
 import mindustry.world.blocks.heat.HeatConsumer;
-import mindustry.world.blocks.payloads.BuildPayload;
-import mindustry.world.blocks.payloads.Payload;
-import mindustry.world.blocks.payloads.PayloadBlock;
-import mindustry.world.blocks.payloads.UnitPayload;
+import mindustry.world.blocks.payloads.*;
 import mindustry.world.consumers.ConsumeItemDynamic;
 import mindustry.world.consumers.ConsumeLiquidsDynamic;
 import mindustry.world.consumers.ConsumePayloadDynamic;
@@ -84,7 +82,6 @@ public class MultiCrafterBlock extends Block {
         ambientSoundVolume = 0.03f;
         
         flags = EnumSet.of(BlockFlag.factory);
-        // drawArrow = false;
         
         config(Integer.class, (build, value) -> ((MultiCrafterBuild) build).setCurrentRecipe(value));
     }
@@ -122,6 +119,7 @@ public class MultiCrafterBlock extends Block {
             if (recipe.output.hasLiquids()) outputsLiquid = true;
             if (recipe.output.hasPower()) outputsPower = true;
             if (recipe.output.hasPayloads()) outputsPayload = true;
+            if (recipe.output.hasUnits()) commandable = true;
             
             if (recipe.randomOutput) hasRandomOutputRecipes = true;
             
@@ -231,6 +229,7 @@ public class MultiCrafterBlock extends Block {
         public @Nullable Payload payload;
         public PayloadSeq payloadInput = new PayloadSeq();
         public PayloadSeq payloadOutput = new PayloadSeq();
+        public @Nullable Vec2 commandPos;
         public boolean payloadOutgoing;
         
         public Vec2 payVector = new Vec2();
@@ -474,11 +473,6 @@ public class MultiCrafterBlock extends Block {
             updatePayload();
         }
         
-        // TODO handle? give user choice?
-        public boolean acceptUnitPayload(Unit unit) {
-            return false;
-        }
-        
         @Override
         public boolean canControlSelect(Unit unit) {
             return !unit.spawnedByCore && unit.type.allowedInPayloads && this.payload == null && acceptUnitPayload(unit) && unit.tileOn() != null && unit.tileOn().build == this;
@@ -546,10 +540,21 @@ public class MultiCrafterBlock extends Block {
             return currentRecipe != null && currentRecipe.input.hasPayloads() && currentRecipe.input.acceptPayload(payload) && payloadInput.get(payload.content()) < currentRecipe.input.getPayloadRequirements(payload);
         }
         
+        // TODO handle? give user choice?
+        public boolean acceptUnitPayload(Unit unit) {
+            return false;
+        }
+        
         @Override
         public int getMaximumAccepted(Item item) {
             return itemCapacity;
         }
+        
+        @Override
+        public Vec2 getCommandPosition() {return commandPos; }
+        
+        @Override
+        public void onCommand(Vec2 target) { commandPos = target; }
         
         @Override
         public void draw() {
@@ -685,8 +690,14 @@ public class MultiCrafterBlock extends Block {
         public void spawnOutputPayload() {
             for (PayloadStack stack : currentRecipe.output.getPayloads()) {
                 if (payloadOutput.get(stack.item) > 0) {
-                    Payload created = stack.item instanceof Block b ? new BuildPayload(b, team) :
-                                        stack.item instanceof UnitType u ? new UnitPayload(u.create(team)) : null;
+                    Payload created = null;
+                    if (stack.item instanceof Block b) created = new BuildPayload(b, team);
+                    else if (stack.item instanceof UnitType u) {
+                        created = new UnitPayload(u.create(team));
+                        
+                        Unit un = ((UnitPayload) created).unit;
+                        if (commandPos != null && un.isCommandable()) un.command().commandPosition(commandPos);
+                    }
                     if (created == null) continue;
                     
                     created.set(x, y, rotdeg());
@@ -846,6 +857,7 @@ public class MultiCrafterBlock extends Block {
             write.f(payVector.x);
             write.f(payVector.y);
             write.f(payRotation);
+            TypeIO.writeVecNullable(write, commandPos);
             
             write.i(seed);
             
@@ -867,6 +879,7 @@ public class MultiCrafterBlock extends Block {
                 payloadOutgoing = read.bool();
                 payVector.set(read.f(), read.f());
                 payRotation = read.f();
+                if (revision >= 2) commandPos = TypeIO.readVecNullable(read);
                 
                 seed = read.i();
             }
@@ -876,7 +889,7 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
-        public byte version() { return 1; }
+        public byte version() { return 2; }
     }
     
     @Override

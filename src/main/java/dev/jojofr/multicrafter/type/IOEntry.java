@@ -189,6 +189,7 @@ public class IOEntry {
     public boolean hasHeat() { return heat > 0; }
     
     public boolean hasPayloads() { return payloads != null && payloads.size > 0; }
+    public boolean hasUnits() { return hasPayloads() && payloads.contains(stack -> stack.item instanceof UnitType); }
     public boolean acceptPayload(Payload payload) {
         if (payloads == null) return false;
         
