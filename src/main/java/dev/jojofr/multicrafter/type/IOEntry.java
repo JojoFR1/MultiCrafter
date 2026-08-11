@@ -121,37 +121,48 @@ public class IOEntry {
     }
     
     public IOEntry removeDuplicate(String name) {
-        Seq<ItemStack> uniqueItems = new Seq<>();
-        Seq<LiquidStack> uniqueLiquids = new Seq<>();
-        Seq<PayloadStack> uniquePayloads = new Seq<>();
-        
-        for (ItemStack stack : items) {
-            if (uniqueItems.contains(other -> other.item == stack.item)) {
-                Log.warn("Duplicate item '@' found in IOEntry for recipe '@', ignoring.", stack.item.name, name);
-                continue;
+        if (hasItems()) {
+            Seq<ItemStack> uniqueItems = new Seq<>(items.length);
+            
+            for (ItemStack stack : items) {
+                if (uniqueItems.contains(other -> other.item == stack.item)) {
+                    Log.warn("Duplicate item '@' found in IOEntry for recipe '@', ignoring.", stack.item.name, name);
+                    continue;
+                }
+                uniqueItems.add(stack);
             }
-            uniqueItems.add(stack);
+            
+            items = uniqueItems.toArray(ItemStack.class);
         }
         
-        for (LiquidStack stack : liquids) {
-            if (uniqueLiquids.contains(other -> other.liquid == stack.liquid)) {
-                Log.warn("Duplicate liquid '@' found in IOEntry for recipe '@', ignoring.", stack.liquid.name, name);
-                continue;
+        if (hasLiquids()) {
+            Seq<LiquidStack> uniqueLiquids = new Seq<>(liquids.length);
+            
+            for (LiquidStack stack : liquids) {
+                if (uniqueLiquids.contains(other -> other.liquid == stack.liquid)) {
+                    Log.warn("Duplicate liquid '@' found in IOEntry for recipe '@', ignoring.", stack.liquid.name, name);
+                    continue;
+                }
+                uniqueLiquids.add(stack);
             }
-            uniqueLiquids.add(stack);
+            
+            liquids = uniqueLiquids.toArray(LiquidStack.class);
+            
         }
         
-        for (PayloadStack stack : payloads) {
-            if (uniquePayloads.contains(other -> other.item == stack.item)) {
-                Log.warn("Duplicate payload '@' found in IOEntry for recipe '@', ignoring.", stack.item.name, name);
-                continue;
+        if (hasPayloads()) {
+            Seq<PayloadStack> uniquePayloads = new Seq<>(payloads.size);
+            
+            for (PayloadStack stack : payloads) {
+                if (uniquePayloads.contains(other -> other.item == stack.item)) {
+                    Log.warn("Duplicate payload '@' found in IOEntry for recipe '@', ignoring.", stack.item.name, name);
+                    continue;
+                }
+                uniquePayloads.add(stack);
             }
-            uniquePayloads.add(stack);
+            
+            payloads = uniquePayloads;
         }
-        
-        items = uniqueItems.toArray(ItemStack.class);
-        liquids = uniqueLiquids.toArray(LiquidStack.class);
-        payloads = uniquePayloads;
         
         return this;
     }
