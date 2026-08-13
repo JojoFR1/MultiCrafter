@@ -10,8 +10,10 @@ import mindustry.world.blocks.payloads.Payload;
 
 /**
  * Represents the inputs or outputs of a {@link Recipe}.
+ * <p>
  * Supports items, liquids, power, heat, and payloads.
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 public class IOEntry {
     /**
      * Items consumed or produced. Can be {@code null} if no items are present.
@@ -62,7 +64,7 @@ public class IOEntry {
      *
      * @deprecated  Use {@link #withItems(Object...)} instead.
      * @param items the {@link ItemStack} pre-built array to set for this entry.
-     * @return      itself, for chaining.
+     * @return      this entry, for chaining.
      */
     @Deprecated(since = "1.5.0")
     public IOEntry withItems(ItemStack... items) {
@@ -73,7 +75,7 @@ public class IOEntry {
      * Sets the {@link #items} by converting the given objects to {@link ItemStack}.
      *
      * @param items the alternating {@code Item, amount} pairs, passed to {@link ItemStack#with(Object...)}.
-     * @return      itself, for chaining.
+     * @return      this entry, for chaining.
      */
     public IOEntry withItems(Object... items) {
         this.items = ItemStack.with(items);
@@ -85,7 +87,7 @@ public class IOEntry {
      *
      * @deprecated    Use {@link #withLiquids(Object...)} instead.
      * @param liquids the {@link LiquidStack} pre-built array to set for this entry.
-     * @return        itself, for chaining.
+     * @return        this entry, for chaining.
      */
     @Deprecated(since = "1.5.0")
     public IOEntry withLiquids(LiquidStack... liquids) {
@@ -96,7 +98,7 @@ public class IOEntry {
      * Sets the {@link #liquids} by converting the given objects to {@link LiquidStack}.
      *
      * @param liquids the alternating {@code Liquid, amount} pairs, passed to {@link LiquidStack#with(Object...)}.
-     * @return        itself, for chaining.
+     * @return        this entry, for chaining.
      */
     public IOEntry withLiquids(Object... liquids) {
         this.liquids = LiquidStack.with(liquids);
@@ -107,7 +109,7 @@ public class IOEntry {
      * Sets the {@link #power} directly.
      *
      * @param power the amount of power to set for this entry, per tick.
-     * @return      itself, for chaining.
+     * @return      this entry, for chaining.
      */
     public IOEntry withPower(float power) {
         this.power = power;
@@ -118,7 +120,7 @@ public class IOEntry {
      * Sets the {@link #heat} directly.
      *
      * @param heat the amount of heat to set for this entry.
-     * @return     itself, for chaining.
+     * @return     this entry, for chaining.
      */
     public IOEntry withHeat(float heat) {
         this.heat = heat;
@@ -130,7 +132,7 @@ public class IOEntry {
      *
      * @deprecated     Use {@link #withPayloads(Object...)} instead.
      * @param payloads the {@link PayloadStack} pre-built array to set for this entry.
-     * @return         itself, for chaining.
+     * @return         this entry, for chaining.
      */
     @Deprecated(since = "1.5.0")
     public IOEntry withPayloads(PayloadStack... payloads) {
@@ -141,7 +143,7 @@ public class IOEntry {
      * Sets the {@link #payloads} by converting the given objects to {@link PayloadStack}.
      *
      * @param payloads the alternating {@code Payload, amount} pairs, passed to {@link PayloadStack#with(Object...)}.
-     * @return         itself, for chaining.
+     * @return         this entry, for chaining.
      */
     public IOEntry withPayloads(Object... payloads) {
         PayloadStack[] stacks = PayloadStack.with(payloads);
@@ -195,13 +197,13 @@ public class IOEntry {
     /**
      * Return the items in this entry.
      *
-     * @return The items in this entry, or an empty array if none are present.
+     * @return the items in this entry, or an empty array if none are present.
      */
     public ItemStack[] getItems() { return items == null ? ItemStack.empty : items; }
     /**
      * Return the liquids in this entry.
      *
-     * @return The liquids in this entry, or an empty array if none are present.
+     * @return the liquids in this entry, or an empty array if none are present.
      */
     public LiquidStack[] getLiquids() { return liquids == null ? LiquidStack.empty : liquids; }
     public float getPower() { return power; }
@@ -209,7 +211,7 @@ public class IOEntry {
     /**
      * Return the payloads in this entry.
      *
-     * @return The payloads in this entry, or an empty sequence if none are present.
+     * @return the payloads in this entry, or an empty sequence if none are present.
      */
     public Seq<PayloadStack> getPayloads() { return payloads == null ? new Seq<>(0) : payloads; }
     
@@ -222,7 +224,6 @@ public class IOEntry {
      * @return          the table displaying the contents of this entry.
      */
     public Table buildTable(boolean perSecond, float craftTime) { return buildTable(true, perSecond, craftTime, false); }
-    
     /**
      * Builds a table displaying the contents of this entry, in a grid format, with a maximum of 5 items per row.
      * <p>
@@ -293,7 +294,7 @@ public class IOEntry {
      * When duplicates are found, only the first occurrence is kept and a warning is logged.
      *
      * @param name the recipe name, used for logging.
-     * @return     itself, for chaining.
+     * @return     this entry, for chaining.
      */
     public IOEntry removeDuplicate(String name) {
         if (hasItems()) items = removeDuplicates(items).toArray(ItemStack.class);
