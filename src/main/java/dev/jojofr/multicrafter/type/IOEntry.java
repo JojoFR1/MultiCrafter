@@ -31,6 +31,7 @@ public class IOEntry {
         this.payloads = other.payloads;
     }
     
+    @Deprecated(since = "1.5.0")
     public IOEntry withItems(ItemStack... items) {
         this.items = items;
         return this;
@@ -41,6 +42,7 @@ public class IOEntry {
         return this;
     }
     
+    @Deprecated(since = "1.5.0")
     public IOEntry withLiquids(LiquidStack... liquids) {
         this.liquids = liquids;
         return this;
@@ -61,6 +63,7 @@ public class IOEntry {
         return this;
     }
     
+    @Deprecated(since = "1.5.0")
     public IOEntry withPayloads(PayloadStack... payloads) {
         this.payloads = new Seq<>(payloads);
         return this;
