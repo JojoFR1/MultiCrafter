@@ -104,7 +104,7 @@ public class JsonRecipe {
         recipe.minEfficiency = this.minEfficiency;
         
         recipe.randomOutput = this.randomOutput;
-        if (randomOutput && (output.hasLiquids() || output.hasPower() ||output.hasHeat() || output.hasPayloads()))
+        if (randomOutput && (output.hasLiquids() || output.hasPower() || output.hasHeat() || output.hasPayloads()))
             throw new IllegalArgumentException("Recipe '" + recipe.name + "' is set to random output, but has non-item outputs. Random output only works with items.");
         
         if (this.unlocked) recipe.isUnlocked();

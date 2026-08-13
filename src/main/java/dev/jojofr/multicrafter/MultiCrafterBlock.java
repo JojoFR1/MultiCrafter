@@ -553,7 +553,7 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
-        public Vec2 getCommandPosition() {return commandPos; }
+        public Vec2 getCommandPosition() { return commandPos; }
         
         @Override
         public void onCommand(Vec2 target) { commandPos = target; }
