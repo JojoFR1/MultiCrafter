@@ -8,6 +8,11 @@ import mindustry.gen.Building;
 import mindustry.world.Block;
 import mindustry.world.draw.DrawBlock;
 
+/**
+ * Draws the current recipe's drawer for a {@link MultiCrafterBlock}.
+ * <p>
+ * During gameplay, the current recipe's drawer is used. For the build plan and icons, the first recipe's drawer is used.
+ */
 public class DrawRecipe extends DrawBlock {
     
     @Override
