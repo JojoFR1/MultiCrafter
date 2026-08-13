@@ -8,8 +8,6 @@ import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.type.Category;
 import mindustry.type.ItemStack;
-import mindustry.type.LiquidStack;
-import mindustry.type.PayloadStack;
 import mindustry.world.Block;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.draw.DrawMulti;
@@ -46,7 +44,9 @@ public class ExampleBlocks {
                     in -> in.withItems().withLiquids().withPower(0).withHeat(0).withPayloads(),
                     out -> out.withItems().withLiquids().withPower(0).withHeat(0).withPayloads(),
                     80f
-                ).withLocalizedName("Example Recipe")
+                )   // The name displayed in-game instead of the internal name. It is recommended to use bundles for localization.
+                    // For bundles: "recipe.name.key=value", key can be: 'name', 'description', 'details' or 'credit'.
+                    .withLocalizedName("Example Recipe")
                     // When 'autoSelectRecipe' is true, this weight will influence which recipe will be selected in case of multiple valid recipes.
                     // The higher weighted recipe will be selected.
                     .withWeight(1f)
@@ -69,9 +69,9 @@ public class ExampleBlocks {
                     // If you have previously defined your recipe as unlocked and loaded the game, then later switched to locked,
                     //   the recipe will not automatically be locked. You will need to reset the research tree to lock it again, or lock this specific recipe using the console.
                     // To make a recipe locked, in the console: Vars.content.getByName(ContentType.typeid_UNUSED, "modname-recipename").clearUnlock()
-                    //
+                    
                     // For research, you need to define it inside a Tech Tree. See the 'TestTechTree' class for an example, or the game's vanilla tech tree for reference.
-                    //
+                    
                     // This drawer will be drawn at the place of a 'DrawRecipe' in the block drawer.
                     .withDrawer(new DrawDefault())
             );
@@ -105,20 +105,16 @@ public class ExampleBlocks {
             maxBoost = 1.0f;
             minEfficiency = -1.0f;
             
-            recipes.add(
-                new Recipe("empty-recipe-attribute") {{
-                    //// All values will take precedence over the block values, if defined. If not defined, the block values will be used.
-                    
+            addRecipe(
+                new Recipe("empty-recipe-attribute")
                     // The values below are considered 'not defined'.
-                    // If you want to use the block value, do not define them at all, or keep them as 'null' or 'NaN' (for float values).
+                    // If you want to use the block value, do not define them at all.
                     // If you want to override the block value, define them with a valid value (not NaN or 'null').
-                    attribute =  null;
-                    baseEfficiency = Float.NaN;
-                    boostScale = Float.NaN;
-                    maxBoost = Float.NaN;
-                    minEfficiency = Float.NaN;
-                    
-                }}
+                    .withAttribute(null)
+                    .withBaseEfficiency(Float.NaN)
+                    .withBoostScale(Float.NaN)
+                    .withMaxBoost(Float.NaN)
+                    .withMinEfficiency(Float.NaN)
             );
             
             requirements(Category.crafting, ItemStack.with(Items.copper, 10));
