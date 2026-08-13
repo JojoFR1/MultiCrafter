@@ -252,6 +252,32 @@ public class Recipe extends UnlockableContent {
         return this;
     }
     
+    /** Only useful for {@link AttributeMultiCrafterBlock} blocks. */
+    public Recipe withAttribute(Attribute attribute) {
+        this.attribute = attribute;
+        return this;
+    }
+    /** Only useful for {@link AttributeMultiCrafterBlock} blocks. */
+    public Recipe withBaseEfficiency(float baseEfficiency) {
+        this.baseEfficiency = baseEfficiency;
+        return this;
+    }
+    /** Only useful for {@link AttributeMultiCrafterBlock} blocks. */
+    public Recipe withBoostScale(float boostScale) {
+        this.boostScale = boostScale;
+        return this;
+    }
+    /** Only useful for {@link AttributeMultiCrafterBlock} blocks. */
+    public Recipe withMaxBoost(float maxBoost) {
+        this.maxBoost = maxBoost;
+        return this;
+    }
+    /** Only useful for {@link AttributeMultiCrafterBlock} blocks. */
+    public Recipe withMinEfficiency(float minEfficiency) {
+        this.minEfficiency = minEfficiency;
+        return this;
+    }
+    
     public Recipe isRandomOutput() { return isRandomOutput(true); }
     public Recipe isNotRandomOutput() { return isRandomOutput(false); }
     /**
