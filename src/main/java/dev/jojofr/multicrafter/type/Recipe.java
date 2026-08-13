@@ -146,8 +146,7 @@ public class Recipe extends UnlockableContent {
         time.add(timeBar).height(50f).width(250f);
         recipeTable.add(time).pad(12f);
         
-        Cell<Table> outputCell = (randomOutput ? recipeTable.add(this.output.buildTableRandom(perSecond, craftTime))
-                                                : recipeTable.add(this.output.buildTable(perSecond, craftTime))).minWidth(80f).pad(12f).fill();
+        Cell<Table> outputCell = recipeTable.add(this.output.buildTable(perSecond, craftTime, this.randomOutput)).minWidth(80f).pad(12f).fill();
         outputCell.right();
         
         table.add(recipeTable).growX();

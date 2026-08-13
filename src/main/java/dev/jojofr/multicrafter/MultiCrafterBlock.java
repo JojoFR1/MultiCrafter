@@ -119,7 +119,7 @@ public class MultiCrafterBlock extends Block {
             if (!outputsLiquid && recipe.output.hasLiquids()) outputsLiquid = true;
             if (!outputsPower && recipe.output.hasPower()) outputsPower = true;
             if (!outputsPayload && recipe.output.hasPayloads()) outputsPayload = true;
-            if (!commandable && recipe.output.hasUnits()) commandable = true;
+            if (!commandable && recipe.output.hasPayloadsUnit()) commandable = true;
             
             if (!hasRandomOutputRecipes && recipe.randomOutput) hasRandomOutputRecipes = true;
             
@@ -763,8 +763,7 @@ public class MultiCrafterBlock extends Block {
                 } else {
                     recipeTable.add(recipe.input.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
                     recipeTable.image(Icon.right);
-                    if (recipe.randomOutput) recipeTable.add(recipe.output.buildTableRandom(false, true, currentRecipe.craftTime)).pad(4f);
-                    else recipeTable.add(recipe.output.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
+                    recipeTable.add(recipe.output.buildTable(false, false, currentRecipe.craftTime, recipe.randomOutput)).pad(4f);
                     
                     buttonContent.add(recipeTable).pad(4f).growX();
                     
