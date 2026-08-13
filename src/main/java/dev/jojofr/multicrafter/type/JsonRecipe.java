@@ -15,6 +15,13 @@ import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.Attribute;
 
+/**
+ * Internal representation of a recipe used for JSON deserialization.
+ * <p>
+ * This is necessary because {@link Recipe} extends {@link mindustry.ctype.UnlockableContent UnlockableContent}, which by default expects a String name during deserialization.
+ * <p>
+ * Java modders should use {@link Recipe} directly instead of this class.
+ */
 @SuppressWarnings("DeprecatedIsStillUsed")
 public class JsonRecipe {
     public String name = "empty-recipe";
@@ -45,7 +52,7 @@ public class JsonRecipe {
     public boolean unlocked = false;
     public boolean alwaysUnlocked = false;
     @Nullable public ResearchData research = null;
-    @Nullable @Deprecated public ItemStack[] researchRequirements = null;
+    @Nullable @Deprecated(since = "1.2.0") public ItemStack[] researchRequirements = null;
     
     public DrawBlock drawer = new DrawDefault();
     
