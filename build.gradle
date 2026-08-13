@@ -3,7 +3,7 @@ import javax.inject.Inject
 interface Injected { @Inject ExecOperations getExecOperations() }
 
 group = 'dev.jojofr.multicrafter'
-version = '1.4.2'
+version = '1.5.0'
 
 def mindustryVersion = 'v159'
 def mindustryGameVersion = 'v159.7'
