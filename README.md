@@ -16,6 +16,14 @@ There is no official documentation yet. It (might) come in the future.
 
 You can use the development testing mod as an example of how to use the library in both Java and JSON. The source code is available in the `src/testMod` folder, or [here](https://github.com/JojoFR1/MultiCrafter/blob/main/src/testMod/) ([Java Version](https://github.com/JojoFR1/MultiCrafter/tree/main/src/testMod/java/dev/jojofr/multicrafter) or [JSON Version](https://github.com/JojoFR1/MultiCrafter/tree/main/src/testMod/resources/content/blocks))
 
+## Mods Using MultiCrafter
+
+Here are some mods using the library!
+
+- [The Factory Must Grow](https://github.com/BSp-2/Factory-Simulator), by `Plooey :3` - "A recreation of a game called Factory Simulator"
+
+Made a mod using MultiCrafter? Feel free to open a pull request to get added to the list!
+
 ## Download
 
 ### Mod
