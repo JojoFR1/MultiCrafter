@@ -21,6 +21,8 @@ You can use the development testing mod as an example of how to use the library 
 Here are some mods using the library!
 
 - [The Factory Must Grow](https://github.com/BSp-2/Factory-Simulator), by `Plooey :3` - "A recreation of a game called Factory Simulator"
+  
+- [Periodic Overhaul](https://github.com/oleksiy1409liut/periodic-overhaul), by `Oleksiy` - "Mod that adds the periodic table"
 
 Made a mod using MultiCrafter? Feel free to open a pull request to get added to the list!
 
