@@ -249,6 +249,11 @@ public class MultiCrafterBlock extends Block {
             
             if (hasRandomOutputRecipes) this.seed = Mathf.randomSeed(tile.pos(), 0, Integer.MAX_VALUE - 1);
         }
+
+        @Override
+        public Object config() {
+            return currentRecipeIndex;
+        }
         
         @Override
         public void updateTile() {
