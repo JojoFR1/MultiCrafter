@@ -86,7 +86,7 @@ public class JsonRecipe {
         
         recipe.weight = this.weight;
         
-        if (recipe.localizedName == null || recipe.localizedName.isEmpty())
+        if (recipe.localizedName == null || recipe.localizedName.isEmpty() || recipe.localizedName.equals(recipe.name))
             recipe.localizedName = this.localizedName;
         recipe.craftEffect = this.craftEffect;
         recipe.updateEffect = this.updateEffect;
