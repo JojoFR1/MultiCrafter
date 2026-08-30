@@ -7,7 +7,10 @@ import arc.graphics.g2d.TextureRegion;
 import arc.math.Angles;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
+import arc.scene.Element;
 import arc.scene.ui.Button;
+import arc.scene.ui.ButtonGroup;
+import arc.scene.ui.ScrollPane;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
@@ -755,8 +758,13 @@ public class MultiCrafterBlock extends Block {
             int index = 0;
             
             Table buttonTable = new Table();
+            ButtonGroup<Button> buttonGroup = new ButtonGroup<>();
+            buttonGroup.setMinCheckCount(0);
+            buttonGroup.setMaxCheckCount(1);
+            
             for (Recipe recipe : recipes) {
-                Button button = new Button(Styles.togglet);
+                Button button = new Button(Styles.clearTogglet);
+                buttonGroup.add(button);
                 Table buttonContent = new Table();
                 
                 Table recipeTable = new Table();
@@ -766,9 +774,9 @@ public class MultiCrafterBlock extends Block {
                     
                     buttonContent.add(recipeTable).pad(4f).growX();
                 } else {
-                    recipeTable.add(recipe.input.buildTable(false, false, currentRecipe.craftTime)).pad(4f);
-                    recipeTable.image(Icon.right);
-                    recipeTable.add(recipe.output.buildTable(false, false, currentRecipe.craftTime, recipe.randomOutput)).pad(4f);
+                    recipeTable.add(recipe.input.buildTable(false, false, recipe.craftTime)).growX().right().pad(4f);
+                    recipeTable.image(Icon.right).padRight(4f).padLeft(4f);
+                    recipeTable.add(recipe.output.buildTable(false, false, recipe.craftTime, recipe.randomOutput)).growX().left().pad(4f);
                     
                     buttonContent.add(recipeTable).pad(4f).growX();
                     
@@ -788,17 +796,27 @@ public class MultiCrafterBlock extends Block {
                     
                     final int finalIndex = index;
                     button.changed(() -> configure(finalIndex));
-                    button.update(() -> button.setChecked(currentRecipeIndex == finalIndex));
+                    button.setChecked(currentRecipeIndex == finalIndex);
                 }
                 button.setDisabled(!recipe.unlockedNow());
                 button.add(buttonContent).pad(4f);
-
-                buttonTable.add(button).pad(4f).margin(10f).grow();
+                
+                buttonTable.add(button).pad(1.5f).grow();
                 buttonTable.row();
                 index++;
             }
             
-            table.add(buttonTable);
+            ScrollPane container = new ScrollPane(buttonTable, Styles.smallPane);
+            container.setScrollingDisabled(true, false);
+            container.setFadeScrollBars(false);
+            
+            table.add(container).growX().maxHeight(300f);
+            
+            table.layout();
+            
+            Element selected = buttonTable.getChildren().get(currentRecipeIndex);
+            container.scrollTo(selected.x, selected.y, selected.getWidth(), selected.getHeight(), false, true);
+            container.updateVisualScroll();
         }
         
         @Override
