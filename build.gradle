@@ -3,7 +3,7 @@ import javax.inject.Inject
 interface Injected { @Inject ExecOperations getExecOperations() }
 
 group = 'dev.jojofr.multicrafter'
-version = '1.5.1'
+version = '1.5.2'
 
 def mindustryVersion = 'v159'
 def mindustryGameVersion = 'v159.7'
@@ -125,7 +125,7 @@ tasks.register('downloadGame') {
     outputs.file(gameFile)
 
     doLast {
-        def url = "https://github.com/Anuken/Mindustry/releases/download/$mindustryGameVersion/Mindustry.jar"
+        def url = "https://github.com/Anuken/Mindustry/releases/download/${mindustryGameVersion}/Mindustry.jar"
         def targetFile = gameFile.asFile
         targetFile.parentFile.mkdirs()
 

@@ -63,7 +63,7 @@ ivy {
 Then, add the following to your dependencies:
 
 ```gradle
-compileOnly 'JojoFR1:MultiCrafter:v1.5.1'
+compileOnly 'JojoFR1:MultiCrafter:v1.5.2'
 ```
 
 ## Contributing
