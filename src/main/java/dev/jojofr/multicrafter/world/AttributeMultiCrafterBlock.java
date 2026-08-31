@@ -79,7 +79,12 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
         public float efficiencyScale() {
             return scaleLiquidConsumption ? efficiencyMultiplier() : super.efficiencyScale();
         }
-        
+
+        @Override
+        public boolean productionValid() {
+            return super.productionValid() && efficiencyMultiplier() > 0f;
+        }
+
         @Override
         public void pickedUp() {
             attrsum = 0f;
