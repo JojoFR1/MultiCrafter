@@ -20,13 +20,6 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
     public boolean displayEfficiency = true;
     public boolean scaleLiquidConsumption = false;
     
-    private Attribute currentAttribute = attribute;
-    private float currentBaseEfficiency = baseEfficiency;
-    private float currentBoostScale = boostScale;
-    private float currentMaxBoost = maxBoost;
-    private float currentMinEfficiency = minEfficiency;
-    
-    
     public AttributeMultiCrafterBlock(String name) { super(name); }
     
     @Override
@@ -36,7 +29,7 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
         if (!displayEfficiency) return;
         
         drawPlaceText(Core.bundle.format("bar.efficiency",
-            (int) ((currentBaseEfficiency + Math.min(currentMaxBoost, currentBoostScale * sumAttribute(currentAttribute, x, y))) * 100f)), x, y, valid);
+            (int) ((baseEfficiency + Math.min(maxBoost, boostScale * sumAttribute(attribute, x, y))) * 100f)), x, y, valid);
     }
     
     @Override
@@ -65,6 +58,12 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
     }
     
     public class AttributeMultiCrafterBuild extends MultiCrafterBuild {
+        private Attribute currentAttribute = attribute;
+        private float currentBaseEfficiency = baseEfficiency;
+        private float currentBoostScale = boostScale;
+        private float currentMaxBoost = maxBoost;
+        private float currentMinEfficiency = minEfficiency;
+
         public float attrsum;
         
         @Override
