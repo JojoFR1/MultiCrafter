@@ -2,6 +2,7 @@ package dev.jojofr.multicrafter.world;
 
 import arc.Core;
 import dev.jojofr.multicrafter.MultiCrafterBlock;
+import dev.jojofr.multicrafter.type.Recipe;
 import mindustry.game.Team;
 import mindustry.graphics.Pal;
 import mindustry.ui.Bar;
@@ -99,14 +100,14 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
         }
         
         @Override
-        protected void setCurrentRecipe(int index) {
-            super.setCurrentRecipe(index);
+        protected void setCurrentRecipe(Recipe recipe, boolean showEffect) {
+            super.setCurrentRecipe(recipe, showEffect);
             
-            currentAttribute = currentRecipe.attribute != null ? currentRecipe.attribute : attribute;
-            currentBaseEfficiency = !Float.isNaN(currentRecipe.baseEfficiency) ? currentRecipe.baseEfficiency : baseEfficiency;
-            currentBoostScale = !Float.isNaN(currentRecipe.boostScale) ? currentRecipe.boostScale : boostScale;
-            currentMaxBoost = !Float.isNaN(currentRecipe.maxBoost) ? currentRecipe.maxBoost : maxBoost;
-            currentMinEfficiency = !Float.isNaN(currentRecipe.minEfficiency) ? currentRecipe.minEfficiency : minEfficiency;
+            currentAttribute = recipe.attribute != null ? recipe.attribute : attribute;
+            currentBaseEfficiency = !Float.isNaN(recipe.baseEfficiency) ? recipe.baseEfficiency : baseEfficiency;
+            currentBoostScale = !Float.isNaN(recipe.boostScale) ? recipe.boostScale : boostScale;
+            currentMaxBoost = !Float.isNaN(recipe.maxBoost) ? recipe.maxBoost : maxBoost;
+            currentMinEfficiency = !Float.isNaN(recipe.minEfficiency) ? recipe.minEfficiency : minEfficiency;
             
             attrsum = sumAttribute(currentAttribute, tile.x, tile.y);
         }
