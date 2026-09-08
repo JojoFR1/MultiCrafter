@@ -80,6 +80,7 @@ public class MultiCrafterBlock extends Block {
         solid = true;
         sync = true;
         configurable = true;
+        saveConfig = true;
         
         ambientSound = Sounds.loopMachine;
         ambientSoundVolume = 0.03f;
