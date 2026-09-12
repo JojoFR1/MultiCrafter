@@ -20,6 +20,8 @@ import arc.util.*;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import dev.jojofr.multicrafter.type.JsonRecipe;
+import dev.jojofr.multicrafter.type.menu.MenuType;
+import dev.jojofr.multicrafter.type.menu.MenuTypes;
 import dev.jojofr.multicrafter.type.Recipe;
 import dev.jojofr.multicrafter.world.AttributeMultiCrafterBlock;
 import mindustry.Vars;
@@ -51,9 +53,11 @@ import mindustry.world.meta.StatValue;
 import mindustry.world.meta.StatValues;
 
 // TODO improve the selection menu
+// TODO multiple liquids outputs is weird, if a pipe goes empty any fluid can be outputted
 public class MultiCrafterBlock extends Block {
+    /** <code>public</code> for backwards compatibility, but should not be used directly. Use {@link #addRecipe(Recipe, Recipe...)} instead. */
     public transient Seq<Recipe> recipes = new Seq<>();
-    /** Only intended for internal use and JSON parsing */
+    /** Internal use only, for JSON parsing. Use {@link #recipes} or {@link #addRecipe(Recipe, Recipe...)} instead. */
     public Seq<JsonRecipe> jsonRecipes;
     public boolean autoSelectRecipe = false;
     
@@ -70,6 +74,9 @@ public class MultiCrafterBlock extends Block {
     public boolean hasRandomOutputRecipes = false;
     
     public DrawBlock drawer = new DrawDefault();
+    public transient MenuType menuType = MenuTypes.DEFAULT;
+    /** Internal use only, for JSON parsing. Use {@link #menuType} instead. */
+    @Nullable public String menu = null;
     
     private final OrderedMap<String, Bar> liquidBarMap = new OrderedMap<>();
     
@@ -105,6 +112,11 @@ public class MultiCrafterBlock extends Block {
         if (jsonRecipes != null) {
             for (JsonRecipe jsonRecipe : jsonRecipes) recipes.add(jsonRecipe.build(this));
             jsonRecipes = null;
+        }
+        
+        if (menu != null) {
+            menuType = MenuTypes.get(menu);
+            menu = null;
         }
         
         if (recipes.isEmpty())
