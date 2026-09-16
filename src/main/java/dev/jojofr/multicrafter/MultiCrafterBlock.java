@@ -115,7 +115,7 @@ public class MultiCrafterBlock extends Block {
         }
         
         if (menu != null) {
-            menuType = MenuTypes.get(menu);
+            menuType = MenuTypes.get(this.name, menu);
             menu = null;
         }
         
@@ -768,68 +768,8 @@ public class MultiCrafterBlock extends Block {
         @Override
         public void buildConfiguration(Table table) {
             if (autoSelectRecipe) return;
-            int index = 0;
             
-            Table buttonTable = new Table();
-            ButtonGroup<Button> buttonGroup = new ButtonGroup<>();
-            buttonGroup.setMinCheckCount(0);
-            buttonGroup.setMaxCheckCount(1);
-            
-            for (Recipe recipe : recipes) {
-                Button button = new Button(Styles.clearTogglet);
-                buttonGroup.add(button);
-                Table buttonContent = new Table();
-                
-                Table recipeTable = new Table();
-                if (!recipe.unlockedNow()) {
-                    recipeTable.image(Icon.lock).pad(4f).fill().grow();
-                    recipeTable.addListener(Tooltip.Tooltips.getInstance().create("@locked", Vars.mobile));
-                    
-                    buttonContent.add(recipeTable).pad(4f).growX();
-                } else {
-                    recipeTable.add(recipe.input.buildTable(false, false, recipe.craftTime)).growX().right().pad(4f);
-                    recipeTable.image(Icon.right).padRight(4f).padLeft(4f);
-                    recipeTable.add(recipe.output.buildTable(false, false, recipe.craftTime, recipe.randomOutput)).growX().left().pad(4f);
-                    
-                    buttonContent.add(recipeTable).pad(4f).growX();
-                    
-                    if (hasAttribute() && recipe.attribute != null && block instanceof AttributeMultiCrafterBlock attributeBlock) {
-                        Table attributeTable = new Table();
-                        
-                        float baseEfficiency = !Float.isNaN(recipe.baseEfficiency) ? recipe.baseEfficiency : attributeBlock.baseEfficiency;
-                        attributeTable.add("[lightgray] " + (baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities).localized() + ": []");
-                        
-                        float boostScale = !Float.isNaN(recipe.boostScale) ? recipe.boostScale : attributeBlock.boostScale;
-                        StatValue statValue = StatValues.blocks(recipe.attribute, block.floating, boostScale * size * size, !attributeBlock.displayEfficiency);
-                        statValue.display(attributeTable);
-                        
-                        buttonContent.row();
-                        buttonContent.add(attributeTable).pad(4f).growX();
-                    }
-                    
-                    final int finalIndex = index;
-                    button.changed(() -> configure(finalIndex));
-                    button.setChecked(currentRecipeIndex == finalIndex);
-                }
-                button.setDisabled(!recipe.unlockedNow());
-                button.add(buttonContent).pad(4f);
-                
-                buttonTable.add(button).pad(1.5f).grow();
-                buttonTable.row();
-                index++;
-            }
-            
-            ScrollPane container = new ScrollPane(buttonTable, Styles.smallPane);
-            container.setScrollingDisabled(true, false);
-            container.setFadeScrollBars(false);
-            
-            table.add(container).growX().maxHeight(300f);
-            
-            table.layout();
-            
-            Element selected = buttonTable.getChildren().get(currentRecipeIndex);
-            container.scrollTo(selected.x, selected.y, selected.getWidth(), selected.getHeight(), false, true);
-            container.updateVisualScroll();
+            menuType.build(table, this);
         }
         
         @Override
@@ -1015,5 +955,5 @@ public class MultiCrafterBlock extends Block {
         });
     }
     
-    protected boolean hasAttribute() { return false; }
+    public boolean hasAttribute() { return false; }
 }

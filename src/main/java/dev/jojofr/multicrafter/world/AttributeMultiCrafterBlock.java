@@ -114,5 +114,5 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
     }
     
     @Override
-    protected boolean hasAttribute() { return true; }
+    public boolean hasAttribute() { return true; }
 }
