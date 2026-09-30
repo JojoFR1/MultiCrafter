@@ -1,6 +1,6 @@
 name: "multicrafter"
 repo: "JojoFR1/MultiCrafter"
-minGameVersion: 159
+minGameVersion: 161
 version: "1.5.2"
 
 java: true

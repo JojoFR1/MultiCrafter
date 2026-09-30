@@ -9,19 +9,16 @@ import arc.util.Time;
 import dev.jojofr.multicrafter.MultiCrafterBlock;
 import dev.jojofr.multicrafter.world.AttributeMultiCrafterBlock;
 import mindustry.content.Fx;
-import mindustry.ctype.ContentType;
-import mindustry.ctype.UnlockableContent;
+import mindustry.type.ContentType;
 import mindustry.entities.Effect;
 import mindustry.gen.Icon;
 import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
+import mindustry.type.UnlockableContent;
 import mindustry.ui.Bar;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
-import mindustry.world.meta.Attribute;
-import mindustry.world.meta.Stat;
-import mindustry.world.meta.StatValue;
-import mindustry.world.meta.StatValues;
+import mindustry.world.meta.*;
 
 /**
  * Defines a recipe used by a {@link MultiCrafterBlock}.
@@ -135,14 +132,14 @@ public class Recipe extends UnlockableContent {
     }
     
     @Override
-    public void setStats() {
+    public void setStats(Stats stats) {
         stats.add(Stat.output, table -> {
             table.row();
             boolean perSecond = Core.settings.getBool("multicrafter.show-per-second");
             table.check("Show per second? ", perSecond, b -> {
                 Core.settings.put("multicrafter.show-per-second", b);
                 stats.remove(Stat.output);
-                setStats();
+                setStats(stats);
             });
             table.row();
             

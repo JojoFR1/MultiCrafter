@@ -9,6 +9,7 @@ import mindustry.ui.Bar;
 import mindustry.world.Tile;
 import mindustry.world.meta.Attribute;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.Stats;
 
 public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
     public Attribute attribute = Attribute.heat;
@@ -52,8 +53,8 @@ public class AttributeMultiCrafterBlock extends MultiCrafterBlock {
     }
     
     @Override
-    public void setStats() {
-        super.setStats();
+    public void setStats(Stats stats) {
+        super.setStats(stats);
         
         stats.add(baseEfficiency <= 0.0001f ? Stat.tiles : Stat.affinities, attribute, floating, boostScale * size * size, !displayEfficiency);
     }

@@ -12,7 +12,7 @@ import arc.util.Nullable;
 import arc.util.Scaling;
 import arc.util.Strings;
 import mindustry.core.UI;
-import mindustry.ctype.UnlockableContent;
+import mindustry.type.UnlockableContent;
 import mindustry.gen.Icon;
 import mindustry.graphics.Pal;
 import mindustry.type.ItemStack;

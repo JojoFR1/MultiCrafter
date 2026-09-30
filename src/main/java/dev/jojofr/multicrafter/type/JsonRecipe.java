@@ -3,11 +3,12 @@ package dev.jojofr.multicrafter.type;
 import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.serialization.Json;
-import arc.util.serialization.JsonValue;
+import arc.util.serialization.JsonWriter;
+import arc.util.serialization.Jval;
 import mindustry.content.Fx;
 import mindustry.content.TechTree;
 import mindustry.entities.Effect;
-import mindustry.game.Objectives;
+import mindustry.game.conditions.UnlockCondition;
 import mindustry.io.SaveVersion;
 import mindustry.type.ItemStack;
 import mindustry.world.Block;
@@ -18,7 +19,7 @@ import mindustry.world.meta.Attribute;
 /**
  * Internal representation of a recipe used for JSON deserialization.
  * <p>
- * This is necessary because {@link Recipe} extends {@link mindustry.ctype.UnlockableContent UnlockableContent}, which by default expects a String name during deserialization.
+ * This is necessary because {@link Recipe} extends {@link mindustry.type.UnlockableContent UnlockableContent}, which by default expects a String name during deserialization.
  * <p>
  * Java modders should use {@link Recipe} directly instead of this class.
  */
@@ -59,13 +60,13 @@ public class JsonRecipe {
     public static class ResearchData implements Json.JsonSerializable {
         public String parent;
         @Nullable public ItemStack[] requirements;
-        @Nullable public Objectives.Objective[] objectives;
+        @Nullable public UnlockCondition[] objectives;
         
         @Override
-        public void write(Json json) {}
+        public void write(Json json, JsonWriter writer) {}
         
         @Override
-        public void read(Json json, JsonValue jsonData) {
+        public void read(Json json, Jval jsonData) {
             if (jsonData.isString()) this.parent = jsonData.asString();
             else if (jsonData.isObject()) {
                 this.parent = jsonData.getString("parent", null);
@@ -74,7 +75,7 @@ public class JsonRecipe {
                     this.requirements = json.readValue(ItemStack[].class, jsonData.get("requirements"));
                 
                 if (jsonData.has("objectives"))
-                    this.objectives = json.readValue(Objectives.Objective[].class, jsonData.get("objectives"));
+                    this.objectives = json.readValue(UnlockCondition[].class, jsonData.get("objectives"));
             }
         }
     }

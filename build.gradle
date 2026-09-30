@@ -5,8 +5,8 @@ interface Injected { @Inject ExecOperations getExecOperations() }
 group = 'dev.jojofr.multicrafter'
 version = '1.5.2'
 
-def mindustryVersion = 'v159'
-def mindustryGameVersion = 'v159.7'
+def mindustryVersion = 'be'
+def mindustryGameVersion = 'be'
 
 java {
     targetCompatibility = JavaVersion.VERSION_17
@@ -125,7 +125,10 @@ tasks.register('downloadGame') {
     outputs.file(gameFile)
 
     doLast {
-        def url = "https://github.com/Anuken/Mindustry/releases/download/${mindustryGameVersion}/Mindustry.jar"
+        def url = mindustryGameVersion == "be"
+                ? new groovy.json.JsonSlurper().parse(new URI("https://api.github.com/repos/Anuken/MindustryBuilds/releases/latest").toURL())
+                    .assets.find { it.name.startsWith("Mindustry-BE-Desktop") }?.browser_download_url
+                : "https://github.com/Anuken/Mindustry/releases/download/${mindustryGameVersion}/Mindustry.jar"
         def targetFile = gameFile.asFile
         targetFile.parentFile.mkdirs()
 

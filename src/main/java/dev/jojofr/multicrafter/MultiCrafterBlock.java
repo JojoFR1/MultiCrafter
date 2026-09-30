@@ -45,10 +45,7 @@ import mindustry.world.consumers.ConsumePayloadDynamic;
 import mindustry.world.consumers.ConsumePowerDynamic;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
-import mindustry.world.meta.BlockFlag;
-import mindustry.world.meta.Stat;
-import mindustry.world.meta.StatValue;
-import mindustry.world.meta.StatValues;
+import mindustry.world.meta.*;
 
 // TODO improve the selection menu
 public class MultiCrafterBlock extends Block {
@@ -980,8 +977,8 @@ public class MultiCrafterBlock extends Block {
     }
     
     @Override
-    public void setStats() {
-        super.setStats();
+    public void setStats(Stats stats) {
+        super.setStats(stats);
         
         stats.add(Stat.output, table -> {
             // Add a toggle to show in per second or total amount
