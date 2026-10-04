@@ -31,7 +31,7 @@ import mindustry.gen.*;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.io.TypeIO;
-import mindustry.logic.LAccess;
+import mindustry.logic.LogicProp;
 import mindustry.type.*;
 import mindustry.ui.Bar;
 import mindustry.ui.Styles;
@@ -186,9 +186,9 @@ public class MultiCrafterBlock extends Block {
         float thresh = 0.55f;
         if(progress >= thresh){
             boolean legStep = payload instanceof UnitPayload u && u.unit.type.allowLegStep;
-            float size = payload.size(), radius = size/2f, x = payload.x(), y = payload.y(), scl = Mathf.clamp(((progress - thresh) / (1f - thresh)) * 1.1f);
+            float size = payload.size(), radius = size / 2f, x = payload.x(), y = payload.y(), scl = Mathf.clamp(((progress - thresh) / (1f - thresh)) * 1.1f);
             
-            Groups.unit.intersect(x - size/2f, y - size/2f, size, size, u -> {
+            Vars.state.entities.unit.intersect(x - size / 2f, y - size / 2f, size, size, u -> {
                 float dst = u.dst(payload);
                 float rs = radius + u.hitSize/2f;
                 if(u.isGrounded() && u.type.allowLegStep == legStep && dst < rs){
@@ -221,6 +221,7 @@ public class MultiCrafterBlock extends Block {
         public Recipe currentRecipe;
         public int currentRecipeIndex;
         
+        public float dumpTimer;
         public float progress;
         public float totalProgress;
         public float warmup;
@@ -353,10 +354,11 @@ public class MultiCrafterBlock extends Block {
         public void dumpOutputs() {
             if (currentRecipe == null) return;
             
-            if (currentRecipe.output.hasItems() && timer(timerDump, dumpTime / timeScale)) {
+            if (currentRecipe.output.hasItems() && (dumpTimer += timeScale * Time.delta) >= dumpTime) {
                 for (ItemStack output : currentRecipe.output.getItems()) {
                     dump(output.item);
                 }
+                dumpTimer %= dumpTime;
             }
             
             if (currentRecipe.output.hasLiquids()) {
@@ -859,8 +861,8 @@ public class MultiCrafterBlock extends Block {
         }
         
         @Override
-        public double sense(LAccess sensor) {
-            if (sensor == LAccess.progress) return progress;
+        public double sense(LogicProp sensor) {
+            if (sensor == LogicProp.progress) return progress;
             return super.sense(sensor);
         }
         
