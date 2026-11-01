@@ -71,8 +71,6 @@ public class MultiCrafterBlock extends Block {
     
     public DrawBlock drawer = new DrawDefault();
     
-    private final OrderedMap<String, Bar> liquidBarMap = new OrderedMap<>();
-    
     public MultiCrafterBlock(String name) {
         super(name);
         
@@ -831,32 +829,26 @@ public class MultiCrafterBlock extends Block {
             boolean liquidAdded = false;
             for (Func<Building, Bar> bar : this.block.listBars()) {
                 if (currentRecipe.hasLiquids() && !liquidAdded && bar == liquidBarPos) {
-                    for (LiquidStack liquid : currentRecipe.input.getLiquids()) {
-                        Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
-                                () -> liquid.liquid.localizedName,
-                                liquid.liquid::barColor,
-                                () -> this.liquids.get(liquid.liquid) / liquid.amount
-                            ));
-                        
-                        table.add(liquidBar).growX();
+                    Seq<Liquid> shown = new Seq<>();
+                    for (LiquidStack liquid : currentRecipe.input.getLiquids())
+                        if (!shown.contains(liquid.liquid)) shown.add(liquid.liquid);
+                    for (LiquidStack liquid : currentRecipe.output.getLiquids())
+                        if (!shown.contains(liquid.liquid)) shown.add(liquid.liquid);
+                    
+                    for (Liquid liquid : shown)  {
+                        table.add(new Bar(
+                            () -> liquid.localizedName,
+                            liquid::barColor,
+                            () -> this.liquids.get(liquid) / liquidCapacity
+                        )).growX();
                         table.row();
                     }
                     
-                    for (LiquidStack liquid : currentRecipe.output.getLiquids()) {
-                        Bar liquidBar = liquidBarMap.get("liquid-" + liquid.liquid.name, () -> new Bar(
-                            () -> liquid.liquid.localizedName,
-                            liquid.liquid::barColor,
-                            () -> this.liquids.get(liquid.liquid) / liquid.amount
-                        ));
-                        
-                        table.add(liquidBar).growX();
-                        table.row();
-                    }
                     liquidAdded = true;
                     continue;
                 }
                 
-                Bar result = (Bar) bar.get(this);
+                Bar result = bar.get(this);
                 if (result != null) {
                     table.add(result).growX();
                     table.row();
