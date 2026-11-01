@@ -15,9 +15,9 @@
 #       example: 1.33 seconds * 60 = 80 ticks
 #======================================================================================================================#
 
-# Mandatory, defines the block as a multicrafter
-type: MultiCrafter
-# You can also define the block as a multicrafter with attribute support. YOU CANNOT USE BOTH TYPE!
+# Mandatory, defines the block as a multicrafter or an attribute multicrafter. YOU CANNOT USE BOTH TYPE!
+# For this example, AttributeMultiCrafter is used, but in most cases you will only need MultiCrafter.
+#     MultiCrafter
 type: AttributeMultiCrafter
 
 # You can define any vanilla block variable below, as long as it is supported by the game. All values are examples.
@@ -127,9 +127,8 @@ jsonRecipes: [
         # The values below are considered 'not defined', but they are not valid values! They are only a representation of the default Java value.
         # If you want to use the block value, do not define them at all.
         # If you want to override the block value, define them with a valid value (not NaN or 'null').
-        attribute: null
-        # The 'none' value is only to make the test mod work, please ignore. It does not exist in the game and will be ignored.
-        attribute: none
+        # The default value is 'null', the '_' is to avoid game crash with the test mod.
+        attribute: null_
         baseEfficiency: NaN
         boostScale: NaN
         maxBoost: NaN
