@@ -3,7 +3,7 @@ import java.net.URI
 plugins { java }
 
 group = "dev.jojofr.multicrafter"
-version = "1.5.2"
+version = "1.5.3"
 
 // Mindustry version to depend on.
 // Valid values:
