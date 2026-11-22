@@ -6,6 +6,7 @@ import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Angles;
 import arc.math.Mathf;
+import arc.math.geom.Geometry;
 import arc.math.geom.Vec2;
 import arc.scene.Element;
 import arc.scene.ui.Button;
@@ -14,7 +15,6 @@ import arc.scene.ui.ScrollPane;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
 import arc.struct.EnumSet;
-import arc.struct.OrderedMap;
 import arc.struct.Seq;
 import arc.util.*;
 import arc.util.io.Reads;
@@ -36,9 +36,14 @@ import mindustry.type.*;
 import mindustry.ui.Bar;
 import mindustry.ui.Styles;
 import mindustry.world.Block;
+import mindustry.world.Tile;
 import mindustry.world.blocks.heat.HeatBlock;
 import mindustry.world.blocks.heat.HeatConsumer;
-import mindustry.world.blocks.payloads.*;
+import mindustry.world.blocks.liquid.Conduit.ConduitBuild;
+import mindustry.world.blocks.payloads.BuildPayload;
+import mindustry.world.blocks.payloads.Payload;
+import mindustry.world.blocks.payloads.PayloadBlock;
+import mindustry.world.blocks.payloads.UnitPayload;
 import mindustry.world.consumers.ConsumeItemDynamic;
 import mindustry.world.consumers.ConsumeLiquidsDynamic;
 import mindustry.world.consumers.ConsumePayloadDynamic;
@@ -57,6 +62,13 @@ public class MultiCrafterBlock extends Block {
     public Seq<JsonRecipe> jsonRecipes;
     public boolean autoSelectRecipe = false;
     
+    /**
+     * Output sides for each recipe liquid, indexed by output order. All recipes share this array, and only use as many
+     * entries as they have liquid outputs. Missing entries default to all sides.
+     * <p>
+     * Values: {@code 0} = right, {@code 1} = up, {@code 2} = left, {@code 3} = down (relative to block rotation),
+     * {@code -1} = all sides. Same behavior as {@link mindustry.world.blocks.production.GenericCrafter#liquidOutputDirections GenericCrafter#liquidOutputDirections}.
+     */
     public int[] liquidOutputDirections = {-1};
     public boolean dumpExtraLiquid = true;
     public boolean ignoreLiquidFullness = false;
@@ -137,6 +149,50 @@ public class MultiCrafterBlock extends Block {
         setupConsumers();
         
         super.init();
+    }
+    
+    public int getLiquidOutputDirection(int index) {
+        return liquidOutputDirections != null && index >= 0 && index < liquidOutputDirections.length ? liquidOutputDirections[index] : -1;
+    }
+    
+    @Override
+    public void drawOverlay(float x, float y, int rotation) {
+        if (!outputsLiquid || recipes.isEmpty()) return;
+        
+        // Each recipe can output different liquids, so cycle through them.
+        LiquidStack[] outputs = recipes.get((int) (Time.time / 90f) % recipes.size).output.getLiquids();
+        
+        for (int i = 0; i < outputs.length; i++) {
+            int direction = getLiquidOutputDirection(i);
+            if (direction == -1) continue;
+            
+            int side = Mathf.mod(direction + rotation, 4);
+            Draw.rect(
+                outputs[i].liquid.fullIcon,
+                x + Geometry.d4x(side) * (size * Vars.tilesize / 2f + 4),
+                y + Geometry.d4y(side) * (size * Vars.tilesize / 2f + 4),
+                8f, 8f
+            );
+        }
+    }
+    
+    @Override
+    public boolean rotatedOutput(int fromX, int fromY, Tile destination) {
+        if (!outputsLiquid || !(destination.build instanceof ConduitBuild)) return super.rotatedOutput(fromX, fromY, destination);
+        
+        Building crafter = Vars.world.build(fromX, fromY);
+        if (!(crafter instanceof MultiCrafterBuild multiCrafter) || multiCrafter.currentRecipe == null) return super.rotatedOutput(fromX, fromY, destination);
+        
+        int liquidCount = multiCrafter.currentRecipe.output.getLiquids().length;
+        if (liquidCount == 0) return super.rotatedOutput(fromX, fromY, destination);
+        
+        int relative = Mathf.mod(crafter.relativeTo(destination) - crafter.rotation, 4);
+        for (int i = 0; i < liquidCount; i++) {
+            int direction = getLiquidOutputDirection(i);
+            if (direction == -1 || direction == relative) return false;
+        }
+        
+        return true;
     }
     
     protected void setupConsumers() {
@@ -364,9 +420,9 @@ public class MultiCrafterBlock extends Block {
             }
             
             if (currentRecipe.output.hasLiquids()) {
-                for (int i = 0; i < currentRecipe.output.getLiquids().length; i++) {
-                    int direction = liquidOutputDirections.length > i ? liquidOutputDirections[i] : -1;
-                    dumpLiquid(currentRecipe.output.getLiquids()[i].liquid, 2f, direction);
+                LiquidStack[] outputLiquids = currentRecipe.output.getLiquids();
+                for (int i = 0; i < outputLiquids.length; i++) {
+                    dumpLiquid(outputLiquids[i].liquid, 2f, getLiquidOutputDirection(i));
                 }
             }
         }

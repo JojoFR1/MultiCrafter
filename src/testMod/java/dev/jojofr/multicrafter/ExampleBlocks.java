@@ -34,6 +34,11 @@ public class ExampleBlocks {
             // This system is experimental and may not work as expected in all cases.
             autoSelectRecipe = false;
             
+            // The side(s) the output liquids of a recipe are dumped to, same as the vanilla crafters 'liquidOutputDirections'.
+            // All recipes will use the same output directions. One slot correspond to the liquid at the same index in the recipe liquids output list, if you have less slots than liquids, it will default to all sides.
+            // Values: -1 = all sides, 0 = right, 1 = up, 2 = left, 3 = down, relative to the block rotation.
+            liquidOutputDirections = new int[]{ -1 };
+            
             /// Adding a recipe
             // This is the new way to add a recipe, it is recommended over manipulating the recipes list directly.
             addRecipe(

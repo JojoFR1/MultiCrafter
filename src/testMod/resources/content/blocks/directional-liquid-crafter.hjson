@@ -1,0 +1,54 @@
+# Example of a multicrafter that dumps its output liquids on specific sides (vanilla 'liquidOutputDirections' behaviour).
+type: MultiCrafter
+
+size: 3
+itemCapacity: 15
+liquidCapacity: 50
+
+# 0 = right, 1 = up, 2 = left, 3 = down (relative to the block rotation), -1 = every side.
+# The list is indexed by the position of the liquid in the recipe output, and shared by all the recipes:
+#   - three-liquids: water -> up (1), oil -> left (2), slag -> down (3)
+#   - two-liquids:   water -> up (1), oil -> left (2)
+#   - one-liquid:    cryofluid -> up (1)
+# The right side (0) is never used for liquid outputs, so it is free for inputs.
+liquidOutputDirections: [1, 2, 3]
+
+jsonRecipes: [
+    {
+        name: three-liquids
+        input: {
+            items: ["sand/1"]
+        }
+        output: {
+            # Values are per tick
+            liquids: ["water/0.1", "oil/0.1", "slag/0.1"]
+        }
+        craftTime: 60
+        alwaysUnlocked: true
+    }
+    {
+        name: two-liquids
+        input: {
+            items: ["sand/1"]
+        }
+        output: {
+            liquids: ["water/0.1", "oil/0.1"]
+        }
+        craftTime: 60
+        alwaysUnlocked: true
+    }
+    {
+        name: one-liquid
+        input: {
+            items: ["sand/1"]
+        }
+        output: {
+            liquids: ["cryofluid/0.1"]
+        }
+        craftTime: 60
+        alwaysUnlocked: true
+    }
+]
+
+requirements: ["copper/10"]
+category: "crafting"
